@@ -1,3 +1,4 @@
+.gitignore
 *.h
 *.dll
 test.py
