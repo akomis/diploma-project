@@ -1,8 +1,7 @@
 # Diploma Project
-Implementation of Data Management System for Industrial IoT Applications
+Implementation of Data Management and Monitoring System for Industrial IoT Applications
 
-![Dobot Magician with Belt](/pics/dobot-magician-belt.png) ![Jevois Camera](/pics/jevois.png)
-
+![Dobot Magician with Belt](/pics/dobot-magician-belt.png)
 ## Overview
 A data management system that collects data from IoT devices such as [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) and [Jevois Camera](http://www.jevois.org/) and monitors them.
 
