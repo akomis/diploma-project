@@ -1,5 +1,5 @@
-# ade
-Diploma Project: Implementation of Data Management System for Industrial IoT Applications
+# Diploma Project
+Implementation of Data Management System for Industrial IoT Applications
 
 ![Dobot Magician with Belt](/pics/dobot-magician-belt.png) ![Jevois Camera](/pics/jevois.png)
 
