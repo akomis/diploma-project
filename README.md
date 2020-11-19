@@ -1,7 +1,10 @@
 # Diploma Project
 Implementation of Data Management and Monitoring System for Industrial IoT Applications
 
-![Dobot Magician with Belt](/pics/dobot-magician-belt.png)
+<div align="center">
+<img alt="Dobot Magician with Belt" src="/pics/dobot-magician-belt.png">
+</div>
+
 ## Overview
 A data management system that collects data from IoT devices such as [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) and [Jevois Camera](http://www.jevois.org/) and monitors them.
 
@@ -16,7 +19,6 @@ A data management system that collects data from IoT devices such as [Dobot Magi
 ## Installation
 `git clone https://github.com/akomis/diploma-project.git`   
 Place `agent.py` on the same directory as `demo-magician-python-64-master`
-
 
 ## Usage
 `python3 agent.py [OPTIONS]`  
