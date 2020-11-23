@@ -14,7 +14,7 @@ A data management system that collects data from IoT devices such as [Dobot Magi
 - [Dobot Demo](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/)
-- [Grafana](https://grafana.com/grafana/download?platform=windows)
+- [Grafana](https://grafana.com/grafana/download?platform=windows)  
 <br>
 
 ## Installation
