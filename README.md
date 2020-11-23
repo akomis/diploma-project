@@ -16,12 +16,15 @@ A data management system that collects data from IoT devices such as [Dobot Magi
 - [Prometheus](https://prometheus.io/download/)
 - [Grafana](https://grafana.com/grafana/download?platform=windows)
 
+
 ## Installation
 `git clone https://github.com/akomis/diploma-project.git`   
 Place `agent.py` on the same directory as `demo-magician-python-64-master`
 
+
 ## Usage
 `python3 agent.py [OPTIONS]`  
+
 
 ### Options
 `-n <agent_name>		Give symbolic name to this monitoring agent (default: Agent0)`  
@@ -31,6 +34,7 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 `-j						Search, connect and monitor a Jevois Camera device`  
 `-p						Set port for prometheus (default: 8000)`  
 `-h						Print this message`  
+
 
 ## Resources
 - [Dobot API & Dobot Communication Protocol](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
