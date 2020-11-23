@@ -19,7 +19,7 @@ A data management system that collects data from IoT devices such as [Dobot Magi
 
 ## Installation
 `git clone https://github.com/akomis/diploma-project.git`   
-Place `agent.py` on the same directory as `demo-magician-python-64-master`
+Place `agent.py` on the same directory as `demo-magician-python-64-master`  
 <br>
 
 ## Usage
