@@ -2,7 +2,7 @@ import getopt
 import sys
 import time
 import DobotDllType as dType
-from prometheus_client import start_http_server, Info, Summary, Enum
+from prometheus_client import start_http_server, Info, Gauge, Enum
 
 
 class DobotMagician():
@@ -20,25 +20,25 @@ class DobotMagician():
                            'deviceName': str(dType.GetDeviceName(self.__api)),
                            'serialNumber': str(dType.GetDeviceSN(self.__api))})
 
-        self.__poses_x = Summary('pose_x', 'Real-time pose of robotic arm: X position')
-        self.__poses_y = Summary('pose_y', 'Real-time pose of robotic arm: Y position')
-        self.__poses_z = Summary('pose_z', 'Real-time pose of robotic arm: Z position')
-        self.__poses_r = Summary('pose_r', 'Real-time pose of robotic arm: R position')
-        self.__kinematics_v = Summary('kinematics_v', 'Kinematics velocity')
-        self.__kinematics_a = Summary('kinematics_a', 'Kinematics acceleration')
-        self.__arm_orientation_l = Summary('arm_orientation_l', 'Arm orientation left')
-        self.__arm_orientation_r = Summary('arm_orientation_r', 'Arm orientation right')
+        self.__poses_x = Gauge('pose_x', 'Real-time pose of robotic arm: X position')
+        self.__poses_y = Gauge('pose_y', 'Real-time pose of robotic arm: Y position')
+        self.__poses_z = Gauge('pose_z', 'Real-time pose of robotic arm: Z position')
+        self.__poses_r = Gauge('pose_r', 'Real-time pose of robotic arm: R position')
+        self.__kinematics_v = Gauge('kinematics_v', 'Kinematics velocity')
+        self.__kinematics_a = Gauge('kinematics_a', 'Kinematics acceleration')
+        self.__arm_orientation_l = Gauge('arm_orientation_l', 'Arm orientation left')
+        self.__arm_orientation_r = Gauge('arm_orientation_r', 'Arm orientation right')
         self.__device_alarm = Enum('alarms', 'Device alarms',states=list(self.alarms.values()))
-        # self.__triggerMode = Summary('triggerMode', 'Handhold teaching trigger mode of saved points')
-        # self.__jogJointParams = Summary('jogJointParams', 'JOG joint parameters (velocity, acceleration)')
-        # self.__jogCoordParams = Summary('jogCoordParams', 'JOG coordinate parameters (velocity, acceleration)')
-        # self.__jogCommonParams = Summary('jogCommonParams', 'JOG common parameters (velocity ratio, acceleration ratio)')
-        # self.__ptpJointParams = Summary('ptpJointParams', 'PTP joint parameters (velocity, acceleration)')
-        # self.__ptpCoordParams = Summary('ptpCoordParams', 'PTP coordinate parameters (velocity, acceleration)')
-        # self.__ptpCommonParams = Summary('ptpCommonParams', 'PTP common parameters (velocity ratio, acceleration ratio)')
-        # self.__ptpJumpParams = Summary('ptpJumpParams', 'PTP jump parameters (jump height, zlimit)')
+        # self.__triggerMode = Gauge('triggerMode', 'Handhold teaching trigger mode of saved points')
+        # self.__jogJointParams = Gauge('jogJointParams', 'JOG joint parameters (velocity, acceleration)')
+        # self.__jogCoordParams = Gauge('jogCoordParams', 'JOG coordinate parameters (velocity, acceleration)')
+        # self.__jogCommonParams = Gauge('jogCommonParams', 'JOG common parameters (velocity ratio, acceleration ratio)')
+        # self.__ptpJointParams = Gauge('ptpJointParams', 'PTP joint parameters (velocity, acceleration)')
+        # self.__ptpCoordParams = Gauge('ptpCoordParams', 'PTP coordinate parameters (velocity, acceleration)')
+        # self.__ptpCommonParams = Gauge('ptpCommonParams', 'PTP common parameters (velocity ratio, acceleration ratio)')
+        # self.__ptpJumpParams = Gauge('ptpJumpParams', 'PTP jump parameters (jump height, zlimit)')
 
-    def _observeAlarms(self):
+    def _setAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
 
         # Convert Bytes to bits (as string for reading)
@@ -64,24 +64,24 @@ class DobotMagician():
         kinematics = dType.GetKinematics(self.__api)
         armOrientation = dType.GetArmOrientation(self.__api)
 
-        self.__poses_x.observe(float(poses[0]))
-        self.__poses_y.observe(float(poses[1]))
-        self.__poses_z.observe(float(poses[2]))
-        self.__poses_r.observe(float(poses[3]))
-        self.__kinematics_v.observe(float(kinematics[0]))
-        self.__kinematics_a.observe(float(kinematics[1]))
-        self.__arm_orientation_l.observe(float(armOrientation[0]))
-        self.__arm_orientation_r.observe(float(armOrientation[1]))
-        self._observeAlarms()
+        self.__poses_x.set(float(poses[0]))
+        self.__poses_y.set(float(poses[1]))
+        self.__poses_z.set(float(poses[2]))
+        self.__poses_r.set(float(poses[3]))
+        self.__kinematics_v.set(float(kinematics[0]))
+        self.__kinematics_a.set(float(kinematics[1]))
+        self.__arm_orientation_l.set(float(armOrientation[0]))
+        self.__arm_orientation_r.set(float(armOrientation[1]))
+        self._setAlarms()
 
-        # self.__triggerMode.observe(dType.GetHHTTrigMode(self.__api)[0])
-        # self.__jogJointParams.observe(dType.GetJOGJointParams(self.__api))
-        # self.__jogCoordParams.observe(dType.GetJOGCoordinateParams(self.__api))
-        # self.__jogCommonParams.observe(dType.GetJOGCommonParams(self.__api))
-        # self.__ptpJointParams.observe(dType.GetPTPJointParams(self.__api))
-        # self.__ptpCoordParams.observe(dType.GetPTPCoordinateParams(self.__api))
-        # self.__ptpJumpParams.observe(dType.GetPTPJumpParams(self.__api))
-        # self.__ptpCommonParams.observe(dType.GetPTPCommonParams(self.__api))
+        # self.__triggerMode.set(dType.GetHHTTrigMode(self.__api)[0])
+        # self.__jogJointParams.set(dType.GetJOGJointParams(self.__api))
+        # self.__jogCoordParams.set(dType.GetJOGCoordinateParams(self.__api))
+        # self.__jogCommonParams.set(dType.GetJOGCommonParams(self.__api))
+        # self.__ptpJointParams.set(dType.GetPTPJointParams(self.__api))
+        # self.__ptpCoordParams.set(dType.GetPTPCoordinateParams(self.__api))
+        # self.__ptpJumpParams.set(dType.GetPTPJumpParams(self.__api))
+        # self.__ptpCommonParams.set(dType.GetPTPCommonParams(self.__api))
 
     def _getDobotApi(self):
         return self.__api
