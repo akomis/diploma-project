@@ -2,44 +2,81 @@ import getopt
 import sys
 import time
 import DobotDllType as dType
-from prometheus_client import start_http_server, Info, Histogram
+from prometheus_client import start_http_server, Info, Summary, Enum
 
 
 class DobotMagician():
-    def __init__(self,  api):
+    # {bit address index : alarm description}
+    alarms = {"0x00":"Public Alarm: Reset Alarm", "0x01":"Public Alarm: Undefined Instruction", "0x02":"Public Alarm: File System Error", "0x03":"Public Alarm: Failured Communication between MCU and FPGA", "0x04":"Public Alarm: Angle Sensor Reading Error",
+              "0x11":"Planning Alarm: Inverse Resolve Alarm", "0x12":"Planning Alarm: Inverse Resolve Limit", "0x13":"Planning Alarm: Data Repetition", "0x14":"Planning Alarm: Arc Input Parameter Alarm", "0x15":"Planning Alarm: JUMP Parameter Error",
+              "0x21":"Kinematic Alarm: Inverse Resolve Alarm", "0x22":"Kinematic Alarm: Inverse Resolve Limit",
+              "0x40":"Limit Alarm: Joint 1 Positive Limit Alarm", "0x41":"Limit Alarm: Joint 1 Negative Limit Alarm", "0x42":"Limit Alarm: Joint 2 Positive Limit Alarm", "0x43":"Limit Alarm: Joint 2 Negative Limit Alarm", "0x44":"Limit Alarm: Joint 3 Positive Limit Alarm", "0x45":"Limit Alarm: Joint 3 Negative Limit Alarm", "0x46":"Limit Alarm: Joint 4 Positive Limit Alarm", "0x47":"Limit Alarm: Joint 4 Negative Limit Alarm", "0x48":"Limit Alarm: Parallegram Positive Limit Alarm", "0x49":"Limit Alarm: Parallegram Negative Limit Alarm"}
+
+    def __init__(self, api):
         self.__api = api
         self.__dinfo = Info('dobot_magician_info', 'General device information')
         self.__dinfo.info({'version': str(dType.GetDeviceInfo(self.__api)),
                            'deviceName': str(dType.GetDeviceName(self.__api)),
-                           'serialNumber':str(dType.GetDeviceSN(self.__api))})
+                           'serialNumber': str(dType.GetDeviceSN(self.__api))})
 
-        self.__poses = Histogram('poses', 'Real-time pose of robotic arm')
-        self.__kinematics = Histogram('kinematics', 'Kinematics parameter')
-        self.__alarmState = Histogram('alarmState', 'Device alarms')
-        self.__armOrientation = Histogram('armOrientation', 'Arm orientation')
-        self.__triggerMode = Histogram('triggerMode', 'Handhold teaching trigger mode of saved points')
-        self.__jogJointParams = Histogram('jogJointParams', 'JOG joint parameters (velocity, acceleration)')
-        self.__jogCoordParams = Histogram('jogCoordParams', 'JOG coordinate parameters (velocity, acceleration)')
-        self.__jogCommonParams = Histogram('jogCommonParams', 'JOG common parameters (velocity ratio, acceleration ratio)')
-        self.__ptpJointParams = Histogram('ptpJointParams', 'PTP joint parameters (velocity, acceleration)')
-        self.__ptpCoordParams = Histogram('ptpCoordParams', 'PTP coordinate parameters (velocity, acceleration)')
-        self.__ptpCommonParams = Histogram('ptpCommonParams', 'PTP common parameters (velocity ratio, acceleration ratio)')
-        self.__ptpJumpParams = Histogram('ptpJumpParams', 'PTP jump parameters (jump height, zlimit)')
+        self.__poses_x = Summary('pose_x', 'Real-time pose of robotic arm: X position')
+        self.__poses_y = Summary('pose_y', 'Real-time pose of robotic arm: Y position')
+        self.__poses_z = Summary('pose_z', 'Real-time pose of robotic arm: Z position')
+        self.__poses_r = Summary('pose_r', 'Real-time pose of robotic arm: R position')
+        self.__kinematics_v = Summary('kinematics_v', 'Kinematics velocity')
+        self.__kinematics_a = Summary('kinematics_a', 'Kinematics acceleration')
+        self.__arm_orientation_l = Summary('arm_orientation_l', 'Arm orientation left')
+        self.__arm_orientation_r = Summary('arm_orientation_r', 'Arm orientation right')
+        self.__device_alarm = Enum('alarms', 'Device alarms',states=list(self.alarms.values()))
+        # self.__triggerMode = Summary('triggerMode', 'Handhold teaching trigger mode of saved points')
+        # self.__jogJointParams = Summary('jogJointParams', 'JOG joint parameters (velocity, acceleration)')
+        # self.__jogCoordParams = Summary('jogCoordParams', 'JOG coordinate parameters (velocity, acceleration)')
+        # self.__jogCommonParams = Summary('jogCommonParams', 'JOG common parameters (velocity ratio, acceleration ratio)')
+        # self.__ptpJointParams = Summary('ptpJointParams', 'PTP joint parameters (velocity, acceleration)')
+        # self.__ptpCoordParams = Summary('ptpCoordParams', 'PTP coordinate parameters (velocity, acceleration)')
+        # self.__ptpCommonParams = Summary('ptpCommonParams', 'PTP common parameters (velocity ratio, acceleration ratio)')
+        # self.__ptpJumpParams = Summary('ptpJumpParams', 'PTP jump parameters (jump height, zlimit)')
+
+    def _observeAlarms(self):
+        alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
+
+        # Convert Bytes to bits (as string for reading)
+        bits = ''
+        for byte in alarmBytes:
+            bits += f'{byte:0>8b}'
+            # print(f'{byte:0>8b}', end=' ')
+
+        index = 0
+        for bit in bits:
+            if bit == '1':
+                self.__device_alarm.state(self.alarms.get('0x'+'{:02X}'.format(index)))
+
+            index += 1
 
 
     def _fetchDobotData(self):
-        self.__poses.observe(dType.GetPose(self.__api))
-        self.__kinematics.observe(dType.GetKinematics(self.__api))
-        self.__alarmState.observe(dType.GetAlarmsState(self.__api)[1])
-        self.__triggerMode.observe(dType.GetHHTTrigMode(self.__api)[0])
-        self.__armOrientation.observe(dType.GetArmOrientation(self.__api)[0])
-        self.__jogJointParams.observe(dType.GetJOGJointParams(self.__api))
-        self.__jogCoordParams.observe(dType.GetJOGCoordinateParams(self.__api))
-        self.__jogCommonParams.observe(dType.GetJOGCommonParams(self.__api))
-        self.__ptpJointParams.observe(dType.GetPTPJointParams(self.__api))
-        self.__ptpCoordParams.observe(dType.GetPTPCoordinateParams(self.__api))
-        self.__ptpJumpParams.observe(dType.GetPTPJumpParams(self.__api))
-        self.__ptpCommonParams.observe(dType.GetPTPCommonParams(self.__api))
+        poses = dType.GetPose(self.__api)
+        kinematics = dType.GetKinematics(self.__api)
+        armOrientation = dType.GetArmOrientation(self.__api)
+
+        self.__poses_x.observe(float(poses[0]))
+        self.__poses_y.observe(float(poses[1]))
+        self.__poses_z.observe(float(poses[2]))
+        self.__poses_r.observe(float(poses[3]))
+        self.__kinematics_v.observe(float(kinematics[0]))
+        self.__kinematics_a.observe(float(kinematics[1]))
+        self.__arm_orientation_l.observe(float(armOrientation[0]))
+        self.__arm_orientation_r.observe(float(armOrientation[1]))
+        self._observeAlarms()
+
+        # self.__triggerMode.observe(dType.GetHHTTrigMode(self.__api)[0])
+        # self.__jogJointParams.observe(dType.GetJOGJointParams(self.__api))
+        # self.__jogCoordParams.observe(dType.GetJOGCoordinateParams(self.__api))
+        # self.__jogCommonParams.observe(dType.GetJOGCommonParams(self.__api))
+        # self.__ptpJointParams.observe(dType.GetPTPJointParams(self.__api))
+        # self.__ptpCoordParams.observe(dType.GetPTPCoordinateParams(self.__api))
+        # self.__ptpJumpParams.observe(dType.GetPTPJumpParams(self.__api))
+        # self.__ptpCommonParams.observe(dType.GetPTPCommonParams(self.__api))
 
     def _getDobotApi(self):
         return self.__api
