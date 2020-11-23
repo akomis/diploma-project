@@ -10,7 +10,8 @@ class DobotMagician():
     alarms = {"0x00":"Public Alarm: Reset Alarm", "0x01":"Public Alarm: Undefined Instruction", "0x02":"Public Alarm: File System Error", "0x03":"Public Alarm: Failured Communication between MCU and FPGA", "0x04":"Public Alarm: Angle Sensor Reading Error",
               "0x11":"Planning Alarm: Inverse Resolve Alarm", "0x12":"Planning Alarm: Inverse Resolve Limit", "0x13":"Planning Alarm: Data Repetition", "0x14":"Planning Alarm: Arc Input Parameter Alarm", "0x15":"Planning Alarm: JUMP Parameter Error",
               "0x21":"Kinematic Alarm: Inverse Resolve Alarm", "0x22":"Kinematic Alarm: Inverse Resolve Limit",
-              "0x40":"Limit Alarm: Joint 1 Positive Limit Alarm", "0x41":"Limit Alarm: Joint 1 Negative Limit Alarm", "0x42":"Limit Alarm: Joint 2 Positive Limit Alarm", "0x43":"Limit Alarm: Joint 2 Negative Limit Alarm", "0x44":"Limit Alarm: Joint 3 Positive Limit Alarm", "0x45":"Limit Alarm: Joint 3 Negative Limit Alarm", "0x46":"Limit Alarm: Joint 4 Positive Limit Alarm", "0x47":"Limit Alarm: Joint 4 Negative Limit Alarm", "0x48":"Limit Alarm: Parallegram Positive Limit Alarm", "0x49":"Limit Alarm: Parallegram Negative Limit Alarm"}
+              "0x40":"Limit Alarm: Joint 1 Positive Limit Alarm", "0x41":"Limit Alarm: Joint 1 Negative Limit Alarm", "0x42":"Limit Alarm: Joint 2 Positive Limit Alarm", "0x43":"Limit Alarm: Joint 2 Negative Limit Alarm", "0x44":"Limit Alarm: Joint 3 Positive Limit Alarm", "0x45":"Limit Alarm: Joint 3 Negative Limit Alarm", "0x46":"Limit Alarm: Joint 4 Positive Limit Alarm", "0x47":"Limit Alarm: Joint 4 Negative Limit Alarm", "0x48":"Limit Alarm: Parallegram Positive Limit Alarm", "0x49":"Limit Alarm: Parallegram Negative Limit Alarm",
+			  "0":"OK"}
 
     def __init__(self, api):
         self.__api = api
@@ -46,12 +47,16 @@ class DobotMagician():
             bits += f'{byte:0>8b}'
             # print(f'{byte:0>8b}', end=' ')
 
-        index = 0
-        for bit in bits:
-            if bit == '1':
-                self.__device_alarm.state(self.alarms.get('0x'+'{:02X}'.format(index)))
-
-            index += 1
+		# If all bits are 0 then device state is clean/safe
+		if bits.strip("0") == '':
+		    self.__device_alarm.state("OK")
+		else:
+	        index = 0
+	        for bit in bits:
+	            if bit == '1':
+	                self.__device_alarm.state(self.alarms.get('0x'+'{:02X}'.format(index)))
+					hasError = True
+	            index += 1
 
 
     def _fetchDobotData(self):
