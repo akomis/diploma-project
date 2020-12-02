@@ -47,9 +47,7 @@ class DobotMagician():
             # print(f'{byte:0>8b}', end=' ')
 
         # If all bits are 0 then device state is clean/safe
-        if bits.strip("0") == '':
-            self.__device_alarm.state("OK")
-        else:
+        if bits.strip("0") != '':
             index = 0
             for bit in bits:
                 if bit == '1':
