@@ -153,7 +153,8 @@ class MonitoringAgent():
 
         if self.__dobot is None and self.__jevois is None:
             print("No devices connected to the agent.")
-            print("Run connectDobot() or connectJevois() before starting a routine")
+            print("Run with -d to connect a dobot magician.")
+			print("Run wtih -j to connect a jevois camera.")
             sys.exit(11)
 
         print('Monitoring..')
