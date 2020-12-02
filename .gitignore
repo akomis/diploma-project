@@ -1,4 +1,6 @@
+.*
 run.sh
+startup.sh
 *.h
 *.dll
 test.py

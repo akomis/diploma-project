@@ -37,7 +37,7 @@ class DobotMagician():
         # self.__ptpCommonParams = Gauge('ptpCommonParams', 'PTP common parameters (velocity ratio, acceleration ratio)')
         # self.__ptpJumpParams = Gauge('ptpJumpParams', 'PTP jump parameters (jump height, zlimit)')
 
-    def _setAlarms(self):
+    def _getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
 
         # Convert Bytes to bits (as string for reading)
@@ -46,16 +46,15 @@ class DobotMagician():
             bits += f'{byte:0>8b}'
             # print(f'{byte:0>8b}', end=' ')
 
-		# If all bits are 0 then device state is clean/safe
-		if bits.strip("0") == '':
-		    self.__device_alarm.state("OK")
-		else:
-	        index = 0
-	        for bit in bits:
-	            if bit == '1':
-	                self.__device_alarm.state(self.alarms.get('0x'+'{:02X}'.format(index)))
-					hasError = True
-	            index += 1
+        # If all bits are 0 then device state is clean/safe
+        if bits.strip("0") == '':
+            self.__device_alarm.state("OK")
+        else:
+            index = 0
+            for bit in bits:
+                if bit == '1':
+                    self.__device_alarm.state(self.alarms.get('0x'+'{:02X}'.format(index)))
+                index += 1
 
 
     def _fetchDobotData(self):
@@ -71,7 +70,7 @@ class DobotMagician():
         self.__kinematics_a.set(float(kinematics[1]))
         self.__arm_orientation_l.set(float(armOrientation[0]))
         self.__arm_orientation_r.set(float(armOrientation[1]))
-        self._setAlarms()
+        self._getAlarms()
 
         # self.__triggerMode.set(dType.GetHHTTrigMode(self.__api)[0])
         # self.__jogJointParams.set(dType.GetJOGJointParams(self.__api))
