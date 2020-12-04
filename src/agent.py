@@ -23,19 +23,8 @@ class DobotMagician():
         self.__poses_y = Gauge('pose_y', 'Real-time pose of robotic arm: Y position')
         self.__poses_z = Gauge('pose_z', 'Real-time pose of robotic arm: Z position')
         self.__poses_r = Gauge('pose_r', 'Real-time pose of robotic arm: R position')
-        self.__kinematics_v = Gauge('kinematics_v', 'Kinematics velocity')
-        self.__kinematics_a = Gauge('kinematics_a', 'Kinematics acceleration')
-        self.__arm_orientation_l = Gauge('arm_orientation_l', 'Arm orientation left')
-        self.__arm_orientation_r = Gauge('arm_orientation_r', 'Arm orientation right')
         self.__device_alarm = Enum('alarms', 'Device alarms',states=list(self.alarms.values()))
-        # self.__triggerMode = Gauge('triggerMode', 'Handhold teaching trigger mode of saved points')
-        # self.__jogJointParams = Gauge('jogJointParams', 'JOG joint parameters (velocity, acceleration)')
-        # self.__jogCoordParams = Gauge('jogCoordParams', 'JOG coordinate parameters (velocity, acceleration)')
-        # self.__jogCommonParams = Gauge('jogCommonParams', 'JOG common parameters (velocity ratio, acceleration ratio)')
-        # self.__ptpJointParams = Gauge('ptpJointParams', 'PTP joint parameters (velocity, acceleration)')
-        # self.__ptpCoordParams = Gauge('ptpCoordParams', 'PTP coordinate parameters (velocity, acceleration)')
-        # self.__ptpCommonParams = Gauge('ptpCommonParams', 'PTP common parameters (velocity ratio, acceleration ratio)')
-        # self.__ptpJumpParams = Gauge('ptpJumpParams', 'PTP jump parameters (jump height, zlimit)')
+
 
     def _getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
@@ -48,11 +37,12 @@ class DobotMagician():
 
         # If all bits are 0 then device state is clean/safe
         if bits.strip("0") != '':
-            index = 0
-            for bit in bits:
-                if bit == '1':
-                    self.__device_alarm.state(self.alarms.get('0x'+'{:02X}'.format(index)))
-                index += 1
+            for alarm in self.alarms:
+                # Get index in 10-base form to check the corresponding bit
+                index = int(alarm, 16)
+                if bits[index] == '1':
+                    self.__device_alarm.state(self.alarms[alarm])
+                    #print(self.alarms[alarm])
 
 
     def _fetchDobotData(self):
