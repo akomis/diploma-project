@@ -15,10 +15,10 @@ class DobotMagician():
 
     def __init__(self, api):
         self.__api = api
-        self.__dinfo = Info('dobot_magician_info', 'General device information')
-        self.__dinfo.info({'version': str(dType.GetDeviceInfo(self.__api)),
-                           'deviceName': str(dType.GetDeviceName(self.__api)),
-                           'serialNumber': str(dType.GetDeviceSN(self.__api))})
+        self.__dinfo = Info('dobot_magician', 'General device information')
+        self.__dinfo.info({'version': str(dType.GetDeviceInfo(self.__api)[0]),
+                           'deviceName': str(dType.GetDeviceName(self.__api)[0]),
+                           'serialNumber': str(dType.GetDeviceSN(self.__api)[0])})
 
         self.__poses_x = Gauge('pose_x', 'Real-time pose of robotic arm: X position')
         self.__poses_y = Gauge('pose_y', 'Real-time pose of robotic arm: Y position')
@@ -49,7 +49,7 @@ class DobotMagician():
 
         # If all bits are 0 then device state is clean/safe
         if bits.strip("0") == '':
-            self.__device_alarm.state("OK")
+            return
         else:
             index = 0
             for bit in bits:
@@ -70,7 +70,6 @@ class DobotMagician():
         self.__kinematics_v.set(float(kinematics[0]))
         self.__kinematics_a.set(float(kinematics[1]))
         self.__arm_orientation_l.set(float(armOrientation[0]))
-        self.__arm_orientation_r.set(float(armOrientation[1]))
         self._getAlarms()
 
         # self.__triggerMode.set(dType.GetHHTTrigMode(self.__api)[0])
@@ -153,10 +152,10 @@ class MonitoringAgent():
             self.__jevois._fetchJevoisData()
 
     def startRoutine(self, duration):
-
         if self.__dobot is None and self.__jevois is None:
             print("No devices connected to the agent.")
-            print("Run connectDobot() or connectJevois() before starting a routine")
+            print("Run with -d to connect to a dobot magician robot")
+            print("Run with -j to connect to a jevois camera")
             sys.exit(11)
 
         print('Monitoring..')
@@ -165,7 +164,7 @@ class MonitoringAgent():
         self.__startTime = time.perf_counter()
 
         while (1):
-            time.sleep(self.__timeoutPeriod)
+            time.sleep(self.__timeoutPeriod/1000)
             self.__fetchData()
 
             if duration is not None:
