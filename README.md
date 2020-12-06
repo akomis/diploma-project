@@ -6,7 +6,7 @@ Implementation of Data Management and Monitoring System for Industrial IoT Appli
 </div>
 
 ## Overview
-A data management system that collects data from IoT devices such as [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) and [Jevois Camera](http://www.jevois.org/) and monitors them.
+A data management system that collects data from IoT devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) and [Jevois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.
 <br><br><br>
 
 ## Dependencies
@@ -14,7 +14,7 @@ A data management system that collects data from IoT devices such as [Dobot Magi
 - [Dobot Demo](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/)
-- [Grafana](https://grafana.com/grafana/download?platform=windows)<br><br>
+<br><br>
 
 ## Installation
 `git clone https://github.com/akomis/diploma-project.git`   
@@ -30,7 +30,7 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 `-a <number>			Define time in minutes for how long should the monitoring last (default: until interrupt)`  
 `-d						Search, connect and monitor a Dobot Magician device`  
 `-j						Search, connect and monitor a Jevois Camera device`  
-`-p						Set port for prometheus (default: 8000)`  
+`-p						Set port for Prometheus endpoint (default: 8000)`  
 `-h						Print this message`
 <br><br>
 

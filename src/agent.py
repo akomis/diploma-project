@@ -170,7 +170,7 @@ def printHelp():
     print('-a <number>\t\tDefine time in minutes for how long should the monitoring last (default: until interrupt)')
     print('-d\t\tSearch, connect and monitor a Dobot Magician device')
     print('-j\t\tSearch, connect and monitor a Jevois Camera device')
-    print('-p\t\tSet port for prometheus (default: 8000)')
+    print('-p\t\tSet port for Prometheus endpoint (default: 8000)')
     print('-h\t\tPrint this message')
 
 def main():
