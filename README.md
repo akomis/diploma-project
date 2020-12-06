@@ -11,7 +11,7 @@ A data management system that collects data from IoT devices such as the [Dobot 
 
 ## Dependencies
 - [Python 3.x](https://www.python.org/downloads/windows/)
-- [Dobot Demo](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
+- [DobotDllType.py](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/)
 <br><br>
@@ -22,16 +22,12 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 <br><br>
 
 ## Usage
-`python3 agent.py [OPTIONS]`  
+`python3 agent.py CONFIGURATION_FILE`  
 
-### Options
-`-n <agent_name>		Give symbolic name to this monitoring agent (default: Agent0)`  
-`-t <number>			Set timeout period between each routine cycle in milliseconds (min/default: 100)`  
-`-a <number>			Define time in minutes for how long should the monitoring last (default: until interrupt)`  
-`-d						Search, connect and monitor a Dobot Magician device`  
-`-j						Search, connect and monitor a Jevois Camera device`  
-`-p						Set port for Prometheus endpoint (default: 8000)`  
-`-h						Print this message`
+
+### Configuration
+Choose which device data/attributes will be monitored by changing the `agent.conf` file.
+
 <br><br>
 
 ## Resources

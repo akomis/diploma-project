@@ -1,16 +1,18 @@
-import getopt
+import configparser
 import sys
 import time
 import DobotDllType as dType
 from prometheus_client import start_http_server, Info, Gauge, Enum
 
+config = configparser.ConfigParser()
+
 
 class DobotMagician():
     # {bit address index : alarm description}
-    alarms = {"0x00":"Public Alarm: Reset Alarm", "0x01":"Public Alarm: Undefined Instruction", "0x02":"Public Alarm: File System Error", "0x03":"Public Alarm: Failured Communication between MCU and FPGA", "0x04":"Public Alarm: Angle Sensor Reading Error",
-              "0x11":"Planning Alarm: Inverse Resolve Alarm", "0x12":"Planning Alarm: Inverse Resolve Limit", "0x13":"Planning Alarm: Data Repetition", "0x14":"Planning Alarm: Arc Input Parameter Alarm", "0x15":"Planning Alarm: JUMP Parameter Error",
-              "0x21":"Kinematic Alarm: Inverse Resolve Alarm", "0x22":"Kinematic Alarm: Inverse Resolve Limit",
-              "0x40":"Limit Alarm: Joint 1 Positive Limit Alarm", "0x41":"Limit Alarm: Joint 1 Negative Limit Alarm", "0x42":"Limit Alarm: Joint 2 Positive Limit Alarm", "0x43":"Limit Alarm: Joint 2 Negative Limit Alarm", "0x44":"Limit Alarm: Joint 3 Positive Limit Alarm", "0x45":"Limit Alarm: Joint 3 Negative Limit Alarm", "0x46":"Limit Alarm: Joint 4 Positive Limit Alarm", "0x47":"Limit Alarm: Joint 4 Negative Limit Alarm", "0x48":"Limit Alarm: Parallegram Positive Limit Alarm", "0x49":"Limit Alarm: Parallegram Negative Limit Alarm"}
+    alarms = {"0x00": "Public Alarm: Reset Alarm", "0x01": "Public Alarm: Undefined Instruction", "0x02": "Public Alarm: File System Error", "0x03": "Public Alarm: Failured Communication between MCU and FPGA", "0x04": "Public Alarm: Angle Sensor Reading Error",
+              "0x11": "Planning Alarm: Inverse Resolve Alarm", "0x12": "Planning Alarm: Inverse Resolve Limit", "0x13": "Planning Alarm: Data Repetition", "0x14": "Planning Alarm: Arc Input Parameter Alarm", "0x15": "Planning Alarm: JUMP Parameter Error",
+              "0x21": "Kinematic Alarm: Inverse Resolve Alarm", "0x22": "Kinematic Alarm: Inverse Resolve Limit",
+              "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
 
     def __init__(self, api):
         self.__api = api
@@ -19,12 +21,8 @@ class DobotMagician():
                            'deviceName': str(dType.GetDeviceName(self.__api)[0]),
                            'serialNumber': str(dType.GetDeviceSN(self.__api)[0])})
 
-        self.__poses_x = Gauge('pose_x', 'Real-time pose of robotic arm: X position')
-        self.__poses_y = Gauge('pose_y', 'Real-time pose of robotic arm: Y position')
-        self.__poses_z = Gauge('pose_z', 'Real-time pose of robotic arm: Z position')
-        self.__poses_r = Gauge('pose_r', 'Real-time pose of robotic arm: R position')
-        self.__device_alarm = Enum('alarms', 'Device alarms',states=list(self.alarms.values()))
-
+        self.__device_alarms = Enum(
+            'alarms', 'Device alarms', states=list(self.alarms.values()))
 
     def _getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
@@ -41,32 +39,10 @@ class DobotMagician():
                 # Get index in 10-base form to check the corresponding bit
                 index = int(alarm, 16)
                 if bits[index] == '1':
-                    self.__device_alarm.state(self.alarms[alarm])
-                    #print(self.alarms[alarm])
-
+                    self.__device_alarms.state(self.alarms[alarm])
 
     def _fetchDobotData(self):
-        poses = dType.GetPose(self.__api)
-        kinematics = dType.GetKinematics(self.__api)
-        armOrientation = dType.GetArmOrientation(self.__api)
-
-        self.__poses_x.set(float(poses[0]))
-        self.__poses_y.set(float(poses[1]))
-        self.__poses_z.set(float(poses[2]))
-        self.__poses_r.set(float(poses[3]))
-        self.__kinematics_v.set(float(kinematics[0]))
-        self.__kinematics_a.set(float(kinematics[1]))
-        self.__arm_orientation_l.set(float(armOrientation[0]))
         self._getAlarms()
-
-        # self.__triggerMode.set(dType.GetHHTTrigMode(self.__api)[0])
-        # self.__jogJointParams.set(dType.GetJOGJointParams(self.__api))
-        # self.__jogCoordParams.set(dType.GetJOGCoordinateParams(self.__api))
-        # self.__jogCommonParams.set(dType.GetJOGCommonParams(self.__api))
-        # self.__ptpJointParams.set(dType.GetPTPJointParams(self.__api))
-        # self.__ptpCoordParams.set(dType.GetPTPCoordinateParams(self.__api))
-        # self.__ptpJumpParams.set(dType.GetPTPJumpParams(self.__api))
-        # self.__ptpCommonParams.set(dType.GetPTPCommonParams(self.__api))
 
     def _getDobotApi(self):
         return self.__api
@@ -81,21 +57,10 @@ class JevoisCamera():
 
 
 class MonitoringAgent():
-    def __init__(self, name, timeoutPeriod, port):
-        self.__name = "Agent0"
-        self.__timeoutPeriod = 100
-        self.__port = 8000
-
-        if name is not None:
-            self.__name = name
-
-        if timeoutPeriod is not None:
-            self.__timeoutPeriod = timeoutPeriod
-
-        if port is not None:
-            self.__port = port
-
-        self.__fetchTimes = []
+    def __init__(self, name, interval, prometheusPort):
+        self.__name = name
+        self.__interval = interval
+        self.__port = prometheusPort
         self.__startTime = None
         self.__jevois = None
         self.__dobot = None
@@ -138,94 +103,82 @@ class MonitoringAgent():
         if self.__jevois is not None:
             self.__jevois._fetchJevoisData()
 
-    def startRoutine(self, duration):
+    def startRoutine(self):
         if self.__dobot is None and self.__jevois is None:
             print("No devices connected to the agent.")
             print("Run with -d to connect to a dobot magician robot")
             print("Run with -j to connect to a jevois camera")
             sys.exit(11)
 
-        print('Monitoring..')
-
         start_http_server(self.__port)
         self.__startTime = time.perf_counter()
 
+        print('Monitoring..')
         while (1):
-            time.sleep(self.__timeoutPeriod/1000)
+            time.sleep(self.__interval / 1000)
             self.__fetchData()
 
-            if duration is not None:
-                duration = int(duration / 60) - int(self.getAgentRuntime())
-                if duration <= 0:
-                    break
 
-    def getTimeoutPeriod(self):
-        return self.__timeoutPeriod
+def readAgentSettings():
+    global config
+
+    name = config.get('AGENT', 'AgentName', fallback="Agent0")
+    if name == '':
+        name = "Agent0"
+
+    try:
+        interval = config.getint('AGENT', 'routineInterval', fallback=100)
+        if (interval < 100):
+            raise ValueError
+    except ValueError:
+        print('RoutineInterval must be a number greater or equal to 100')
+        sys.exit(4)
+
+    try:
+        port = config.getint('AGENT', 'PrometheusPort', fallback=8080)
+        if port > 65535 or port < 0:
+            print(str(port) + " is not a valid port")
+            raise ValueError
+    except ValueError:
+        print('PrometheusPort must be a number from 0 to 65535')
+        sys.exit(5)
+
+    return name, interval, port
 
 def printHelp():
-    print('Monitoring Agent for Dobot Magician and Jevois Camera\n')
-    print('Options:')
-    print('-n <agent_name>\t\tGive symbolic name to this monitoring agent (default: Agent0)')
-    print('-t <number>\t\tSet timeout period between each routine cycle in milliseconds (min/default: 100)')
-    print('-a <number>\t\tDefine time in minutes for how long should the monitoring last (default: until interrupt)')
-    print('-d\t\tSearch, connect and monitor a Dobot Magician device')
-    print('-j\t\tSearch, connect and monitor a Jevois Camera device')
-    print('-p\t\tSet port for Prometheus endpoint (default: 8000)')
-    print('-h\t\tPrint this message')
+    print('Monitoring Agent for Dobot Magician and Jevois Camera')
+    print('Usage: $ python3 agent.py CONFIGURATION_FILE')
+
 
 def main():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'djhp:n:t:')
-    except getopt.GetoptError as err:
-        print(str(err))
-        sys.exit(2)
+    global config
+    if len(sys.argv) != 2:
+        print("Wrong amount of arguments. Use -h or --help for more information.")
+        exit(1)
 
-    agentName = None
-    timeoutPeriod = None
-    duration = None
-    port = None
+    argument = sys.argv[1]
 
-    for opt, arg in opts:
-        if opt == '-h':
-            printHelp()
-            sys.exit()
-        elif opt == '-n':
-            agentName = arg
-        elif opt == '-t':
-            try:
-                timeoutPeriod = int(arg)
-                if (timeoutPeriod < 100):
-                    raise ValueError
-            except ValueError:
-                print('Timeout must be a number greater or equal to 100')
-                sys.exit(3)
-        elif opt == '-a':
-            try:
-                duration = int(arg)
-            except ValueError:
-                print('Alive duration must be a number')
-                sys.exit(4)
-        elif opt == '-p':
-            try:
-                port = int(arg)
-                if port > 65535 or port < 0:
-                    print(str(port) + " is not a valid port")
-                    raise ValueError
-            except ValueError:
-                print('Port must be a number from 0 to 65535')
-                sys.exit(5)
+    if argument == '-h' or argument == '--help':
+        printHelp()
+        exit(0)
+    else:
+        try:
+            config.read(argument)
+        except:
+            print("Cant open configuration file " + argument)
+            exit(2)
 
+    agentName, routineInterval, prometheusPort = readAgentSettings()
+    Agent = MonitoringAgent(agentName, routineInterval, prometheusPort)
 
-    Agent = MonitoringAgent(agentName, timeoutPeriod, port)
+    if 'DOBOT' in config.sections():
+        Agent.connectDobot()
 
-    for opt, arg in opts:
-        if opt == '-d':
-            Agent.connectDobot()
-        elif opt == '-j':
-            #Agent.connectJevois()
-            pass
+    if 'JEVOIS' in config.sections():
+        Agent.connectJevois()
 
-    Agent.startRoutine(duration)
+    Agent.startRoutine()
+
 
 if __name__ == '__main__':
     main()
