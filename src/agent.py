@@ -1,6 +1,7 @@
 import configparser
 import sys
 import time
+import webbrowser
 import DobotDllType as dType
 from prometheus_client import start_http_server, Info, Gauge, Enum
 
@@ -16,14 +17,12 @@ class DobotMagician():
 
 
     def __init__(self, api):
-        global config
         self.__api = api
-        self.__dinfo = Info('dobot_magician', 'General device information')
-        self.__dinfo.info({'version': str(dType.GetDeviceInfo(self.__api)[0]),
-                           'deviceName': str(dType.GetDeviceName(self.__api)[0]),
-                           'serialNumber': str(dType.GetDeviceSN(self.__api)[0])})
+        self.__monitoringOptions = readMonitoringSettings()
 
-        self.__device_alarms = Enum('alarms', 'Device alarms', states=list(self.alarms.values()))
+    def readMonitoringSettings():
+        global config
+        pass
 
     def _getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
@@ -146,15 +145,11 @@ def readAgentSettings():
 
     return name, interval, port
 
-def printHelp():
-    print('Monitoring Agent for Dobot Magician and Jevois Camera')
-    print('Usage: $ python3 agent.py')
-
-
 def main():
     global config
     if sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        printHelp()
+        # Open latest README.md documentation of diploma-project
+        webbrowser.open('https://github.com/akomis/diploma-project/blob/master/README.md')
         exit(1)
 
     try:

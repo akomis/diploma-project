@@ -6,7 +6,7 @@ Implementation of Data Management and Monitoring System for Industrial IoT Appli
 </div>
 
 ## Overview
-A data management system that collects data from IoT devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) and [Jevois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.
+A data management system that collects data from IoT devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) (sliding rail) and [Jevois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.
 <br><br><br>
 
 ## Dependencies
@@ -22,7 +22,7 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 <br><br>
 
 ## Configuration
-Change agent's settings and choose which device data/attributes will be monitored by changing the `agent.conf` file.
+Change agent's settings and choose which device data/attributes will be monitored by changing the `agent.conf` file. For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no` or `false` depending on your preference.
 ### AGENT
 |   Config Name   |                        Description                        | Type | Default |
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
