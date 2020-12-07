@@ -1,8 +1,5 @@
-agent.conf
-getters.*
+tmp/*
 .*
-run.sh
-startup.sh
 *.h
 *.dll
 test.py

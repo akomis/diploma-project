@@ -14,15 +14,16 @@ class DobotMagician():
               "0x21": "Kinematic Alarm: Inverse Resolve Alarm", "0x22": "Kinematic Alarm: Inverse Resolve Limit",
               "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
 
+
     def __init__(self, api):
+        global config
         self.__api = api
         self.__dinfo = Info('dobot_magician', 'General device information')
         self.__dinfo.info({'version': str(dType.GetDeviceInfo(self.__api)[0]),
                            'deviceName': str(dType.GetDeviceName(self.__api)[0]),
                            'serialNumber': str(dType.GetDeviceSN(self.__api)[0])})
 
-        self.__device_alarms = Enum(
-            'alarms', 'Device alarms', states=list(self.alarms.values()))
+        self.__device_alarms = Enum('alarms', 'Device alarms', states=list(self.alarms.values()))
 
     def _getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
@@ -147,26 +148,20 @@ def readAgentSettings():
 
 def printHelp():
     print('Monitoring Agent for Dobot Magician and Jevois Camera')
-    print('Usage: $ python3 agent.py CONFIGURATION_FILE')
+    print('Usage: $ python3 agent.py')
 
 
 def main():
     global config
-    if len(sys.argv) != 2:
-        print("Wrong amount of arguments. Use -h or --help for more information.")
+    if sys.argv[1] == "-h" or sys.argv[1] == "--help":
+        printHelp()
         exit(1)
 
-    argument = sys.argv[1]
-
-    if argument == '-h' or argument == '--help':
-        printHelp()
-        exit(0)
-    else:
-        try:
-            config.read(argument)
-        except:
-            print("Cant open configuration file " + argument)
-            exit(2)
+    try:
+        config.read('agent.conf')
+    except:
+        print("Cant open configuration file. Make sure agent.conf is in the same directory as agent.py")
+        exit(2)
 
     agentName, routineInterval, prometheusPort = readAgentSettings()
     Agent = MonitoringAgent(agentName, routineInterval, prometheusPort)
