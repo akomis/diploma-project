@@ -17,12 +17,73 @@ class DobotMagician():
 
 
     def __init__(self, api):
-        self.__api = api
-        self.__monitoringOptions = readMonitoringSettings()
-
-    def readMonitoringSettings():
         global config
-        pass
+        self.__api = api
+        dobotSection = config.get('DOBOT')
+
+        enabledDeviceInfo = {}
+        if dobotSection.getboolean('DeviceSN', fallback=False):
+            enabledDeviceInfo["serial_number"] = dType.GetDeviceSN(api)[0]
+        if dobotSection.getboolean('DeviceName', fallback=False):
+            enabledDeviceInfo["device_name"] = dType.GetDeviceName(api)[0]
+        if dobotSection.getboolean('DeviceVersion', fallback=False):
+            enabledDeviceInfo["version"] = '.'.join(list(map(str, dType.GetDeviceVersion(api))))
+        if len(enabledDeviceInfo) > 0:
+            self.__deviceInfo = Info('dobot_magician', 'General information about monitored Dobot Magician device')
+            self.__deviceInfo.info(enabledDeviceInfo)
+
+        enabledWifiInfo = {}
+        if dobotSection.getboolean('WifiSSID', fallback=False):
+            enabledWifiInfo["ssid"] = dType.GetWIFISSID(api)
+        if dobotSection.getboolean('WifiPassword', fallback=False):
+            enabledWifiInfo["password"] = dType.GetWIFIPassword(api)
+        if dobotSection.getboolean('WifiIPAddress', fallback=False):
+            enabledWifiInfo["ip_address"] = dType.GetWIFIIPAddress(api)
+        if dobotSection.getboolean('WifiNetmask', fallback=False):
+            enabledWifiInfo["netmask"] = dType.GetWIFINetmask(api)
+        if dobotSection.getboolean('WifiGateway', fallback=False):
+            enabledWifiInfo["gateway"] = dType.GetWIFIGateway(api)
+        if dobotSection.getboolean('WifiDNS', fallback=False):
+            enabledWifiInfo["dns"] = dType.GetWIFIDNS(api)
+        if len(enabledWifiInfo) > 0:
+            self.__wifiInfo = Info('wifi', 'Information regarding the device\'s wifi connection')
+            self.__wifiInfo.info(enabledWifiInfo)
+
+        if dobotSection.getboolean('QueueIndex', fallback=False):
+            self.__queueIndex = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
+            
+        if dobotSection.getboolean('', fallback=False):
+            self.__ = Gauge('','')
 
     def _getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
