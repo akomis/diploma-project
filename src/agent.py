@@ -612,8 +612,6 @@ class MonitoringAgent():
     def startRoutine(self):
         if self.__dobot is None and self.__jevois is None:
             print("No devices connected to the agent.")
-            print("Run with -d to connect to a dobot magician robot")
-            print("Run with -j to connect to a jevois camera")
             sys.exit(11)
 
         start_http_server(self.__port)
