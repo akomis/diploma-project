@@ -22,7 +22,8 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 <br><br>
 
 ## Configuration
-Change agent's settings and choose which device data/attributes will be monitored by changing the `agent.conf` file. For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` or remove the entry completely, depending on your preference.
+Change agent's settings and choose which device data/attributes will be monitored by changing the `agent.conf` file. For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` or remove the entry completely, depending on your preference.  
+In order for the agent to find a certain device such as a Dobot Magician or a Jevois camera, a section of the device ([DOBOT] and [JEVOIS] respectively) must exist in the configuration file.
 ### AGENT
 |   Config Name   |                        Description                        | Type | Default |
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
