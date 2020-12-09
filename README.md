@@ -22,8 +22,10 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 <br><br>
 
 ## Configuration
-Change agent's settings and choose which device data/attributes will be monitored by changing the `agent.conf` file. For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` or remove the entry completely, depending on your preference.  
-In order for the agent to find a certain device such as a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `DOBOT:COM3` for serial or `DOBOT:192.168.0.3` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).
+Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
+In order for the agent to find a certain device such as a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `DOBOT:COM3` for serial or `DOBOT:192.168.0.3` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).  
+For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` or remove the entry completely, depending on your preference.  
+
 ### AGENT
 |   Config Name   |                        Description                        | Type | Default |
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
