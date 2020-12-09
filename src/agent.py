@@ -343,7 +343,7 @@ class DobotMagician():
         if dobotSection.getboolean('AutoLevelingResult', fallback=False):
             self.__autoLevelingResult.set(dType.GetAutoLevelingResult(self.__api)[0])
 
-        endEffector = dType.GetAutoLevelingResult(self.__api)
+        endEffector = dType.GetEndEffectorParams(self.__api)
         if dobotSection.getboolean('EndEffectorX', fallback=False):
             self.__endEffectorX.set(endEffector[0])
 
