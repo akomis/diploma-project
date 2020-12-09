@@ -1,7 +1,8 @@
-import configparser
+import re
 import sys
 import time
 import webbrowser
+import configparser
 import DobotDllType as dType
 from prometheus_client import start_http_server, Info, Gauge, Enum
 
@@ -16,11 +17,13 @@ class DobotMagician():
               "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
 
 
-    def __init__(self, api):
+    def __init__(self, api, port):
         global config
-        dobotSection = config['DOBOT']
 
         self.__api = api
+        self.__port = port
+
+        dobotSection = config['DOBOT' + ':' + self.__port]
 
         enabledDeviceInfo = {}
         if dobotSection.getboolean('DeviceSN', fallback=False):
@@ -272,7 +275,7 @@ class DobotMagician():
         if dobotSection.getboolean('WifiConnectionStatus', fallback=False):
             self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'])
 
-    def _getAlarms(self):
+    def __getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
 
         # Convert Bytes to bits (as string for reading)
@@ -289,9 +292,9 @@ class DobotMagician():
                 if bits[index] == '1':
                     self.__alarmsState.state(self.alarms[alarm])
 
-    def _fetchDobotData(self):
+    def fetchData(self):
         global config
-        dobotSection = config['DOBOT']
+        dobotSection = config['DOBOT' + ':' + self.__port]
 
         if dobotSection.getboolean('DeviceTime', fallback=False):
             self.__deviceTime.set(dType.GetDeviceTime(self.__api)[0])
@@ -325,7 +328,7 @@ class DobotMagician():
             self.__angleEndEffector.set(pose[7])
 
         if dobotSection.getboolean('AlarmsState', fallback=False):
-            self._getAlarms()
+            self.__getAlarms()
 
         home = dType.GetHOMEParams(self.__api)
         if dobotSection.getboolean('HomeX', fallback=False):
@@ -550,96 +553,77 @@ class DobotMagician():
             else:
                 self.__wifiConnectionStatus.state('disabled')
 
-    def _getDobotApi(self):
-        return self.__api
-
-
-class JevoisCamera():
-    def __init__(self, cap):
-        self.__cap = cap
-
-    def _fetchJevoisData(self):
-        pass
-
 
 class MonitoringAgent():
     def __init__(self):
         global config
-        self.__name = config.get('AGENT', 'AgentName', fallback="Agent0")
-        if self.__name == '':
-            self.__name = "Agent0"
+        self.__agentName = config.get('AGENT', 'AgentName', fallback="Agent0")
+        if self.__agentName == '':
+            self.__agentName = "Agent0"
 
         try:
-            self.__interval = config.getint('AGENT', 'routineInterval', fallback=100)
-            if (self.__interval < 100):
+            self.__routineInterval = config.getint('AGENT', 'routineInterval', fallback=100)
+            if (self.__routineInterval < 100):
                 raise ValueError
         except ValueError:
             print('RoutineInterval must be a number greater or equal to 100')
             sys.exit(4)
 
         try:
-            self.__port = config.getint('AGENT', 'PrometheusPort', fallback=8080)
-            if self.__port > 65535 or self.__port < 0:
-                print(str(self.__port) + " is not a valid port")
+            self.__prometheusPort = config.getint('AGENT', 'PrometheusPort', fallback=8080)
+            if self.__prometheusPort > 65535 or self.__prometheusPort < 0:
+                print(str(self.__prometheusPort) + " is not a valid port")
                 raise ValueError
         except ValueError:
             print('PrometheusPort must be a number from 0 to 65535')
             sys.exit(5)
 
-        self.__startTime = None
-        self.__jevois = None
-        self.__dobot = None
+        self.__devices = []
 
-    def getAgentRuntime(self):
-        if self.__startTime is None:
-            print('There is no active routine on this agent.')
-            return
-
-        return time.perf_counter() - self.__startTime
-
-    def connectDobot(self):
+    def __connectDobot(self, port):
         # Load Dll and get the CDLL object
         api = dType.load()
         # Connect Dobot
-        state = dType.ConnectDobot(api, "", 115200)[0]
+        state = dType.ConnectDobot(api, port, 115200)[0]
 
         if state == dType.DobotConnect.DobotConnect_NoError:
-            self.__dobot = DobotMagician(api)
-            print('Dobot Magician connected succesfully!')
-            return 0
+            print("Dobot Magician at port " + port + " connected succesfully!")
+            return DobotMagician(api, port)
         else:
-            print("Couldn't connect with a Dobot Magician device")
-            return 1
+            print("Couldn't connect with a Dobot Magician device at port " + port)
+            return None
 
-    def disconnectDobot(self):
-        if self.__dobot is not None:
-            dType.DisconnectDobot(self.__dobot._getDobotApi())
+    def __connectToDevices(self):
+        global config
 
-    def connectJevois(self):
-        pass
+        # Discover through the config which devices should be monitored
+        for section in config:
+            part = str(section).split(':')
+            name = part[0]
+            port = part[1]
 
-    def disconnectJevois(self):
-        pass
+            # Depending on the type of device try to connect to it
+            if name.lower() == 'dobot':
+                dobot = self.__connectDobot(port)
+                if dobot is not None:
+                    self.__devices.append(dobot)
 
-    def __fetchData(self):
-        if self.__dobot is not None:
-            self.__dobot._fetchDobotData()
-
-        if self.__jevois is not None:
-            self.__jevois._fetchJevoisData()
 
     def startRoutine(self):
-        if self.__dobot is None and self.__jevois is None:
+        if len(self.__devices) == 0:
             print("No devices connected to the agent.")
             sys.exit(11)
 
-        start_http_server(self.__port)
-        self.__startTime = time.perf_counter()
+        print('Connecting to devices listed in agent.conf..')
+        self.__connectToDevices()
+        print('Starting prometheus server at port ' + str(self.__prometheusPort) + "..")
+        start_http_server(self.__prometheusPort)
 
         print('Monitoring..')
         while (1):
-            time.sleep(self.__interval / 1000)
-            self.__fetchData()
+            time.sleep(self.__routineInterval / 1000)
+            for device in self.__devices:
+                device.fetchData()
 
 def argumentHandler(args):
     if len(args) == 2:
