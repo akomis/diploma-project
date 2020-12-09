@@ -29,7 +29,7 @@ In order for the agent to find a certain device such as a Dobot Magician or a Je
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
 |    AgentName    |                  Symbolic name for agent                  |  str |  Agent0 |
 | RoutineInterval | Timeout period between each routine cycle in milliseconds |  int |   100   |
-|  PrometheusPort |                Port for Prometheus endpoint               |  int |   8080  |
+|  PrometheusPort |                Port for Prometheus endpoint               |  int |   8000  |
 
 ### DOBOT
 |         Config Name        |                                          Description                                          | Prometheus Type | Default Setting |            API Call            |

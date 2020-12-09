@@ -18,7 +18,7 @@ class DobotMagician():
 
     def __init__(self, api):
         global config
-        dobotSection = config.get('DOBOT')
+        dobotSection = config['DOBOT']
 
         self.__api = api
 
@@ -273,7 +273,7 @@ class DobotMagician():
             self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'])
 
     def _getAlarms(self):
-        alarmBytes = dType.GetAlarmsState(self.__self.__api, 10)[0]
+        alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
 
         # Convert Bytes to bits (as string for reading)
         bits = ''
@@ -291,7 +291,7 @@ class DobotMagician():
 
     def _fetchDobotData(self):
         global config
-        dobotSection = config.get('DOBOT')
+        dobotSection = config['DOBOT']
 
         if dobotSection.getboolean('DeviceTime', fallback=False):
             self.__deviceTime.set(dType.GetDeviceTime(self.__api)[0])
@@ -325,7 +325,7 @@ class DobotMagician():
             self.__angleEndEffector.set(pose[7])
 
         if dobotSection.getboolean('AlarmsState', fallback=False):
-            _getAlarms()
+            self._getAlarms()
 
         home = dType.GetHOMEParams(self.__api)
         if dobotSection.getboolean('HomeX', fallback=False):
@@ -530,7 +530,7 @@ class DobotMagician():
         if dobotSection.getboolean('SlidingRailJogAcceleration', fallback=False):
             self.__slidingRailJogAcceleration.set(jogRail[1])
 
-        ptpRail = dType.GETPTPLParams(self.__api)
+        ptpRail = dType.GetPTPLParams(self.__api)
         if dobotSection.getboolean('SlidingRailPtpVelocity', fallback=False):
             self.__slidingRailPtpVelocity.set(ptpRail[0])
 
@@ -651,16 +651,21 @@ def readAgentSettings():
 
 def main():
     global config
-    if sys.argv[1] == "-h" or sys.argv[1] == "--help":
-        # Open latest README.md documentation of diploma-project
-        webbrowser.open('https://github.com/akomis/diploma-project/blob/master/README.md')
-        exit(1)
+    if len(sys.argv) == 2:
+        if sys.argv[1] == "-h" or sys.argv[1] == "--help":
+            # Open latest README.md documentation of diploma-project
+            webbrowser.open('https://github.com/akomis/diploma-project/blob/master/README.md')
+            exit(1)
+        else:
+            print('Unrecognised option ' + sys.argv[1])
+            print('For more information: $ agent.py --help')
+            exit(2)
 
     try:
         config.read('agent.conf')
     except:
         print("Cant open configuration file. Make sure agent.conf is in the same directory as agent.py")
-        exit(2)
+        exit(3)
 
     agentName, routineInterval, prometheusPort = readAgentSettings()
     Agent = MonitoringAgent(agentName, routineInterval, prometheusPort)
