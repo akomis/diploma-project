@@ -539,13 +539,13 @@ class DobotMagician():
 
 
         if dobotSection.getboolean('WifiModuleStatus', fallback=False):
-            if bool(dType.GetWIFIConfigMode(self.__api)):
+            if bool(dType.GetWIFIConfigMode(self.__api)[0]):
                 self.__wifiModuleStatus.state('enabled')
             else:
                 self.__wifiModuleStatus.state('disabled')
 
         if dobotSection.getboolean('WifiConnectionStatus', fallback=False):
-            if bool(dType.GetWIFIConnectStatus(self.__api)):
+            if bool(dType.GetWIFIConnectStatus(self.__api)[0]):
                 self.__wifiConnectionStatus.state('enabled')
             else:
                 self.__wifiConnectionStatus.state('disabled')
