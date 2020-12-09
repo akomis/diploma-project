@@ -563,10 +563,29 @@ class JevoisCamera():
 
 
 class MonitoringAgent():
-    def __init__(self, name, interval, prometheusPort):
-        self.__name = name
-        self.__interval = interval
-        self.__port = prometheusPort
+    def __init__(self):
+        global config
+        self.__name = config.get('AGENT', 'AgentName', fallback="Agent0")
+        if self.__name == '':
+            self.__name = "Agent0"
+
+        try:
+            self.__interval = config.getint('AGENT', 'routineInterval', fallback=100)
+            if (self.__interval < 100):
+                raise ValueError
+        except ValueError:
+            print('RoutineInterval must be a number greater or equal to 100')
+            sys.exit(4)
+
+        try:
+            self.__port = config.getint('AGENT', 'PrometheusPort', fallback=8080)
+            if self.__port > 65535 or self.__port < 0:
+                print(str(self.__port) + " is not a valid port")
+                raise ValueError
+        except ValueError:
+            print('PrometheusPort must be a number from 0 to 65535')
+            sys.exit(5)
+
         self.__startTime = None
         self.__jevois = None
         self.__dobot = None
@@ -622,37 +641,9 @@ class MonitoringAgent():
             time.sleep(self.__interval / 1000)
             self.__fetchData()
 
-
-def readAgentSettings():
-    global config
-
-    name = config.get('AGENT', 'AgentName', fallback="Agent0")
-    if name == '':
-        name = "Agent0"
-
-    try:
-        interval = config.getint('AGENT', 'routineInterval', fallback=100)
-        if (interval < 100):
-            raise ValueError
-    except ValueError:
-        print('RoutineInterval must be a number greater or equal to 100')
-        sys.exit(4)
-
-    try:
-        port = config.getint('AGENT', 'PrometheusPort', fallback=8080)
-        if port > 65535 or port < 0:
-            print(str(port) + " is not a valid port")
-            raise ValueError
-    except ValueError:
-        print('PrometheusPort must be a number from 0 to 65535')
-        sys.exit(5)
-
-    return name, interval, port
-
-def main():
-    global config
-    if len(sys.argv) == 2:
-        if sys.argv[1] == "-h" or sys.argv[1] == "--help":
+def argumentHandler(args):
+    if len(args) == 2:
+        if args[1] == "-h" or args[1] == "--help":
             # Open latest README.md documentation of diploma-project
             webbrowser.open('https://github.com/akomis/diploma-project/blob/master/README.md')
             exit(1)
@@ -661,21 +652,18 @@ def main():
             print('For more information: $ agent.py --help')
             exit(2)
 
+def readConfig():
+    global config
     try:
         config.read('agent.conf')
     except:
         print("Cant open configuration file. Make sure agent.conf is in the same directory as agent.py")
         exit(3)
 
-    agentName, routineInterval, prometheusPort = readAgentSettings()
-    Agent = MonitoringAgent(agentName, routineInterval, prometheusPort)
-
-    if 'DOBOT' in config.sections():
-        Agent.connectDobot()
-
-    if 'JEVOIS' in config.sections():
-        Agent.connectJevois()
-
+def main():
+    argumentHandler(sys.argv)
+    readConfig()
+    Agent = MonitoringAgent()
     Agent.startRoutine()
 
 
