@@ -39,7 +39,7 @@ class DobotMagician():
         if dobotSection.getboolean('WifiPassword', fallback=False):
             enabledWifiInfo["password"] = dType.GetWIFIPassword(self.__api)[0]
         if dobotSection.getboolean('WifiIPAddress', fallback=False):
-            enabledWifiInfo["ip_address"] = '.'.join(list(map(str, dType.GetWIFIIPAddress(self.__api)[:-1])))
+            enabledWifiInfo["ip_address"] = '.'.join(list(map(str, dType.GetWIFIIPAddress(self.__api)[1:])))
         if dobotSection.getboolean('WifiNetmask', fallback=False):
             enabledWifiInfo["netmask"] = '.'.join(list(map(str, dType.GetWIFINetmask(self.__api))))
         if dobotSection.getboolean('WifiGateway', fallback=False):
