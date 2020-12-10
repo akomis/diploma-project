@@ -7,7 +7,7 @@ Implementation of Data Management and Monitoring System for Industrial IoT Appli
 
 ## Overview
 A data management system that collects data from IoT devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Conveyor belt](https://www.dobot.cc/products/conveyor-belt-kit-overview.html) (sliding rail) and [Jevois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.
-<br><br><br>
+<br><br>
 
 ## Dependencies
 - [Python 3.x](https://www.python.org/downloads/windows/)

@@ -1,4 +1,3 @@
-import re
 import sys
 import time
 import webbrowser
@@ -604,6 +603,7 @@ class MonitoringAgent():
                 port = part[1]
             except IndexError:
                 print('All device entries should follow this format [DEVICE:PORT]')
+                print('For more information use --help')
                 exit(6)
 
             # Depending on the type of device try to connect to it
