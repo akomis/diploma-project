@@ -598,9 +598,13 @@ class MonitoringAgent():
 
         # Discover through the config which devices should be monitored
         for section in config:
-            part = str(section).split(':')
-            name = part[0]
-            port = part[1]
+            try:
+                part = str(section).split(':')
+                name = part[0]
+                port = part[1]
+            except IndexError:
+                print('All device entries should follow this format [DEVICE:PORT]')
+                exit(6)
 
             # Depending on the type of device try to connect to it
             if name.lower() == 'dobot':
