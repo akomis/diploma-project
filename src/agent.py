@@ -21,7 +21,6 @@ class DobotMagician():
 
         self.__api = api
         self.__port = port
-
         dobotSection = config['DOBOT' + ':' + self.__port]
 
         enabledDeviceInfo = {}
@@ -32,7 +31,7 @@ class DobotMagician():
         if dobotSection.getboolean('DeviceVersion', fallback=False):
             enabledDeviceInfo["version"] = '.'.join(list(map(str, dType.GetDeviceVersion(self.__api))))
         if len(enabledDeviceInfo) > 0:
-            self.__deviceInfo = Info('dobot_magician', 'General information about monitored Dobot Magician device')
+            self.__deviceInfo = Info(self.__port.lower()+'_'+'dobot_magician', 'General information about monitored Dobot Magician device')
             self.__deviceInfo.info(enabledDeviceInfo)
 
         enabledWifiInfo = {}
@@ -49,230 +48,230 @@ class DobotMagician():
         if dobotSection.getboolean('WifiDNS', fallback=False):
             enabledWifiInfo["dns"] = '.'.join(list(map(str, dType.GetWIFIDNS(self.__api))))
         if len(enabledWifiInfo) > 0:
-            self.__wifiInfo = Info('wifi', 'Information regarding the device\'s wifi connection')
+            self.__wifiInfo = Info(self.__port.lower()+'_'+'wifi', 'Information regarding the device\'s wifi connection')
             self.__wifiInfo.info(enabledWifiInfo)
 
         if dobotSection.getboolean('DeviceTime', fallback=False):
-            self.__deviceTime = Gauge('device_time','Device\'s clock/time')
+            self.__deviceTime = Gauge(self.__port.lower()+'_'+'device_time','Device\'s clock/time')
 
         if dobotSection.getboolean('QueueIndex', fallback=False):
-            self.__queueIndex = Gauge('queue_index','Current index in command queue')
+            self.__queueIndex = Gauge(self.__port.lower()+'_'+'queue_index','Current index in command queue')
 
         if dobotSection.getboolean('PoseX', fallback=False):
-            self.__poseX = Gauge('pose_x','Real-time cartesian coordinate of device\'s X axis')
+            self.__poseX = Gauge(self.__port.lower()+'_'+'pose_x','Real-time cartesian coordinate of device\'s X axis')
 
         if dobotSection.getboolean('PoseY', fallback=False):
-            self.__poseY = Gauge('pose_y','Real-time cartesian coordinate of device\'s Y axis')
+            self.__poseY = Gauge(self.__port.lower()+'_'+'pose_y','Real-time cartesian coordinate of device\'s Y axis')
 
         if dobotSection.getboolean('PoseZ', fallback=False):
-            self.__poseZ = Gauge('pose_z','Real-time cartesian coordinate of device\'s Z axis')
+            self.__poseZ = Gauge(self.__port.lower()+'_'+'pose_z','Real-time cartesian coordinate of device\'s Z axis')
 
         if dobotSection.getboolean('PoseR', fallback=False):
-            self.__poseR = Gauge('pose_r','Real-time cartesian coordinate of device\'s R axis')
+            self.__poseR = Gauge(self.__port.lower()+'_'+'pose_r','Real-time cartesian coordinate of device\'s R axis')
 
         if dobotSection.getboolean('AngleBase', fallback=False):
-            self.__angleBase = Gauge('angle_base','Base joint angle')
+            self.__angleBase = Gauge(self.__port.lower()+'_'+'angle_base','Base joint angle')
 
         if dobotSection.getboolean('AngleRearArm', fallback=False):
-            self.__angleRearArm = Gauge('angle_rear_arm','Rear arm joint angle')
+            self.__angleRearArm = Gauge(self.__port.lower()+'_'+'angle_rear_arm','Rear arm joint angle')
 
         if dobotSection.getboolean('AngleForearm', fallback=False):
-            self.__angleForearm = Gauge('angle_forearm','Forearm joint angle')
+            self.__angleForearm = Gauge(self.__port.lower()+'_'+'angle_forearm','Forearm joint angle')
 
         if dobotSection.getboolean('AngleEndEffector', fallback=False):
-            self.__angleEndEffector = Gauge('angle_end_effector','End effector joint angle')
+            self.__angleEndEffector = Gauge(self.__port.lower()+'_'+'angle_end_effector','End effector joint angle')
 
         if dobotSection.getboolean('AlarmsState', fallback=False):
-            self.__alarmsState = Enum('alarms', 'Device alarms', states=list(self.alarms.values()))
+            self.__alarmsState = Enum(self.__port.lower()+'_'+'alarms', 'Device alarms', states=list(self.alarms.values()))
 
         if dobotSection.getboolean('HomeX', fallback=False):
-            self.__homeX = Gauge('home_x','Home position for X axis')
+            self.__homeX = Gauge(self.__port.lower()+'_'+'home_x','Home position for X axis')
 
         if dobotSection.getboolean('HomeY', fallback=False):
-            self.__homeY = Gauge('home_y','Home position for Y axis')
+            self.__homeY = Gauge(self.__port.lower()+'_'+'home_y','Home position for Y axis')
 
         if dobotSection.getboolean('HomeZ', fallback=False):
-            self.__homeZ = Gauge('home_z','Home position for Z axis')
+            self.__homeZ = Gauge(self.__port.lower()+'_'+'home_z','Home position for Z axis')
 
         if dobotSection.getboolean('HomeR', fallback=False):
-            self.__homeR = Gauge('home_r','Home position for R axis')
+            self.__homeR = Gauge(self.__port.lower()+'_'+'home_r','Home position for R axis')
 
         if dobotSection.getboolean('AutoLevelingResult', fallback=False):
-            self.__autoLevelingResult = Gauge('auto_leveling_result','Automatic leveling precision result')
+            self.__autoLevelingResult = Gauge(self.__port.lower()+'_'+'auto_leveling_result','Automatic leveling precision result')
 
         if dobotSection.getboolean('EndEffectorX', fallback=False):
-            self.__endEffectorX = Gauge('end_effector_x','X-axis offset of end effector')
+            self.__endEffectorX = Gauge(self.__port.lower()+'_'+'end_effector_x','X-axis offset of end effector')
 
         if dobotSection.getboolean('EndEffectorY', fallback=False):
-            self.__endEffectorY = Gauge('end_effector_y','Y-axis offset of end effector')
+            self.__endEffectorY = Gauge(self.__port.lower()+'_'+'end_effector_y','Y-axis offset of end effector')
 
         if dobotSection.getboolean('EndEffectorZ', fallback=False):
-            self.__endEffectorZ = Gauge('end_effector_z','Z-axis offset of end effector')
+            self.__endEffectorZ = Gauge(self.__port.lower()+'_'+'end_effector_z','Z-axis offset of end effector')
 
         if dobotSection.getboolean('LaserStatus', fallback=False):
-            self.__laserStatus = Enum('laser_status','Status (enabled/disabled) of laser', states=['enabled','disabled'])
+            self.__laserStatus = Enum(self.__port.lower()+'_'+'laser_status','Status (enabled/disabled) of laser', states=['enabled','disabled'])
 
         if dobotSection.getboolean('SuctionCupStatus', fallback=False):
-            self.__suctionCupStatus = Enum('suction_cup_status','Status (enabled/disabled) of suction cup', states=['enabled','disabled'])
+            self.__suctionCupStatus = Enum(self.__port.lower()+'_'+'suction_cup_status','Status (enabled/disabled) of suction cup', states=['enabled','disabled'])
 
         if dobotSection.getboolean('GripperStatus', fallback=False):
-            self.__gripperStatus = Enum('gripper_status','Status (enabled/disabled) of gripper', states=['enabled','disabled'])
+            self.__gripperStatus = Enum(self.__port.lower()+'_'+'gripper_status','Status (enabled/disabled) of gripper', states=['enabled','disabled'])
 
         if dobotSection.getboolean('JogBaseVelocity', fallback=False):
-            self.__jogBaseVelocity = Gauge('jog_base_velocity','Velocity (°/s) of base joint in jogging mode')
+            self.__jogBaseVelocity = Gauge(self.__port.lower()+'_'+'jog_base_velocity','Velocity (°/s) of base joint in jogging mode')
 
         if dobotSection.getboolean('JogRearArmVelocity', fallback=False):
-            self.__jogRearArmVelocity = Gauge('jog_rear_arm_velocity','Velocity (°/s) of rear arm joint in jogging mode')
+            self.__jogRearArmVelocity = Gauge(self.__port.lower()+'_'+'jog_rear_arm_velocity','Velocity (°/s) of rear arm joint in jogging mode')
 
         if dobotSection.getboolean('JogForearmVelocity', fallback=False):
-            self.__jogForearmVelocity = Gauge('jog_forearm_velocity','Velocity (°/s) of forearm joint in jogging mode')
+            self.__jogForearmVelocity = Gauge(self.__port.lower()+'_'+'jog_forearm_velocity','Velocity (°/s) of forearm joint in jogging mode')
 
         if dobotSection.getboolean('JogEndEffectorVelocity', fallback=False):
-            self.__jogEndEffectorVelocity = Gauge('jog_end_effector_velocity','Velocity (°/s) of end effector joint in jogging mode')
+            self.__jogEndEffectorVelocity = Gauge(self.__port.lower()+'_'+'jog_end_effector_velocity','Velocity (°/s) of end effector joint in jogging mode')
 
         if dobotSection.getboolean('JogBaseAcceleration', fallback=False):
-            self.__jogBaseAcceleration = Gauge('jog_base_acceleration','Acceleration (°/s^2) of base joint in jogging mode')
+            self.__jogBaseAcceleration = Gauge(self.__port.lower()+'_'+'jog_base_acceleration','Acceleration (°/s^2) of base joint in jogging mode')
 
         if dobotSection.getboolean('JogRearArmAcceleration', fallback=False):
-            self.__jogRearArmAcceleration = Gauge('jog_rear_arm_acceleration','Acceleration (°/s^2) of rear arm joint in jogging mode')
+            self.__jogRearArmAcceleration = Gauge(self.__port.lower()+'_'+'jog_rear_arm_acceleration','Acceleration (°/s^2) of rear arm joint in jogging mode')
 
         if dobotSection.getboolean('JogForearmAcceleration', fallback=False):
-            self.__jogForearmAcceleration = Gauge('jog_forearm_acceleration','Acceleration (°/s^2) of forearm joint in jogging mode')
+            self.__jogForearmAcceleration = Gauge(self.__port.lower()+'_'+'jog_forearm_acceleration','Acceleration (°/s^2) of forearm joint in jogging mode')
 
         if dobotSection.getboolean('JogEndEffectorAcceleration', fallback=False):
-            self.__jogEndEffectorAcceleration = Gauge('jog_end_effector_acceleration','Acceleration (°/s^2) of end effector joint in jogging mode')
+            self.__jogEndEffectorAcceleration = Gauge(self.__port.lower()+'_'+'jog_end_effector_acceleration','Acceleration (°/s^2) of end effector joint in jogging mode')
 
         if dobotSection.getboolean('JogAxisXVelocity', fallback=False):
-            self.__jogAxisXVelocity = Gauge('jog_axis_x_velocity','Velocity (mm/s) of device\'s X axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisXVelocity = Gauge(self.__port.lower()+'_'+'jog_axis_x_velocity','Velocity (mm/s) of device\'s X axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisYVelocity', fallback=False):
-            self.__jogAxisYVelocity = Gauge('jog_axis_y_velocity','Velocity (mm/s) of device\'s Y axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisYVelocity = Gauge(self.__port.lower()+'_'+'jog_axis_y_velocity','Velocity (mm/s) of device\'s Y axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisZVelocity', fallback=False):
-            self.__jogAxisZVelocity = Gauge('jog_axis_z_velocity','Velocity (mm/s) of device\'s Z axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisZVelocity = Gauge(self.__port.lower()+'_'+'jog_axis_z_velocity','Velocity (mm/s) of device\'s Z axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisRVelocity', fallback=False):
-            self.__jogAxisRVelocity = Gauge('jog_axis_r_velocity','Velocity (mm/s) of device\'s R axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisRVelocity = Gauge(self.__port.lower()+'_'+'jog_axis_r_velocity','Velocity (mm/s) of device\'s R axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisXAcceleration', fallback=False):
-            self.__jogAxisXAcceleration = Gauge('jog_axis_x_acceleration','Acceleration (mm/s^2) of device\'s X axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisXAcceleration = Gauge(self.__port.lower()+'_'+'jog_axis_x_acceleration','Acceleration (mm/s^2) of device\'s X axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisYAcceleration', fallback=False):
-            self.__jogAxisYAcceleration = Gauge('jog_axis_y_acceleration','Acceleration (mm/s^2) of device\'s Y axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisYAcceleration = Gauge(self.__port.lower()+'_'+'jog_axis_y_acceleration','Acceleration (mm/s^2) of device\'s Y axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisZAcceleration', fallback=False):
-            self.__jogAxisZAcceleration = Gauge('jog_axis_z_acceleration','Acceleration (mm/s^2) of device\'s Z axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisZAcceleration = Gauge(self.__port.lower()+'_'+'jog_axis_z_acceleration','Acceleration (mm/s^2) of device\'s Z axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogAxisRAcceleration', fallback=False):
-            self.__jogAxisRAcceleration = Gauge('jog_axis_r_acceleration','Acceleration (mm/s^2) of device\'s R axis (cartesian coordinate) in jogging mode')
+            self.__jogAxisRAcceleration = Gauge(self.__port.lower()+'_'+'jog_axis_r_acceleration','Acceleration (mm/s^2) of device\'s R axis (cartesian coordinate) in jogging mode')
 
         if dobotSection.getboolean('JogVelocityRatio', fallback=False):
-            self.__jogVelocityRatio = Gauge('jog_velocity_ratio','Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode')
+            self.__jogVelocityRatio = Gauge(self.__port.lower()+'_'+'jog_velocity_ratio','Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode')
 
         if dobotSection.getboolean('JogAccelerationRatio', fallback=False):
-            self.__jogAccelerationRatio = Gauge('jog_acceleration_ratio','Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode')
+            self.__jogAccelerationRatio = Gauge(self.__port.lower()+'_'+'jog_acceleration_ratio','Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode')
 
         if dobotSection.getboolean('PtpBaseVelocity', fallback=False):
-            self.__ptpBaseVelocity = Gauge('ptp_base_velocity','Velocity (°/s) of base joint in point to point mode')
+            self.__ptpBaseVelocity = Gauge(self.__port.lower()+'_'+'ptp_base_velocity','Velocity (°/s) of base joint in point to point mode')
 
         if dobotSection.getboolean('PtpRearArmVelocity', fallback=False):
-            self.__ptpRearArmVelocity = Gauge('ptp_rear_arm_velocity','Velocity (°/s) of rear arm joint in point to point mode')
+            self.__ptpRearArmVelocity = Gauge(self.__port.lower()+'_'+'ptp_rear_arm_velocity','Velocity (°/s) of rear arm joint in point to point mode')
 
         if dobotSection.getboolean('PtpForearmVelocity', fallback=False):
-            self.__ptpForearmVelocity = Gauge('ptp_forearm_velocity','Velocity (°/s) of forearm joint in point to point mode')
+            self.__ptpForearmVelocity = Gauge(self.__port.lower()+'_'+'ptp_forearm_velocity','Velocity (°/s) of forearm joint in point to point mode')
 
         if dobotSection.getboolean('PtpEndEffectorVelocity', fallback=False):
-            self.__ptpEndEffectorVelocity = Gauge('ptp_end_effector_velocity','Velocity (°/s) of end effector joint in point to point mode')
+            self.__ptpEndEffectorVelocity = Gauge(self.__port.lower()+'_'+'ptp_end_effector_velocity','Velocity (°/s) of end effector joint in point to point mode')
 
         if dobotSection.getboolean('PtpBaseAcceleration', fallback=False):
-            self.__ptpBaseAcceleration = Gauge('ptp_base_acceleration','Acceleration (°/s^2) of base joint in point to point mode')
+            self.__ptpBaseAcceleration = Gauge(self.__port.lower()+'_'+'ptp_base_acceleration','Acceleration (°/s^2) of base joint in point to point mode')
 
         if dobotSection.getboolean('PtpRearArmAcceleration', fallback=False):
-            self.__ptpRearArmAcceleration = Gauge('ptp_rear_arm_acceleration','Acceleration (°/s^2) of rear arm joint in point to point mode')
+            self.__ptpRearArmAcceleration = Gauge(self.__port.lower()+'_'+'ptp_rear_arm_acceleration','Acceleration (°/s^2) of rear arm joint in point to point mode')
 
         if dobotSection.getboolean('PtpForearmAcceleration', fallback=False):
-            self.__ptpForearmAcceleration = Gauge('ptp_forearm_acceleration','Acceleration (°/s^2) of forearm joint in point to point mode')
+            self.__ptpForearmAcceleration = Gauge(self.__port.lower()+'_'+'ptp_forearm_acceleration','Acceleration (°/s^2) of forearm joint in point to point mode')
 
         if dobotSection.getboolean('PtpEndEffectorAcceleration', fallback=False):
-            self.__ptpEndEffectorAcceleration = Gauge('ptp_end_effector_acceleration','Acceleration (°/s^2) of end effector joint in point to point mode')
+            self.__ptpEndEffectorAcceleration = Gauge(self.__port.lower()+'_'+'ptp_end_effector_acceleration','Acceleration (°/s^2) of end effector joint in point to point mode')
 
         if dobotSection.getboolean('PtpXYZVelocity', fallback=False):
-            self.__ptpXYZVelocity = Gauge('ptp_xyz_velocity','Velocity (mm/s) of device\'s X, Y, Z axis (cartesian coordinate) in point to point mode')
+            self.__ptpXYZVelocity = Gauge(self.__port.lower()+'_'+'ptp_xyz_velocity','Velocity (mm/s) of device\'s X, Y, Z axis (cartesian coordinate) in point to point mode')
 
         if dobotSection.getboolean('PtpRVelocity', fallback=False):
-            self.__ptpRVelocity = Gauge('ptp_r_velocity','Velocity (mm/s) of device\'s R axis (cartesian coordinate) in point to point mode')
+            self.__ptpRVelocity = Gauge(self.__port.lower()+'_'+'ptp_r_velocity','Velocity (mm/s) of device\'s R axis (cartesian coordinate) in point to point mode')
 
         if dobotSection.getboolean('PtpXYZAcceleration', fallback=False):
-            self.__ptpXYZAcceleration = Gauge('ptp_x_y_z_acceleration','Acceleration (mm/s^2) of device\'s X, Y, Z axis (cartesian coordinate) in point to point mode')
+            self.__ptpXYZAcceleration = Gauge(self.__port.lower()+'_'+'ptp_x_y_z_acceleration','Acceleration (mm/s^2) of device\'s X, Y, Z axis (cartesian coordinate) in point to point mode')
 
         if dobotSection.getboolean('PtpRAcceleration', fallback=False):
-            self.__ptpRAcceleration = Gauge('ptp_r_acceleration','Acceleration (mm/s^2) of device\'s R axis (cartesian coordinate) in point to point mode')
+            self.__ptpRAcceleration = Gauge(self.__port.lower()+'_'+'ptp_r_acceleration','Acceleration (mm/s^2) of device\'s R axis (cartesian coordinate) in point to point mode')
 
         if dobotSection.getboolean('PtpVelocityRatio', fallback=False):
-            self.__ptpVelocityRatio = Gauge('ptp_velocity_ratio','Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode')
+            self.__ptpVelocityRatio = Gauge(self.__port.lower()+'_'+'ptp_velocity_ratio','Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode')
 
         if dobotSection.getboolean('PtpAccelerationRatio', fallback=False):
-            self.__ptpAccelerationRatio = Gauge('ptp_acceleration_ratio','Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode')
+            self.__ptpAccelerationRatio = Gauge(self.__port.lower()+'_'+'ptp_acceleration_ratio','Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode')
 
         if dobotSection.getboolean('LiftingHeight', fallback=False):
-            self.__liftingHeight = Gauge('lifting_height','Lifting height in jump mode')
+            self.__liftingHeight = Gauge(self.__port.lower()+'_'+'lifting_height','Lifting height in jump mode')
 
         if dobotSection.getboolean('HeighLimit', fallback=False):
-            self.__heightLimit = Gauge('height_limit','Max lifting height in jump mode')
+            self.__heightLimit = Gauge(self.__port.lower()+'_'+'height_limit','Max lifting height in jump mode')
 
         if dobotSection.getboolean('CpVelocity', fallback=False):
-            self.__cpVelocity = Gauge('cp_velocity','Velocity (mm/s) in cp mode')
+            self.__cpVelocity = Gauge(self.__port.lower()+'_'+'cp_velocity','Velocity (mm/s) in cp mode')
 
         if dobotSection.getboolean('CpAcceleration', fallback=False):
-            self.__cpAcceleration = Gauge('cp_acceleration','Acceleration (mm/s^2) in cp mode')
+            self.__cpAcceleration = Gauge(self.__port.lower()+'_'+'cp_acceleration','Acceleration (mm/s^2) in cp mode')
 
         if dobotSection.getboolean('ArcXYZVelocity', fallback=False):
-            self.__arcXYZVelocity = Gauge('arc_x_y_z_velocity','Velocity (mm/s) of X, Y, Z axis in arc mode')
+            self.__arcXYZVelocity = Gauge(self.__port.lower()+'_'+'arc_x_y_z_velocity','Velocity (mm/s) of X, Y, Z axis in arc mode')
 
         if dobotSection.getboolean('ArcRVelocity', fallback=False):
-            self.__arcRVelocity = Gauge('arc_r_velocity','Velocity (mm/s) of R axis in arc mode')
+            self.__arcRVelocity = Gauge(self.__port.lower()+'_'+'arc_r_velocity','Velocity (mm/s) of R axis in arc mode')
 
         if dobotSection.getboolean('ArcXYZAcceleration', fallback=False):
-            self.__arcXYZAcceleration = Gauge('arc_x_y_z_acceleration','Acceleration (mm/s^2) of X, Y, Z axis in arc mode')
+            self.__arcXYZAcceleration = Gauge(self.__port.lower()+'_'+'arc_x_y_z_acceleration','Acceleration (mm/s^2) of X, Y, Z axis in arc mode')
 
         if dobotSection.getboolean('ArcRAcceleration', fallback=False):
-            self.__arcRAcceleration = Gauge('arc_r_acceleration','Acceleration (mm/s^2) of R axis in arc mode')
+            self.__arcRAcceleration = Gauge(self.__port.lower()+'_'+'arc_r_acceleration','Acceleration (mm/s^2) of R axis in arc mode')
 
         if dobotSection.getboolean('AngleStaticErrRear', fallback=False):
-            self.__angleStaticErrRear = Gauge('angle_static_err_rear','Rear arm angle sensor static error')
+            self.__angleStaticErrRear = Gauge(self.__port.lower()+'_'+'angle_static_err_rear','Rear arm angle sensor static error')
 
         if dobotSection.getboolean('AngleStaticErrFront', fallback=False):
-            self.__angleStaticErrFront = Gauge('arc_static_err_front','Forearm angle sensor static error')
+            self.__angleStaticErrFront = Gauge(self.__port.lower()+'_'+'arc_static_err_front','Forearm angle sensor static error')
 
         if dobotSection.getboolean('AngleCoefRear', fallback=False):
-            self.__angleCoefRear = Gauge('angle_coef_rear','Rear arm angle sensor linearization parameter')
+            self.__angleCoefRear = Gauge(self.__port.lower()+'_'+'angle_coef_rear','Rear arm angle sensor linearization parameter')
 
         if dobotSection.getboolean('AngleCoefFront', fallback=False):
-            self.__angleCoefFront = Gauge('angle_coef_front','Forearm angle sensor linearization parameter')
+            self.__angleCoefFront = Gauge(self.__port.lower()+'_'+'angle_coef_front','Forearm angle sensor linearization parameter')
 
         if dobotSection.getboolean('SlidingRailStatus', fallback=False):
-            self.__slidingRailStatus = Enum('sliding_rail_status','Sliding rail\'s status (enabled/disabled)', states=['enabled','disabled'])
+            self.__slidingRailStatus = Enum(self.__port.lower()+'_'+'sliding_rail_status','Sliding rail\'s status (enabled/disabled)', states=['enabled','disabled'])
 
         if dobotSection.getboolean('SlidingRailPose', fallback=False):
-            self.__slidingRailPose = Gauge('sliding_rail_pose','Sliding rail\'s real-time pose in mm')
+            self.__slidingRailPose = Gauge(self.__port.lower()+'_'+'sliding_rail_pose','Sliding rail\'s real-time pose in mm')
 
         if dobotSection.getboolean('SlidingRailJogVelocity', fallback=False):
-            self.__slidingRailJogVelocity = Gauge('sliding_rail_jog_velocity','Velocity (mm/s) of sliding rail in jogging mode')
+            self.__slidingRailJogVelocity = Gauge(self.__port.lower()+'_'+'sliding_rail_jog_velocity','Velocity (mm/s) of sliding rail in jogging mode')
 
         if dobotSection.getboolean('SlidingRailJogAcceleration', fallback=False):
-            self.__slidingRailJogAcceleration = Gauge('sliding_rail_jog_acceleration','Acceleration (mm/s^2) of sliding rail in jogging mode')
+            self.__slidingRailJogAcceleration = Gauge(self.__port.lower()+'_'+'sliding_rail_jog_acceleration','Acceleration (mm/s^2) of sliding rail in jogging mode')
 
         if dobotSection.getboolean('SlidingRailPtpVelocity', fallback=False):
-            self.__slidingRailPtpVelocity = Gauge('sliding_rail_ptp_velocity','Velocity (mm/s) of sliding rail in point to point mode')
+            self.__slidingRailPtpVelocity = Gauge(self.__port.lower()+'_'+'sliding_rail_ptp_velocity','Velocity (mm/s) of sliding rail in point to point mode')
 
         if dobotSection.getboolean('SlidingRailPtpAcceleration', fallback=False):
-            self.__slidingRailPtpAcceleration = Gauge('sliding_rail_ptp_acceleration','Acceleration (mm/s^2) of sliding rail in point to point mode')
+            self.__slidingRailPtpAcceleration = Gauge(self.__port.lower()+'_'+'sliding_rail_ptp_acceleration','Acceleration (mm/s^2) of sliding rail in point to point mode')
 
         if dobotSection.getboolean('WifiModuleStatus', fallback=False):
-            self.__wifiModuleStatus = Enum('wifi_module_status','Wifi module status (enabled/disabled)', states=['enabled','disabled'])
+            self.__wifiModuleStatus = Enum(self.__port.lower()+'_'+'wifi_module_status','Wifi module status (enabled/disabled)', states=['enabled','disabled'])
 
         if dobotSection.getboolean('WifiConnectionStatus', fallback=False):
-            self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'])
+            self.__wifiConnectionStatus = Enum(self.__port.lower()+'_'+'wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'])
 
     def __getAlarms(self):
         alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
@@ -293,6 +292,8 @@ class DobotMagician():
 
     def fetchData(self):
         global config
+        # Switch to desired Dobot device
+        dType.ConnectDobot(api, port, 115200)
         dobotSection = config['DOBOT' + ':' + self.__port]
 
         if dobotSection.getboolean('DeviceTime', fallback=False):
