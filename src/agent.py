@@ -293,7 +293,7 @@ class DobotMagician():
     def fetchData(self):
         global config
         # Switch to desired Dobot device
-        dType.ConnectDobot(api, port, 115200)
+        dType.ConnectDobot(self.__api, self.__port, 115200)
         dobotSection = config['DOBOT' + ':' + self.__port]
 
         if dobotSection.getboolean('DeviceTime', fallback=False):
