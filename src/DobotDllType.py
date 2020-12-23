@@ -3,13 +3,6 @@ import ctypes.wintypes
 import time, platform, math
 import os
 
-connections = []
-
-def free_library(handle):
-    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-    kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
-    kernel32.FreeLibrary(handle)
-
 def enum(**enums):
     return type("Enum", (), enums)
 
@@ -592,6 +585,8 @@ isUsingLinearRail = False
 #parker add 2018 8 29 添加Wifi设置模块退出标志位
 QuitDobotApiFlag = True
 
+connections = []
+
 def load():
     if platform.system() == "Windows":
         id = len(connections)
@@ -680,16 +675,37 @@ def ConnectDobot(api, portName, baudrate):
 
     return [result, masterDevType, slaveDevType, fwName, fwVer, masterId, slaveId, connectInfo.masterDevInfo.runTime]
 
+def free_library(api):
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
+    handle = api._handle
+    kernel32.FreeLibrary(handle)
 
 def DisconnectDobot(api):
-    api.DisconnectDobot(c_int(masterId))
-    free_library(api._handle)
+    #api.DisconnectDobot(c_int(masterId))
     id = connections.index(api)
-    os.remove('.\\runtime\dobot' + str(id) + '.dll')
+    if connections[id] is not None:
+        free_library(api)
+        os.remove('.\\runtime\dobot' + str(id) + '.dll')
+        connections[id] = None
+        #print('Removed dobot with id: ' + str(id))
 
 def DisconnectAll():
     for api in connections:
-        DisconnectDobot(api)
+        id = connections.index(api)
+        free_library(api)
+        os.remove('.\\runtime\dobot' + str(id) + '.dll')
+        #print('Removed dobot with id: ' + str(id))
+
+    connections.clear()
+
+def GetActiveDobots():
+    size = 0
+    for device in connections:
+        if device is not None:
+            size += 1
+
+    return size
 
 def GetMarlinVersion(api):
     api.GetMarlinVersion(c_int(masterId), c_int(slaveId))
