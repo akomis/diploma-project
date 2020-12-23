@@ -3,7 +3,6 @@ tmp/*
 *.h
 *.dll
 test.py
-DobotDllType.py
 README.dobot
 *.idea
 
