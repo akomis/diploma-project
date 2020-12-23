@@ -580,7 +580,6 @@ class MonitoringAgent():
     def __connectDobot(self, port):
         # Load Dll and get the CDLL object
         api = dType.load()
-        # Connect Dobot
         state = dType.ConnectDobot(api, port, 115200)[0]
 
         if state == dType.DobotConnect.DobotConnect_NoError:
@@ -610,8 +609,8 @@ class MonitoringAgent():
                 if dobot is not None:
                     self.__devices.append(dobot)
 
-        def __disconnectDevices(self):
-            dType.DisconnectAll() # Disconnect Dobot devices
+    def __disconnectDevices(self):
+        dType.DisconnectAll() # Disconnect Dobot devices
 
     def startRoutine(self):
         if len(self.__devices) == 0:
