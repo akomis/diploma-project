@@ -7,7 +7,6 @@ from prometheus_client import start_http_server, Info, Gauge, Enum
 
 config = configparser.ConfigParser()
 
-
 class DobotMagician():
     # {bit address index : alarm description}
     alarms = {"0x00": "Public Alarm: Reset Alarm", "0x01": "Public Alarm: Undefined Instruction", "0x02": "Public Alarm: File System Error", "0x03": "Public Alarm: Failured Communication between MCU and FPGA", "0x04": "Public Alarm: Angle Sensor Reading Error",
@@ -292,8 +291,6 @@ class DobotMagician():
 
     def fetchData(self):
         global config
-        # Switch to desired Dobot device
-        dType.ConnectDobot(self.__api, self.__port, 115200)
         dobotSection = config['DOBOT' + ':' + self.__port]
 
         if dobotSection.getboolean('DeviceTime', fallback=False):
@@ -593,7 +590,7 @@ class MonitoringAgent():
             print("Couldn't connect with a Dobot Magician device at port " + port)
             return None
 
-    def __connectToDevices(self):
+    def __connectDevices(self):
         global config
 
         # Discover through the config which devices should be monitored
@@ -613,6 +610,8 @@ class MonitoringAgent():
                 if dobot is not None:
                     self.__devices.append(dobot)
 
+        def __disconnectDevices(self):
+            dType.DisconnectAll() # Disconnect Dobot devices
 
     def startRoutine(self):
         if len(self.__devices) == 0:
@@ -620,15 +619,18 @@ class MonitoringAgent():
             sys.exit(11)
 
         print('Connecting to devices listed in agent.conf..')
-        self.__connectToDevices()
+        self.__connectDevices()
         print('Starting prometheus server at port ' + str(self.__prometheusPort) + "..")
         start_http_server(self.__prometheusPort)
 
         print('Monitoring..')
-        while (1):
-            time.sleep(self.__routineInterval / 1000)
-            for device in self.__devices:
-                device.fetchData()
+        try:
+            while (1):
+                time.sleep(self.__routineInterval / 1000)
+                for device in self.__devices:
+                    device.fetchData()
+        except KeyboardInterrupt:
+            self.__disconnectDevices()
 
 def argumentHandler(args):
     if len(args) == 2:
