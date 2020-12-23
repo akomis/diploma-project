@@ -1,6 +1,14 @@
 from ctypes import *
+import ctypes.wintypes
 import time, platform, math
 import os
+
+connections = []
+
+def free_library(handle):
+    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
+    kernel32.FreeLibrary(handle)
 
 def enum(**enums):
     return type("Enum", (), enums)
@@ -586,9 +594,10 @@ QuitDobotApiFlag = True
 
 def load():
     if platform.system() == "Windows":
-        #print("您用的dll是64位，为了顺利运行，请保证您的python环境也是64位")
-        #print("python环境是：",platform.architecture())
-        return CDLL("./DobotDll.dll",  RTLD_GLOBAL)
+        id = len(connections)
+        os.system('copy /Y .\\runtime\DobotDll.dll .\\runtime\dobot' + str(id) + '.dll > NUL')
+        connections.append(CDLL('.\\runtime\dobot' + str(id) + '.dll',  RTLD_GLOBAL))
+        return connections[id]
     elif platform.system() == "Darwin":
         return CDLL("./libDobotDll.dylib",  RTLD_GLOBAL)
     elif platform.system() == "Linux":
@@ -674,7 +683,13 @@ def ConnectDobot(api, portName, baudrate):
 
 def DisconnectDobot(api):
     api.DisconnectDobot(c_int(masterId))
+    free_library(api._handle)
+    id = connections.index(api)
+    os.remove('.\\runtime\dobot' + str(id) + '.dll')
 
+def DisconnectAll():
+    for api in connections:
+        DisconnectDobot(api)
 
 def GetMarlinVersion(api):
     api.GetMarlinVersion(c_int(masterId), c_int(slaveId))
