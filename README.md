@@ -25,10 +25,11 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 
 ## Configuration
 Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.
-For changing the agent's settings you can change the values under the `AGENT`.  
-In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `DOBOT:COM3` for serial or `DOBOT:192.168.0.3` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).  
-For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false`depending on your preference. By removing an entry completely the value for the entry will be resolved to the default.
-For more details on the configuration settings check the tables below for each section.
+For changing the agent's settings you can change the values under the `[AGENT]` section.  
+In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `[DOBOT:COM7]` for serial or `[DOBOT:192.168.0.3]` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).
+Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[JEVOIS:PORT]` must exist in the configuration file (e.g. `[JEVOIS:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-seperated list with object names in the "objects" entry (e.g. objects = cube pen paper).
+For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default.
+For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.
 
 ### AGENT
 |   Config Name   |                        Description                        | Type | Default |
@@ -123,6 +124,13 @@ For more details on the configuration settings check the tables below for each s
 |         WifiNetmask        |                                          Subnet mask                                          |    info (str)   |       off       |       GetWIFINetmask(api)      |
 |         WifiGateway        |                                        Default Gateway                                        |    info (str)   |       off       |       GetWIFIGateway(api)      |
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
+
+### JEVOIS
+|    Config Name   |          Description         |  Prometheus Type | Default |
+|:----------------:|:----------------------------:|:----------------:|:-------:|
+| ObjectIdentified |   Identified object's name   |    enum (str)    |    on   |
+|  ObjectLocation  | Identified object's location | gauge(s) (float) |    on   |
+|    ObjectSize    |   Identified object's size   |   gauge (float)  |   off   |
 
 For a more practical insight check the default `agent.conf` included.
 <br><br>
