@@ -1,5 +1,6 @@
 import sys
 import time
+import serial
 import webbrowser
 import configparser
 import DobotDllType as dType
@@ -550,6 +551,16 @@ class DobotMagician():
             else:
                 self.__wifiConnectionStatus.state('disabled')
 
+class JevoisCamera():
+    def __init__(self, serial, port):
+        global config
+
+        self.__port = port
+        self.__serial = serial
+        jevoisSection = config['JEVOIS' + ':' + self.__port]
+
+    def fetchData(self):
+        pass
 
 class MonitoringAgent():
     def __init__(self):
@@ -586,7 +597,16 @@ class MonitoringAgent():
             print("Dobot Magician at port " + port + " connected succesfully!")
             return DobotMagician(api, port)
         else:
-            print("Couldn't connect with a Dobot Magician device at port " + port)
+            print("Couldn't connect with Dobot Magician device at port " + port)
+            return None
+
+    def __connectJevois(self, port):
+        try:
+            ser = serial.Serial(port, 9600, timeout=1)
+            print("Jevois Camera at port " + port + " connected succesfully!")
+            return JevoisCamera(ser, port)
+        except:
+            print("Couldn't connect with Jevois Camera device at port " + port)
             return None
 
     def __connectDevices(self):
@@ -594,6 +614,10 @@ class MonitoringAgent():
 
         # Discover through the config which devices should be monitored
         for section in config:
+            # Skip the Agent section as it does not represent a device
+            if str(section) == 'agent':
+                continue
+
             try:
                 part = str(section).split(':')
                 name = part[0]
@@ -604,10 +628,16 @@ class MonitoringAgent():
                 exit(6)
 
             # Depending on the type of device try to connect to it
-            if name.lower() == 'dobot':
+            if name == 'DOBOT':
                 dobot = self.__connectDobot(port)
                 if dobot is not None:
                     self.__devices.append(dobot)
+            elif name == 'JEVOIS':
+                jevois = self.__connectJevois(port)
+                if jevois is not None:
+                    self.__devices.append(jevois)
+            else:
+                print("Device with name " + name + " cannot be recognised")
 
     def __disconnectDevices(self):
         dType.DisconnectAll() # Disconnect Dobot devices

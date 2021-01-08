@@ -24,12 +24,12 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 <br><br>
 
 ## Configuration
-Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.
+Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
 For changing the agent's settings you can change the values under the `[AGENT]` section.  
-In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `[DOBOT:COM7]` for serial or `[DOBOT:192.168.0.3]` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).
-Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[JEVOIS:PORT]` must exist in the configuration file (e.g. `[JEVOIS:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-seperated list with object names in the "objects" entry (e.g. objects = cube pen paper).
-For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default.
-For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.
+In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `[DOBOT:COM7]` for serial or `[DOBOT:192.168.0.3]` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).  
+Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[JEVOIS:PORT]` must exist in the configuration file (e.g. `[JEVOIS:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-seperated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
+For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in caps.
+For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
 ### AGENT
 |   Config Name   |                        Description                        | Type | Default |
@@ -143,6 +143,7 @@ Make sure that `agent.conf` is properly setup and in the same directory as the e
 ## Resources
 - [Dobot API & Dobot Communication Protocol](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot ALARM](http://www.dobot.it/wp-content/uploads/2018/03/dobot-magician-alarm-en.pdf)
+- [JeVois: Standardized serial messages formatting](http://jevois.org/doc/UserSerialStyle.html)
 - [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
 - [Grafana Documentation](https://grafana.com/docs/)
 <br><br>
