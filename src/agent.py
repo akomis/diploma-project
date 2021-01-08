@@ -23,11 +23,11 @@ class DobotMagician():
         dobotSection = config['DOBOT' + ':' + self.__port]
 
         enabledDeviceInfo = {}
-        if dobotSection.getboolean('DeviceSN', fallback=False):
+        if dobotSection.getboolean('DeviceSN', fallback=True):
             enabledDeviceInfo["serial_number"] = dType.GetDeviceSN(self.__api)[0]
-        if dobotSection.getboolean('DeviceName', fallback=False):
+        if dobotSection.getboolean('DeviceName', fallback=True):
             enabledDeviceInfo["device_name"] = dType.GetDeviceName(self.__api)[0]
-        if dobotSection.getboolean('DeviceVersion', fallback=False):
+        if dobotSection.getboolean('DeviceVersion', fallback=True):
             enabledDeviceInfo["version"] = '.'.join(list(map(str, dType.GetDeviceVersion(self.__api))))
         if len(enabledDeviceInfo) > 0:
             self.__deviceInfo = Info(self.__port.lower()+'_'+'dobot_magician', 'General information about monitored Dobot Magician device')
@@ -56,31 +56,31 @@ class DobotMagician():
         if dobotSection.getboolean('QueueIndex', fallback=False):
             self.__queueIndex = Gauge(self.__port.lower()+'_'+'queue_index','Current index in command queue')
 
-        if dobotSection.getboolean('PoseX', fallback=False):
+        if dobotSection.getboolean('PoseX', fallback=True):
             self.__poseX = Gauge(self.__port.lower()+'_'+'pose_x','Real-time cartesian coordinate of device\'s X axis')
 
-        if dobotSection.getboolean('PoseY', fallback=False):
+        if dobotSection.getboolean('PoseY', fallback=True):
             self.__poseY = Gauge(self.__port.lower()+'_'+'pose_y','Real-time cartesian coordinate of device\'s Y axis')
 
-        if dobotSection.getboolean('PoseZ', fallback=False):
+        if dobotSection.getboolean('PoseZ', fallback=True):
             self.__poseZ = Gauge(self.__port.lower()+'_'+'pose_z','Real-time cartesian coordinate of device\'s Z axis')
 
-        if dobotSection.getboolean('PoseR', fallback=False):
+        if dobotSection.getboolean('PoseR', fallback=True):
             self.__poseR = Gauge(self.__port.lower()+'_'+'pose_r','Real-time cartesian coordinate of device\'s R axis')
 
-        if dobotSection.getboolean('AngleBase', fallback=False):
+        if dobotSection.getboolean('AngleBase', fallback=True):
             self.__angleBase = Gauge(self.__port.lower()+'_'+'angle_base','Base joint angle')
 
-        if dobotSection.getboolean('AngleRearArm', fallback=False):
+        if dobotSection.getboolean('AngleRearArm', fallback=True):
             self.__angleRearArm = Gauge(self.__port.lower()+'_'+'angle_rear_arm','Rear arm joint angle')
 
-        if dobotSection.getboolean('AngleForearm', fallback=False):
+        if dobotSection.getboolean('AngleForearm', fallback=True):
             self.__angleForearm = Gauge(self.__port.lower()+'_'+'angle_forearm','Forearm joint angle')
 
-        if dobotSection.getboolean('AngleEndEffector', fallback=False):
+        if dobotSection.getboolean('AngleEndEffector', fallback=True):
             self.__angleEndEffector = Gauge(self.__port.lower()+'_'+'angle_end_effector','End effector joint angle')
 
-        if dobotSection.getboolean('AlarmsState', fallback=False):
+        if dobotSection.getboolean('AlarmsState', fallback=True):
             self.__alarmsState = Enum(self.__port.lower()+'_'+'alarms', 'Device alarms', states=list(self.alarms.values()))
 
         if dobotSection.getboolean('HomeX', fallback=False):
@@ -300,31 +300,31 @@ class DobotMagician():
             self.__queueIndex.set(dType.GetQueuedCmdCurrentIndex(self.__api)[0])
 
         pose = dType.GetPose(self.__api)
-        if dobotSection.getboolean('PoseX', fallback=False):
+        if dobotSection.getboolean('PoseX', fallback=True):
             self.__poseX.set(pose[0])
 
-        if dobotSection.getboolean('PoseY', fallback=False):
+        if dobotSection.getboolean('PoseY', fallback=True):
             self.__poseY.set(pose[1])
 
-        if dobotSection.getboolean('PoseZ', fallback=False):
+        if dobotSection.getboolean('PoseZ', fallback=True):
             self.__poseZ.set(pose[2])
 
-        if dobotSection.getboolean('PoseR', fallback=False):
+        if dobotSection.getboolean('PoseR', fallback=True):
             self.__poseR.set(pose[3])
 
-        if dobotSection.getboolean('AngleBase', fallback=False):
+        if dobotSection.getboolean('AngleBase', fallback=True):
             self.__angleBase.set(pose[4])
 
-        if dobotSection.getboolean('AngleRearArm', fallback=False):
+        if dobotSection.getboolean('AngleRearArm', fallback=True):
             self.__angleRearArm.set(pose[5])
 
-        if dobotSection.getboolean('AngleForearm', fallback=False):
+        if dobotSection.getboolean('AngleForearm', fallback=True):
             self.__angleForearm.set(pose[6])
 
-        if dobotSection.getboolean('AngleEndEffector', fallback=False):
+        if dobotSection.getboolean('AngleEndEffector', fallback=True):
             self.__angleEndEffector.set(pose[7])
 
-        if dobotSection.getboolean('AlarmsState', fallback=False):
+        if dobotSection.getboolean('AlarmsState', fallback=True):
             self.__getAlarms()
 
         home = dType.GetHOMEParams(self.__api)

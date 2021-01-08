@@ -27,7 +27,7 @@ Place `agent.py` on the same directory as `demo-magician-python-64-master`
 Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.
 For changing the agent's settings you can change the values under the `AGENT`.  
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[DOBOT:PORT]` must exist in the configuration file (e.g. `DOBOT:COM3` for serial or `DOBOT:192.168.0.3` for connecting through wifi). You can connect multiple devices through various ports (serial port/ip address).  
-For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` or remove the entry completely, depending on your preference.  
+For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false`depending on your preference. By removing an entry completely the value for the entry will be resolved to the default.
 For more details on the configuration settings check the tables below for each section.
 
 ### AGENT
@@ -38,7 +38,7 @@ For more details on the configuration settings check the tables below for each s
 |  PrometheusPort |                Port for Prometheus endpoint               |  int |   8000  |
 
 ### DOBOT
-|         Config Name        |                                          Description                                          | Prometheus Type | Default Setting |            API Call            |
+|         Config Name        |                                          Description                                          | Prometheus Type |     Default     |            API Call            |
 |:--------------------------:|:---------------------------------------------------------------------------------------------:|:---------------:|:---------------:|:------------------------------:|
 |          DeviceSN          |                                     Device's serial number                                    |    info (str)   |        on       |        GetDeviceSN(api)        |
 |         DeviceName         |                                      Device's name/alias                                      |    info (str)   |        on       |       GetDeviceName(api)       |
