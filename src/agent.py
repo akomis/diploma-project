@@ -9,13 +9,6 @@ from prometheus_client import start_http_server, Info, Gauge, Enum
 config = configparser.ConfigParser()
 
 class DobotMagician():
-    # {bit address index : alarm description}
-    alarms = {"0x00": "Public Alarm: Reset Alarm", "0x01": "Public Alarm: Undefined Instruction", "0x02": "Public Alarm: File System Error", "0x03": "Public Alarm: Failured Communication between MCU and FPGA", "0x04": "Public Alarm: Angle Sensor Reading Error",
-              "0x11": "Planning Alarm: Inverse Resolve Alarm", "0x12": "Planning Alarm: Inverse Resolve Limit", "0x13": "Planning Alarm: Data Repetition", "0x14": "Planning Alarm: Arc Input Parameter Alarm", "0x15": "Planning Alarm: JUMP Parameter Error",
-              "0x21": "Kinematic Alarm: Inverse Resolve Alarm", "0x22": "Kinematic Alarm: Inverse Resolve Limit",
-              "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
-
-
     def __init__(self, api, port):
         global config
 
@@ -82,7 +75,7 @@ class DobotMagician():
             self.__angleEndEffector = Gauge('angle_end_effector','End effector joint angle', ['device'])
 
         if dobotSection.getboolean('AlarmsState', fallback=True):
-            self.__alarmsState = Enum('alarms', 'Device alarms', states=list(self.alarms.values()), ['device'])
+            self.__alarmsState = Enum('alarms', 'Device alarms', states=list(dType.alarms.values()), ['device'])
 
         if dobotSection.getboolean('HomeX', fallback=False):
             self.__homeX = Gauge('home_x','Home position for X axis', ['device'])
@@ -273,23 +266,6 @@ class DobotMagician():
         if dobotSection.getboolean('WifiConnectionStatus', fallback=False):
             self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'], ['device'])
 
-    def __getAlarms(self):
-        alarmBytes = dType.GetAlarmsState(self.__api, 10)[0]
-
-        # Convert Bytes to bits (as string for reading)
-        bits = ''
-        for byte in alarmBytes:
-            bits += f'{byte:0>8b}'
-            # print(f'{byte:0>8b}', end=' ')
-
-        # If all bits are 0 then device state is clean/safe
-        if bits.strip("0") != '':
-            for alarm in self.alarms:
-                # Get index in 10-base form to check the corresponding bit
-                index = int(alarm, 16)
-                if bits[index] == '1':
-                    self.__alarmsState.labels('dobot_'+self.__port).state(self.alarms[alarm])
-
     def fetchData(self):
         global config
         dobotSection = config['DOBOT' + ':' + self.__port]
@@ -326,7 +302,8 @@ class DobotMagician():
             self.__angleEndEffector.labels('dobot_'+self.__port).set(pose[7])
 
         if dobotSection.getboolean('AlarmsState', fallback=True):
-            self.__getAlarms()
+            for a in dType.GetAlarmsState(self.__api)
+                self.__alarmsState.labels('dobot_'+self.__port).state(a)
 
         home = dType.GetHOMEParams(self.__api)
         if dobotSection.getboolean('HomeX', fallback=False):
