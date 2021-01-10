@@ -715,6 +715,7 @@ class MonitoringAgent():
         except KeyboardInterrupt:
             self.__disconnectDevices()
 
+
 def argumentHandler(args):
     if len(args) == 2:
         if args[1] == "-h" or args[1] == "--help":
