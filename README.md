@@ -140,6 +140,11 @@ Make sure that `agent.conf` is properly setup and in the same directory as the e
 `$ python3 agent.py`
 <br><br>
 
+## DobotDllType.py Fork
+Throughout the analysis of the Dobot API, some minor issues arose with fetching certain useful attributes such as the GetPoseL() function which returns the position of the sliding rail (if there is one connected to the robot) which requires the math library to operate and it is not included. This was the first reason to fork the Dobot API and do simple modifications to ensure that all the useful functions can be called with no issues and not sacrifice any useful information. The main reason though that the Dobot API has been forked is the fact that it follows a concurrent model for connecting to Dobot Magician devices. This stems from the fact that the default's API architecture allows only one Dobot Magician can be connected at a time. In order to fetch data from multiple Dobot Magician devices one should switch through the devices by disconnecting from the currently connected robot and connecting to the next one. The device switching procedures adds a significant overhead which goes against two major goals of the system which is efficiency and scalability. In order to align the implementation with the project's goals there is need for a parallel model instead of a concurrent model of connecting to and fetching data from Dobot Magician devices. Inspection and use of reverse engineering techniques have been used to figure out that all data necessary to communicate with a Dobot Magician device live inside the dynamic link library (DobotDll.dll/libDobotDll.so). In order to achieve parallel connections to multiple Dobot Magician devices core modifications to the load() function have been made to create a different instance of the dynamic link library for each device connected at runtime. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll/so) as well as the GetActiveDobots() and DisconnectAll() functions to accomodate the change and enrich the flexibility it provides.
+<br><br>
+
+
 ## Resources
 - [Dobot API & Dobot Communication Protocol](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot ALARM](http://www.dobot.it/wp-content/uploads/2018/03/dobot-magician-alarm-en.pdf)

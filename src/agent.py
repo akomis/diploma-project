@@ -551,6 +551,7 @@ class DobotMagician():
             else:
                 self.__wifiConnectionStatus.labels('dobot_'+self.__port).state('disabled')
 
+
 class JevoisCamera():
     def __init__(self, serial, port, dimension):
         global config
@@ -578,7 +579,6 @@ class JevoisCamera():
 
         if jevoisSection.getboolean('ObjectSize', fallback=False):
             self.__objectSize = Gauge('object_size','Identified object\'s size', ['device'])
-
 
     def fetchData(self):
         line = self.__serial.readline().rstrip()
