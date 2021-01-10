@@ -552,15 +552,63 @@ class DobotMagician():
                 self.__wifiConnectionStatus.labels('dobot_'+self.__port).state('disabled')
 
 class JevoisCamera():
-    def __init__(self, serial, port):
+    def __init__(self, serial, port, dimension):
         global config
 
-        self.__port = port
         self.__serial = serial
+        self.__port = port
+        self.__dimension = dimension
         jevoisSection = config['JEVOIS' + ':' + self.__port]
 
+        if jevoisSection.getboolean('ObjectIdentified', fallback=True):
+            if jevoisSection.get('objects') is not None:
+                self.__options = jevoisSection["options"].split()
+                self.__objectIdentified = Enum('object_identified', 'Object Identified', states=self.__options, ['device'])
+            else:
+                print('The \"options\" list is necessary for monitoring identified objects')
+                print('Skipping monitoring objects identified for JEVOIS:' + self.__port)
+
+        if jevoisSection.getboolean('ObjectLocation', fallback=True):
+            self.__objectLocationX = Gauge('object_location_x', 'Identified object\'s x position',['device'])
+            if int(self.__dimension) > 1:
+                self.__objectLocationY = Gauge('object_location_y', 'Identified object\'s y position',['device'])
+            if int(self.__dimension) == 3:
+                self.__objectLocationZ = Gauge('object_location_z', 'Identified object\'s Z position',['device'])
+
+        if jevoisSection.getboolean('ObjectSize', fallback=False):
+            self.__objectSize = Gauge('object_size','Identified object\'s size', ['device'])
+
+
     def fetchData(self):
-        pass
+        line = self.__serial.readline().rstrip()
+        tok = line.split()
+        # Abort fetching if timeout or malformed line
+        if len(tok) < 1: return
+        if self.__dimension == '1' and len(tok) != 4: return
+        if self.__dimension == '2' and len(tok) != 6: return
+        if self.__dimension == '3' and len(tok) != 8: return
+
+        if jevoisSection.getboolean('ObjectIdentified', fallback=True):
+            if tok[1] in self.__options:
+                self.__objectIdentified.labels('jevois'+self.__port).state(tok[1])
+
+        if jevoisSection.getboolean('ObjectLocation', fallback=True):
+            self.__objectLocationX.lables('jevois'+self.__port).set(float(tok[2]))
+
+            if int(self.__dimension) > 1:
+                self.__objectLocationY.labels('jevois'+self.__port).set(float(tok[3]))
+
+            if int(self.__dimension) == 3:
+                self.__objectLOcationZ.labels('jevois'+self.__port).set(float(tok[4]))
+
+        if jevoisSection.getboolean('ObjectSize', fallback=False):
+            if self.__dimension == '1':
+                self.__objectSize.labels('jevois'+self.__port).set(float(tok[3]))
+            elif self.__dimension == '2':
+                self.__objectSize.labels('jevois'+self.__port).set(float(tok[4])*float(tok[5]))
+            elif self.__dimension == '3':
+                self.__objectSize.labels('jevois'+self.__port).set(float(tok[5])*float(tok[6])*float(tok[7]))
+
 
 class MonitoringAgent():
     def __init__(self):
@@ -603,8 +651,13 @@ class MonitoringAgent():
     def __connectJevois(self, port):
         try:
             ser = serial.Serial(port, 115200, timeout=1)
+            line = ser.readline().rstrip()
+            tok = line.split()
+            # Raise exception if timeout or malformed line or not supported serstyle
+            if len(tok) < 1: raise Exception('The line is malformed.')
+            if tok[0][0] != 'N': raise Exception('Unsupported serstyle. Can only interpret Normal messages.')
             print("Jevois Camera at port " + port + " connected succesfully!")
-            return JevoisCamera(ser, port)
+            return JevoisCamera(ser, port, tok[0][1])
         except:
             print("Couldn't connect with Jevois Camera device at port " + port)
             return None
@@ -615,11 +668,11 @@ class MonitoringAgent():
         # Discover through the config which devices should be monitored
         for section in config:
             # Skip the Agent section as it does not represent a device
-            if str(section) == 'agent':
+            if section == 'AGENT':
                 continue
 
             try:
-                part = str(section).split(':')
+                part = section.split(':')
                 name = part[0]
                 port = part[1]
             except IndexError:
@@ -675,7 +728,9 @@ def argumentHandler(args):
 def readConfig():
     global config
     try:
-        config.read('agent.conf')
+        check = config.read('agent.conf')[0]
+        if check == '':
+            raise Exception("Couldn't find agent.conf")
     except:
         print("Cant open configuration file. Make sure agent.conf is in the same directory as agent.py")
         exit(3)
