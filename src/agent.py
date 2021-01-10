@@ -558,6 +558,7 @@ class JevoisCamera():
         self.__serial = serial
         self.__port = port
         self.__dimension = dimension
+        self.__options = None
         jevoisSection = config['JEVOIS' + ':' + self.__port]
 
         if jevoisSection.getboolean('ObjectIdentified', fallback=True):
@@ -589,7 +590,7 @@ class JevoisCamera():
         if self.__dimension == '3' and len(tok) != 8: return
 
         if jevoisSection.getboolean('ObjectIdentified', fallback=True):
-            if tok[1] in self.__options:
+            if self.__options is not None and tok[1] in self.__options:
                 self.__objectIdentified.labels('jevois'+self.__port).state(tok[1])
 
         if jevoisSection.getboolean('ObjectLocation', fallback=True):
