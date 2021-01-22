@@ -1231,13 +1231,25 @@ def GetKinematics(api):
         break
     return [kinematics.velocity, kinematics.acceleration]
 
+def GetAlarmsState(api,  maxLen=1000):
+    alarmsState = create_string_buffer(maxLen)
+    #alarmsState = c_byte(0)
+    len = c_int(0)
+    while(True):
+        result = api.GetAlarmsState(c_int(masterId), c_int(slaveId), alarmsState, byref(len),  maxLen)
+        if result != DobotCommunicate.DobotCommunicate_NoError:
+            dSleep(5)
+            continue
+        break
+    return [alarmsState.raw, len.value]
+
 # {bit address index : alarm description}
 alarms = {"0x00": "Public Alarm: Reset Alarm", "0x01": "Public Alarm: Undefined Instruction", "0x02": "Public Alarm: File System Error", "0x03": "Public Alarm: Failured Communication between MCU and FPGA", "0x04": "Public Alarm: Angle Sensor Reading Error",
           "0x11": "Planning Alarm: Inverse Resolve Alarm", "0x12": "Planning Alarm: Inverse Resolve Limit", "0x13": "Planning Alarm: Data Repetition", "0x14": "Planning Alarm: Arc Input Parameter Alarm", "0x15": "Planning Alarm: JUMP Parameter Error",
           "0x21": "Kinematic Alarm: Inverse Resolve Alarm", "0x22": "Kinematic Alarm: Inverse Resolve Limit",
           "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
 
-def GetAlarmsState(api):
+def GetAlarmsStateX(api):
     alarmsState = create_string_buffer(10)
     #alarmsState = c_byte(0)
     len = c_int(0)

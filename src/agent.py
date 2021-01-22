@@ -302,7 +302,7 @@ class DobotMagician():
             self.__angleEndEffector.labels('dobot_'+self.__port).set(pose[7])
 
         if dobotSection.getboolean('AlarmsState', fallback=True):
-            for a in dType.GetAlarmsState(self.__api)
+            for a in dType.GetAlarmsStateX(self.__api)
                 self.__alarmsState.labels('dobot_'+self.__port).state(a)
 
         home = dType.GetHOMEParams(self.__api)
