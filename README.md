@@ -141,7 +141,8 @@ Make sure that `agent.conf` is properly setup and in the same directory as the e
 <br><br>
 
 ## DobotDllType.py Fork (DobotDllTypeX.py)
-Throughout the analysis of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functiones are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the Dobot Demo.
+Throughout the analysis of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functiones are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the Dobot Demo. For importing and utilizing the fork:  
+`import DobotDllTypeX as dType`
 ### Fixes
 * Fixed `GetPoseL(api)` function, which returns the position of the sliding rail (if there is one connected to the robot), by importing the math library which is required for the needs of the function, however not included by default.
 ### Improvements
