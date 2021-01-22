@@ -684,8 +684,6 @@ def ConnectDobot(api, portName, baudrate):
     return [result, masterDevType, slaveDevType, fwName, fwVer, masterId, slaveId, connectInfo.masterDevInfo.runTime]
 
 def ConnectDobotX(portName, baudrate=115200):
-    global masterId, slaveId, masterDevType, slaveDevType
-
     try:
         api = loadX()
         if api is None:
@@ -693,42 +691,9 @@ def ConnectDobotX(portName, baudrate=115200):
     except:
         return None, [0]
 
-    szPara = create_string_buffer(100)
-    szPara.raw = portName.encode("utf-8")
-    connectInfo = ConnectInfo()
+    state = ConnectDobot(api, portName, baudrate)
 
-    result = api.ConnectDobot(szPara, baudrate, byref(connectInfo))
-    if result != DobotConnect.DobotConnect_NoError:
-        return [result, 0, 0, 0, 0, 0, 0, 0]
-    masterId = connectInfo.masterDevInfo.devId
-    masterDevType = connectInfo.masterDevInfo.type
-    try:
-        if masterDevType == DevType.Conntroller:
-            if connectInfo.slaveDevInfo1.type == 0 and connectInfo.slaveDevInfo2.type == 0:
-                slaveId = -1
-                slaveDevType = 0
-                try:
-                    fwName = str(connectInfo.masterDevInfo.firmwareName, encoding="utf-8").strip(b'\x00'.decode())
-                    fwVer = str(connectInfo.masterDevInfo.firwareVersion, encoding="utf-8").strip(b'\x00'.decode())
-                    # print("masterId: ", masterId, connectInfo.slaveDevInfo1.devId, connectInfo.slaveDevInfo2.devId, fwName, fwVer)
-                except Exception as e:
-                    print(e)
-            else:
-                slaveId = connectInfo.slaveDevInfo1.devId if connectInfo.slaveDevInfo1.type != DevType.Idle else connectInfo.slaveDevInfo2.devId
-                fwName = str(connectInfo.slaveDevInfo1.firmwareName, encoding="utf-8").strip(b'\x00'.decode()) if connectInfo.slaveDevInfo1.type != DevType.Idle else str(connectInfo.slaveDevInfo2.firmwareName, encoding="utf-8").strip(b'\x00'.decode())
-                fwVer = str(connectInfo.slaveDevInfo1.firwareVersion, encoding="utf-8").strip(b'\x00'.decode()) if connectInfo.slaveDevInfo1.type != DevType.Idle else str(connectInfo.slaveDevInfo2.firwareVersion, encoding="utf-8").strip(b'\x00'.decode())
-                slaveDevType = connectInfo.slaveDevInfo1.type if connectInfo.slaveDevInfo1.type != DevType.Idle else connectInfo.slaveDevInfo2.type
-                # slaveDevType = dType.DevType.MagicianLite  # for test
-        else:
-            slaveId = 0
-            slaveDevType = 0
-            fwName = str(connectInfo.masterDevInfo.firmwareName, encoding="utf-8").strip(b'\x00'.decode())
-            fwVer = str(connectInfo.masterDevInfo.firwareVersion, encoding="utf-8").strip(b'\x00'.decode())
-
-    except Exception as e:
-        print(e)
-
-    return api, [result, masterDevType, slaveDevType, fwName, fwVer, masterId, slaveId, connectInfo.masterDevInfo.runTime]
+    return api, state
 
 def DisconnectDobot(api):
     api.DisconnectDobot(c_int(masterId))
@@ -1250,17 +1215,7 @@ alarms = {"0x00": "Public Alarm: Reset Alarm", "0x01": "Public Alarm: Undefined 
           "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
 
 def GetAlarmsStateX(api):
-    alarmsState = create_string_buffer(10)
-    #alarmsState = c_byte(0)
-    len = c_int(0)
-    while(True):
-        result = api.GetAlarmsState(c_int(masterId), c_int(slaveId), alarmsState, byref(len),  maxLen)
-        if result != DobotCommunicate.DobotCommunicate_NoError:
-            dSleep(5)
-            continue
-        break
-
-    alarmBytes = alarmsState.raw
+    alarmBytes = GetAlarmsState(api, 10)
 
     # Convert Bytes to bits (as string for reading)
     bits = ''
