@@ -19,8 +19,7 @@ The goal of this system is to be a cheap, effective and modular solution at moni
 <br><br>
 
 ## Installation
-`git clone https://github.com/akomis/diploma-project.git`   
-Place `agent.py` on the same directory as `demo-magician-python-64-master`
+`git clone https://github.com/akomis/diploma-project.git`
 <br><br>
 
 ## Configuration
@@ -136,7 +135,7 @@ For a more practical insight check the default `agent.conf` included.
 <br><br>
 
 ## Usage
-Make sure that `agent.conf` is properly setup and in the same directory as the executable  
+Make sure that `agent.conf` is properly setup and in the same directory as the executable.  
 `$ python3 agent.py`
 <br><br>
 

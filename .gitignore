@@ -1,10 +1,7 @@
 tmp/*
 .*
-*.h
-*.dll
 test.py
 README.dobot
-*.idea
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
