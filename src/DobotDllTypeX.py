@@ -589,6 +589,16 @@ connections = []
 
 def load():
     if platform.system() == "Windows":
+        print("您用的dll是64位，为了顺利运行，请保证您的python环境也是64位")
+        print("python环境是：",platform.architecture())
+        return CDLL("./DobotDll.dll",  RTLD_GLOBAL)
+    elif platform.system() == "Darwin":
+        return CDLL("./libDobotDll.dylib",  RTLD_GLOBAL)
+    elif platform.system() == "Linux":
+        return cdll.loadLibrary("libDobotDll.so")
+
+def loadX():
+    if platform.system() == "Windows":
         id = len(connections)
         os.system('copy /Y .\\runtime\DobotDll.dll .\\runtime\dobot' + str(id) + '.dll > NUL')
         connections.append(CDLL('.\\runtime\dobot' + str(id) + '.dll',  RTLD_GLOBAL))
@@ -634,7 +644,6 @@ slaveId = 0
 masterDevType = 0
 slaveDevType = 0
 
-
 def ConnectDobot(api, portName, baudrate):
     global masterId, slaveId, masterDevType, slaveDevType
 
@@ -672,8 +681,57 @@ def ConnectDobot(api, portName, baudrate):
 
     except Exception as e:
         print(e)
-
     return [result, masterDevType, slaveDevType, fwName, fwVer, masterId, slaveId, connectInfo.masterDevInfo.runTime]
+
+def ConnectDobotX(portName, baudrate=115200):
+    global masterId, slaveId, masterDevType, slaveDevType
+
+    try:
+        api = loadX()
+        if api is None:
+            raise Exception
+    except:
+        return None, [0]
+
+    szPara = create_string_buffer(100)
+    szPara.raw = portName.encode("utf-8")
+    connectInfo = ConnectInfo()
+
+    result = api.ConnectDobot(szPara, baudrate, byref(connectInfo))
+    if result != DobotConnect.DobotConnect_NoError:
+        return [result, 0, 0, 0, 0, 0, 0, 0]
+    masterId = connectInfo.masterDevInfo.devId
+    masterDevType = connectInfo.masterDevInfo.type
+    try:
+        if masterDevType == DevType.Conntroller:
+            if connectInfo.slaveDevInfo1.type == 0 and connectInfo.slaveDevInfo2.type == 0:
+                slaveId = -1
+                slaveDevType = 0
+                try:
+                    fwName = str(connectInfo.masterDevInfo.firmwareName, encoding="utf-8").strip(b'\x00'.decode())
+                    fwVer = str(connectInfo.masterDevInfo.firwareVersion, encoding="utf-8").strip(b'\x00'.decode())
+                    # print("masterId: ", masterId, connectInfo.slaveDevInfo1.devId, connectInfo.slaveDevInfo2.devId, fwName, fwVer)
+                except Exception as e:
+                    print(e)
+            else:
+                slaveId = connectInfo.slaveDevInfo1.devId if connectInfo.slaveDevInfo1.type != DevType.Idle else connectInfo.slaveDevInfo2.devId
+                fwName = str(connectInfo.slaveDevInfo1.firmwareName, encoding="utf-8").strip(b'\x00'.decode()) if connectInfo.slaveDevInfo1.type != DevType.Idle else str(connectInfo.slaveDevInfo2.firmwareName, encoding="utf-8").strip(b'\x00'.decode())
+                fwVer = str(connectInfo.slaveDevInfo1.firwareVersion, encoding="utf-8").strip(b'\x00'.decode()) if connectInfo.slaveDevInfo1.type != DevType.Idle else str(connectInfo.slaveDevInfo2.firwareVersion, encoding="utf-8").strip(b'\x00'.decode())
+                slaveDevType = connectInfo.slaveDevInfo1.type if connectInfo.slaveDevInfo1.type != DevType.Idle else connectInfo.slaveDevInfo2.type
+                # slaveDevType = dType.DevType.MagicianLite  # for test
+        else:
+            slaveId = 0
+            slaveDevType = 0
+            fwName = str(connectInfo.masterDevInfo.firmwareName, encoding="utf-8").strip(b'\x00'.decode())
+            fwVer = str(connectInfo.masterDevInfo.firwareVersion, encoding="utf-8").strip(b'\x00'.decode())
+
+    except Exception as e:
+        print(e)
+
+    return api, [result, masterDevType, slaveDevType, fwName, fwVer, masterId, slaveId, connectInfo.masterDevInfo.runTime]
+
+def DisconnectDobot(api):
+    api.DisconnectDobot(c_int(masterId))
 
 def free_library(api):
     kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
@@ -681,7 +739,7 @@ def free_library(api):
     handle = api._handle
     kernel32.FreeLibrary(handle)
 
-def DisconnectDobot(api):
+def DisconnectDobotX(api):
     #api.DisconnectDobot(c_int(masterId))
     id = connections.index(api)
     if connections[id] is not None:

@@ -54,7 +54,7 @@ For more details on the configuration settings for the Agent, Dobot Magician and
 |        AngleRearArm        |                                      Rear arm joint angle                                     |  gauge (float)  |        on       |          GetPose(api)          |
 |        AngleForearm        |                                      Forearm joint angle                                      |  gauge (float)  |        on       |          GetPose(api)          |
 |      AngleEndEffector      |                                    End effector joint angle                                   |  gauge (float)  |        on       |          GetPose(api)          |
-|         AlarmsState        |                                     Device's active alarms                                    |  enum (alarms)  |        on       |     GetAlarmsState(api, 10)    |
+|         AlarmsState        |                                     Device's active alarms                                    |  enum (alarms)  |        on       |       GetAlarmsState(api)      |
 |            HomeX           |                                    Home position for X axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |
 |            HomeY           |                                    Home position for Y axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |
 |            HomeZ           |                                    Home position for Z axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |

@@ -3,7 +3,7 @@ import time
 import serial
 import webbrowser
 import configparser
-import DobotDllType as dType
+import DobotDllTypeX as dType
 from prometheus_client import start_http_server, Info, Gauge, Enum
 
 config = configparser.ConfigParser()
@@ -615,11 +615,9 @@ class MonitoringAgent():
         self.__devices = []
 
     def __connectDobot(self, port):
-        # Load Dll and get the CDLL object
-        api = dType.load()
-        state = dType.ConnectDobot(api, port, 115200)[0]
+        api, state = dType.ConnectDobotX(port)
 
-        if state == dType.DobotConnect.DobotConnect_NoError:
+        if state[0] == dType.DobotConnect.DobotConnect_NoError:
             print("Dobot Magician at port " + port + " connected succesfully!")
             return DobotMagician(api, port)
         else:
