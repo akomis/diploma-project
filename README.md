@@ -143,22 +143,26 @@ Make sure that `agent.conf` is properly setup and in the same directory as the e
 ## DobotDllType.py Fork (DobotDllTypeX.py)
 Throughout the analysis of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functiones are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the Dobot Demo.
 ### Fixes
-Fixed `GetPoseL(api)` function which returns the position of the sliding rail (if there is one connected to the robot) which requires the math library to operate and it is not included by default.
+* Fixed `GetPoseL(api)` function, which returns the position of the sliding rail (if there is one connected to the robot), by importing the math library which is required for the needs of the function, however not included by default.
 ### Improvements
 * Created `loadX()` to replace `load()` that implements loading individual dll/so (DobotDll.dll instances) for each connected device in order to enable parallel connection with multiple dobots. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll/so). This function is not meant to be called explicitly.
 * Created `ConnectDobotX(port)` to replace `api = load(); state = ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()` improvement, it allows parallel connections to Dobot Magicians and removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
-`dobot0, state1 = dType.ConnectDobotX("192.168.43.4")
+```
+dobot0, state1 = dType.ConnectDobotX("192.168.43.4")
 dobot1, state2 = dType.ConnectDobotX("192.168.43.5")
 
 if state1[0] == dType.DobotConnect.DobotConnect_NoError:
     print("192.168.43.4 name: " + str(dType.GetDeviceName(dobot0)[0]))
 
 if state2[0] == dType.DobotConnect.DobotConnect_NoError:
-    print("192.168.43.5 name: " + str(dType.GetDeviceName(dobot1)[0]))`
+    print("192.168.43.5 name: " + str(dType.GetDeviceName(dobot1)[0]))
+```
 * Created `GetAlarmsStateX(api)` which is an alternative to `GetAlarmsState(api, maxLen)` that uses a hardcoded dictionary of bit addresses and alarm descriptions that is used for decoding the byte array returned by the default function and instead return the active alarms per name and description. The decoding of the alarms byte array is achieved by traversing the array by alarm index based on a hardcoded dictionary called alarms with the key being the bit index and the corresponding value the alarm description as described in the Dobot ALARM document. This results in retrieving only the active alarms with a time complexity of O(N) where N is the number of documented alarms and leaves unrelated LOC from the monitoring agent as this is a Dobot matter and is cleaner to be resolved in the Python encapsulation. Example of use:  
-`print("Active alarms:")
+```
+print("Active alarms:")
 for a in dType.GetAlarmsStateX(dobot0)
-  print(a)`
+  print(a)
+```
 ### Additions
 * Created function `GetActiveDobots()` that returns the amount of currently connected Dobot Magician
 * Created function `DisconnectAll()` to disconnect from all connected Dobot Magician devices and clean up any runtime files
