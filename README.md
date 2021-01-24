@@ -163,8 +163,8 @@ for a in dType.GetAlarmsStateX(dobot0)
   print(a)
 ```
 ### Additions
-* Created function `GetActiveDobots()` that returns the amount of currently connected Dobot Magician
-* Created function `DisconnectAll()` to disconnect from all connected Dobot Magician devices and clean up any runtime files
+* Created function `GetActiveDobots()` that returns the amount of currently connected Dobot Magicians  
+* Created function `DisconnectAll()` to disconnect from all connected Dobot Magician devices and clean up any runtime files  
 Both additions were due to the major `ConnectDobotX(port)` function and their purpose is to accomodate it and enrich the flexibility it provides.
 <br><br>
 
