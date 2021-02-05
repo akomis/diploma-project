@@ -12,7 +12,6 @@ The goal of this system is to be a cheap, effective and modular solution at moni
 
 ## Dependencies
 - [Python 3.9](https://www.python.org/downloads/windows/)
-- [DobotDllType.py](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/)
 - [Grafana](https://grafana.com/get)
