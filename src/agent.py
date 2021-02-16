@@ -627,15 +627,10 @@ class MonitoringAgent():
     def __connectJevois(self, port):
         try:
             ser = serial.Serial(port, 115200, timeout=1)
-            line = ser.readline().rstrip()
-            tok = line.split()
-            # Raise exception if timeout or malformed line or not supported serstyle
-            if len(tok) < 1: raise Exception('The line is malformed.')
-            if tok[0][0] != 'N': raise Exception('Unsupported serstyle. Can only interpret Normal messages.')
             print("Jevois Camera at port " + port + " connected succesfully!")
             return JevoisCamera(ser, port, tok[0][1])
-        except:
-            print("Couldn't connect with Jevois Camera device at port " + port)
+        except Exception as e:
+            print("Couldn't connect with Jevois Camera device at port " + port + " (" + str(e) + ")")
             return None
 
     def __connectDevices(self):
