@@ -665,6 +665,8 @@ class MonitoringAgent():
 
     def __disconnectDevices(self):
         dType.DisconnectAll() # Disconnect Dobot devices and not leave any junk files on the disk
+        for device in devices:
+            print(str(type(device)))
 
     def startRoutine(self):
         if len(self.__devices) == 0:
@@ -697,6 +699,14 @@ def argumentHandler(args):
             print('For more information: $ agent.py --help')
             exit(2)
 
+def debugConfig():
+    # TODO
+    # Options are categorized as {section:key}
+    #validOptions = {}
+    #for key in config.sections:
+    #    if key not in validOptions:
+    #        print(key + " is not a valid configuration option")
+
 def readConfig():
     global config
     try:
@@ -706,6 +716,8 @@ def readConfig():
     except:
         print("Cant open configuration file. Make sure agent.conf is in the same directory as agent.py")
         exit(3)
+
+    debugConfig()
 
 def main():
     argumentHandler(sys.argv)

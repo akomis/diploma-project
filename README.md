@@ -158,13 +158,13 @@ if state2[0] == dType.DobotConnect.DobotConnect_NoError:
 * Created `GetAlarmsStateX(api)` which is an alternative to `GetAlarmsState(api, maxLen)` that uses a hardcoded dictionary of bit addresses and alarm descriptions that is used for decoding the byte array returned by the default function and instead return the active alarms per name and description. The decoding of the alarms byte array is achieved by traversing the array by alarm index based on a hardcoded dictionary called alarms with the key being the bit index and the corresponding value the alarm description as described in the Dobot ALARM document. This results in retrieving only the active alarms with a time complexity of O(N) where N is the number of documented alarms and leaves unrelated LOC from the monitoring agent as this is a Dobot matter and is cleaner to be resolved in the Python encapsulation. Example of use:  
 ```
 print("Active alarms:")
-for a in dType.GetAlarmsStateX(dobot0)
-  print(a)
+for a in dType.GetAlarmsStateX(dobot0):
+    print(a)
 ```
 ### Additions
 * Created function `GetActiveDobots()` that returns the amount of currently connected Dobot Magicians  
 * Created function `DisconnectAll()` to disconnect from all connected Dobot Magician devices and clean up any runtime files  
-Both additions were due to the major `ConnectDobotX(port)` function and their purpose is to accomodate it and enrich the flexibility it provides.
+Both additions were due to the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
 <br><br>
 
 
