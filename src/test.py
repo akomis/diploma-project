@@ -87,46 +87,46 @@ def testParallelDobotConnection(portList):
 
     dType.DisconnectAll()
 
+def testConfigValidation():
+    config = configparser.ConfigParser()
+    config.read('agent.conf')
+
+    validOptions = {"AGENT":["agentname","routineinterval","prometheusport"],
+                    "DOBOT":["devicesn","devicename","deviceversion","devicetime","queueindex",
+                    "posex","posey","posez","poser","anglebase","anglereararm","angleforearm",
+                    "angleendeffector","alarmsstate","homex","homey","homez","homer","autolevelingresult",
+                    "endeffectorx","endeffectory","endeffectorz","laserstatus","suctioncupstatus","gripperstatus","jogbasevelocity",
+                    "jogreararmvelocity","jogforearmvelocity","jogendeffectorvelocity","jogbaseacceleration","jogreararmacceleration",
+                    "jogforearmacceleration","jogendeffectoracceleration","jogaxisxvelocity","jogaxisyvelocity","jogaxiszvelocity","jogaxisrvelocity","jogaxisxacceleration",
+                    "jogaxisyacceleration","jogaxiszacceleration","jogaxisracceleration","jogvelocityratio","jogaccelerationratio","ptpbasevelocity","ptpreararmvelocity",
+                    "ptpforearmvelocity","ptpendeffectorvelocity","ptpbaseacceleration","ptpreararmacceleration","ptpforearmacceleration","ptpendeffectoracceleration","ptpaxisxyzvelocity",
+                    "ptpaxisrvelocity","ptpaxisxyzacceleration","ptpaxisracceleration","ptpvelocityratio","ptpaccelerationratio","liftingheight","heightlimit",
+                    "cpvelocity","cpacceleration","arcxyzvelocity","arcrvelocity","arcxyzacceleration","arcracceleration","anglestaticerrrear",
+                    "anglestaticerrfront","anglecoefrear","anglecoeffront","slidingrailstatus","slidingrailpose","slidingrailjogvelocity","slidingrailjogacceleration",
+                    "slidingrailptpvelocity","slidingrailptpacceleration","wifimodulestatus","wificonnectionstatus","wifissid","wifipassword","wifiipaddress",
+                    "wifinetmask","wifigateway","wifidns"],
+                    "JEVOIS":["objects","objectidentified","objectlocation","objectsize"]}
+
+    ignoreValueCheck = ["agentname","routineinterval","prometheusport","objects"]
+
+    validValues = ["1","yes","true","on","0","no","false","off"]
+
+    for section in config.sections():
+        sectionType = section.split(':')[0]
+
+        if sectionType not in validOptions.keys():
+            print("[WARNING] \"" + section + "\" cannot be recognised for validation.")
+            continue
+
+        for option in config[section]:
+            if option not in validOptions[sectionType]:
+                print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
+
+            if option not in ignoreValueCheck and config[section][option] not in validValues:
+                print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
 
 #measureSwitchOverhead()
 #testJevoisConnectivity("COM12")
 #testAlarms("192.168.43.4")
 #testParallelDobotConnection(["192.168.43.4","192.168.43.5"])
-
-
-config = configparser.ConfigParser()
-config.read('agent.conf')
-
-validOptions = {"AGENT":["agentname","routineinterval","prometheusport"],
-                "DOBOT":["devicesn","devicename","deviceversion","devicetime","queueindex",
-                "posex","posey","posez","poser","anglebase","anglereararm","angleforearm",
-                "angleendeffector","alarmsstate","homex","homey","homez","homer","autolevelingresult",
-                "endeffectorx","endeffectory","endeffectorz","laserstatus","suctioncupstatus","gripperstatus","jogbasevelocity",
-                "jogreararmvelocity","jogforearmvelocity","jogendeffectorvelocity","jogbaseacceleration","jogreararmacceleration",
-                "jogforearmacceleration","jogendeffectoracceleration","jogaxisxvelocity","jogaxisyvelocity","jogaxiszvelocity","jogaxisrvelocity","jogaxisxacceleration",
-                "jogaxisyacceleration","jogaxiszacceleration","jogaxisracceleration","jogvelocityratio","jogaccelerationratio","ptpbasevelocity","ptpreararmvelocity",
-                "ptpforearmvelocity","ptpendeffectorvelocity","ptpbaseacceleration","ptpreararmacceleration","ptpforearmacceleration","ptpendeffectoracceleration","ptpaxisxyzvelocity",
-                "ptpaxisrvelocity","ptpaxisxyzacceleration","ptpaxisracceleration","ptpvelocityratio","ptpaccelerationratio","liftingheight","heightlimit",
-                "cpvelocity","cpacceleration","arcxyzvelocity","arcrvelocity","arcxyzacceleration","arcracceleration","anglestaticerrrear",
-                "anglestaticerrfront","anglecoefrear","anglecoeffront","slidingrailstatus","slidingrailpose","slidingrailjogvelocity","slidingrailjogacceleration",
-                "slidingrailptpvelocity","slidingrailptpacceleration","wifimodulestatus","wificonnectionstatus","wifissid","wifipassword","wifiipaddress",
-                "wifinetmask","wifigateway","wifidns"],
-                "JEVOIS":["objects","objectidentified","objectlocation","objectsize"]}
-
-ignoreValueCheck = ["agentname","routineinterval","prometheusport","objects"]
-
-validValues = ["1","yes","true","on","0","no","false","off"]
-
-for section in config.sections():
-    sectionType = section.split(':')[0]
-
-    if sectionType not in validOptions.keys():
-        print("[WARNING] \"" + section + "\" cannot be recognised for validation.")
-        continue
-
-    for option in config[section]:
-        if option not in validOptions[sectionType]:
-            print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
-
-        if option not in ignoreValueCheck and config[section][option] not in validValues:
-            print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
+#testConfigValidation()
