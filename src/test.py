@@ -90,12 +90,3 @@ def testParallelDobotConnection(portList):
 #testJevoisConnectivity("COM12")
 #testAlarms("192.168.43.4")
 #testParallelDobotConnection(["192.168.43.4","192.168.43.5"])
-class Test():
-    x = 0
-    y = 1
-
-    def printSomething():
-        print(x + "  " + y)
-
-testObj = Test()
-print("type " + str(type(testObj).__name__))

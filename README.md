@@ -167,6 +167,9 @@ for a in dType.GetAlarmsStateX(dobot0):
 Both additions were due to the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
 <br><br>
 
+## Testing
+A small manageable testing framework for the monitoring agent (agent.py) is the 'test.py' script which includes a number of functions respective to different tests and run examples in comments.
+<br><br>
 
 ## Resources
 - [Dobot API & Dobot Communication Protocol](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
