@@ -763,11 +763,11 @@ def readConfig():
         check = config.read('agent.conf')[0]
         if check == '':
             raise Exception("Couldn't find agent.conf")
+
+        validateConfig()
     except:
         print("Can't open configuration file. Make sure agent.conf is in the same directory as agent.py")
         exit(3)
-
-    validateConfig()
 
 
 def main():
