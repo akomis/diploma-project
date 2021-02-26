@@ -2,6 +2,7 @@ import sys, os
 import threading
 import time
 import serial
+import configparser
 import DobotDllTypeX as dType
 
 def measureSwitchOverhead():
@@ -86,21 +87,8 @@ def testParallelDobotConnection(portList):
 
     dType.DisconnectAll()
 
+
 #measureSwitchOverhead()
 #testJevoisConnectivity("COM12")
 #testAlarms("192.168.43.4")
 #testParallelDobotConnection(["192.168.43.4","192.168.43.5"])
-
-class A():
-    def __init__(self, port):
-        self.y = port
-
-    def something(self):
-        self.x = 100
-
-class B(A):
-    def printer(self):
-        print(self.y)
-
-test = B(123)
-test.printer()
