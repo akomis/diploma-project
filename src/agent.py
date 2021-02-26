@@ -741,12 +741,15 @@ def validateConfig():
         sectionType = section.split(':')[0]
 
         if sectionType not in validOptions.keys():
-            print("[WARNING] " + section + " cannot be recognised for validation.")
+            print("[WARNING] \"" + section + "\" cannot be recognised for validation.")
             continue
 
         for option in config[section]:
             if option.lower() not in validOptions[sectionType]:
-                print("[WARNING] " + option + " is not a valid option for section " + section + " and will be ignored.")
+                print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
+
+            if config[section][option].lower() not in ["1","yes","true","on","0","no","false","off"]:
+                print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
 
 def readConfig():
     global config
