@@ -113,13 +113,20 @@ validOptions = {"AGENT":["agentname","routineinterval","prometheusport"],
                 "wifinetmask","wifigateway","wifidns"],
                 "JEVOIS":["objects","objectidentified","objectlocation","objectsize"]}
 
+ignoreValueCheck = ["agentname","routineinterval","prometheusport","objects"]
+
+validValues = ["1","yes","true","on","0","no","false","off"]
+
 for section in config.sections():
     sectionType = section.split(':')[0]
+
     if sectionType not in validOptions.keys():
-        print("[WARNING] " + section + " cannot be recognised for validation.")
+        print("[WARNING] \"" + section + "\" cannot be recognised for validation.")
         continue
 
     for option in config[section]:
-        print(option + ": " + config[section][option])
-        if option.lower() not in validOptions[sectionType]:
-            print("[WARNING] " + option + " is not a valid option for section " + section + " and will be ignored.")
+        if option not in validOptions[sectionType]:
+            print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
+
+        if option not in ignoreValueCheck and config[section][option] not in validValues:
+            print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")

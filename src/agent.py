@@ -737,6 +737,10 @@ def validateConfig():
                     "wifinetmask","wifigateway","wifidns"],
                     "JEVOIS":["objects","objectidentified","objectlocation","objectsize"]}
 
+    ignoreValueCheck = ["agentname","routineinterval","prometheusport","objects"]
+
+    validValues = ["1","yes","true","on","0","no","false","off"]
+
     for section in config.sections():
         sectionType = section.split(':')[0]
 
@@ -745,10 +749,10 @@ def validateConfig():
             continue
 
         for option in config[section]:
-            if option.lower() not in validOptions[sectionType]:
+            if option not in validOptions[sectionType]:
                 print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
 
-            if config[section][option].lower() not in ["1","yes","true","on","0","no","false","off"]:
+            if option not in ignoreValueCheck and config[section][option] not in validValues:
                 print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
 
 def readConfig():
