@@ -8,19 +8,30 @@ from prometheus_client import start_http_server, Info, Gauge, Enum
 
 config = configparser.ConfigParser()
 
-class DOBOT():
+class DEVICE(port):
     def __init__(self, port):
         self.__port = port
 
+    @abstractmethod
+    def _connect():
+        yield None
+
+    @abstractmethod
+    def _fetch():
+        yield None
+
+    @abstractmethod
+    def _disconnect():
+        yield None
+
+class DOBOT(DEVICE):
     def _connect(self):
         self.__api, state = dType.ConnectDobotX(port)
 
         if state[0] == dType.DobotConnect.DobotConnect_NoError:
-            print("Dobot Magician at port " + self.__port + " connected succesfully!")
             self.__prominit()
             return True
         else:
-            print("Couldn't connect with Dobot Magician device at port " + self.__port)
             return False
 
     def __prominit(self):
@@ -541,19 +552,17 @@ class DOBOT():
     def _disconnect(self):
         dType.DisconnectDobotX(self.__api)
 
-class JEVOIS():
+class JEVOIS(DEVICE):
     def __init__(self, port):
         self.__port = port
 
     def _connect(self):
         try:
             self.__serial = serial.Serial(self.__port, 115200, timeout=1)
-            print("Jevois Camera at port " + self.__port + " connected succesfully!")
             self.__prominit()
-            return true
+            return True
         except Exception as e:
-            print("Couldn't connect with Jevois Camera device at port " + self.__port + " (" + str(e) + ")")
-            return false
+            return False
 
     def __prominit(self):
         global config
@@ -666,10 +675,12 @@ class MonitoringAgent():
 
             constructor = globals()[deviceType]
             device = constructor(connectionPort)
-            isConnected = device._connect()
-            if isConnected:
+
+            if device._connect():
                 devices.append(device)
+                print("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
             else:
+                print("[ERROR] " + deviceType + " at port " + connectionPort + " cannot be connected.")
                 print("[WARNING] Device " + deviceType + " at " + connectionPort + " will not be monitored.")
 
     def __disconnectDevices(self):
@@ -692,7 +703,7 @@ class MonitoringAgent():
             while (1):
                 time.sleep(self.__routineInterval / 1000)
                 for device in self.__devices:
-                    device.fetchData()
+                    device._fetch()
         except KeyboardInterrupt:
             self.__disconnectDevices()
 

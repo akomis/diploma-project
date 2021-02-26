@@ -90,3 +90,17 @@ def testParallelDobotConnection(portList):
 #testJevoisConnectivity("COM12")
 #testAlarms("192.168.43.4")
 #testParallelDobotConnection(["192.168.43.4","192.168.43.5"])
+
+class A():
+    def __init__(self, port):
+        self.y = port
+
+    def something(self):
+        self.x = 100
+
+class B(A):
+    def printer(self):
+        print(self.y)
+
+test = B(123)
+test.printer()
