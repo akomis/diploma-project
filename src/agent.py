@@ -38,8 +38,6 @@ class DOBOT(DEVICE):
             return False
 
     def __prominit(self):
-        global config
-        self.__section = config[type(self).__name__ + ':' + self.__port]
         enabledDeviceInfo = {}
         if self.__section.getboolean('DeviceSN', fallback=True):
             enabledDeviceInfo["serial_number"] = dType.GetDeviceSN(self.__api)[0]
@@ -291,9 +289,6 @@ class DOBOT(DEVICE):
             self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'], ['device'])
 
     def _fetch(self):
-        global config
-        self.__section = config['DOBOT' + ':' + self.__port]
-
         if self.__section.getboolean('DeviceTime', fallback=False):
             self.__deviceTime.labels('dobot_'+self.__port).set(dType.GetDeviceTime(self.__api)[0])
 
@@ -585,9 +580,6 @@ class JEVOIS(DEVICE):
             self.__objectSize = Gauge('object_size','Identified object\'s size', ['device'])
 
     def _fetch(self):
-        global config
-        self.__section = config[type(self).__name__ + ':' + self.__port]
-
         line = self.__serial.readline().rstrip()
         tok = line.split()
         dimension = tok[0][1]
