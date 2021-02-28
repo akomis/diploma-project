@@ -3,7 +3,6 @@ import time
 import serial
 import webbrowser
 import configparser
-import DobotDllTypeX as dType
 from prometheus_client import start_http_server, Info, Gauge, Enum
 from device_modules import *
 

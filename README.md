@@ -155,8 +155,9 @@ Used to extract all enabled monitoring attributes for said device and update the
 ###_disconnect()
 Responsible for disconnecting the device, close any open ports/streams and remove any runtime temporary files regarding the device.  
 
-For a practical example one can review the source code of `Dobot.py` and `Jevois.py`.
-Any runtime files needed for communicating with a device can be placed in the `runtime` directory.
+All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot.py` device module) should also be included in the `device_modules` directory for better organization.  
+For a practical example one can review the source code of the included `Dobot.py` and `Jevois.py`.  
+Any runtime files needed for communicating with a device should be placed in the `runtime` directory.  
 <br><br>
 
 ## Testing

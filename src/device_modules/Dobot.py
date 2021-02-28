@@ -1,4 +1,5 @@
 import Device
+import DobotDllTypeX as dType
 
 class Dobot(Device):
     configValidOptions = ["devicesn","devicename","deviceversion","devicetime","queueindex",
