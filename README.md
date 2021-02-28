@@ -148,11 +148,11 @@ The system can scale (monitoring station level) vertically as the agent can conn
 The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device module and place it in the `device_modules` directory. This module should include a class that is a child of the Device class found in the `Device.py` module (`import Device`) and implements all its static fields and methods. The name of the class is determining the name that the agent will use to discover a device through `agent.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
 The static fields that need to be implemented is the `configValidOptions` which includes all the valid fields/options a device can have in the configuration file and the `configIgnoreValueCheck` list which includes the fields that are not considered monitoring options (which enables/disables the attributes to be monitorid) and shall skip the enabling/disabling value check.  
 The methods that need implementing is the _connect, _fetch and _disconnect methods. More specifically
-###_connect()
+### `_connect()`
 Responsible for connecting to the device, initialize the prometheus metrics and other necessary device information that is vital for the use of the other methods. If the connection attempt is unsuccessful this method should return False, otherwise it should return True.
-###_fetch()
+### `_fetch()`
 Used to extract all enabled monitoring attributes for said device and update the Prometheus metrics accordingly.
-###_disconnect()
+### `_disconnect()`
 Responsible for disconnecting the device, close any open ports/streams and remove any runtime temporary files regarding the device.  
 
 All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot.py` device module) should also be included in the `device_modules` directory for better organization.  
