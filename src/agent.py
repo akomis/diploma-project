@@ -14,12 +14,12 @@ class Agent():
 
     def __init__(self):
         global config
-        self.__agentName = config.get('AGENT', 'AgentName', fallback="Agent0")
+        self.__agentName = config.get('Agent', 'AgentName', fallback="Agent0")
         if self.__agentName == '':
             self.__agentName = "Agent0"
 
         try:
-            self.__routineInterval = config.getint('AGENT', 'routineInterval', fallback=100)
+            self.__routineInterval = config.getint('Agent', 'routineInterval', fallback=100)
             if (self.__routineInterval < 100):
                 raise ValueError
         except ValueError:
@@ -27,7 +27,7 @@ class Agent():
             sys.exit(4)
 
         try:
-            self.__prometheusPort = config.getint('AGENT', 'PrometheusPort', fallback=8080)
+            self.__prometheusPort = config.getint('Agent', 'PrometheusPort', fallback=8080)
             if self.__prometheusPort > 65535 or self.__prometheusPort < 0:
                 print(str(self.__prometheusPort) + " is not a valid port")
                 raise ValueError
@@ -43,7 +43,7 @@ class Agent():
         # Discover through the config which devices should be monitored
         for section in config:
             # Skip the Agent section as it does not represent a device
-            if section == 'AGENT':
+            if section == 'Agent':
                 continue
 
             try:
@@ -133,12 +133,12 @@ def validateConfig():
 def readConfig():
     global config
 
-    print("Opening")
     try:
         check = config.read('agent.conf')[0]
         if check == '':
             raise Exception("Couldn't find agent.conf")
 
+        print("Reading agent.conf..")
         validateConfig()
     except:
         print("Can't open configuration file. Make sure agent.conf is in the same directory as agent.py")
