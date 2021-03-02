@@ -175,7 +175,7 @@ Throughout the analysis of the Dobot API, some minor issues arose with fetching 
 ### Improvements
 * `loadX()` function to replace `load()` that implements loading individual dll/so (DobotDll.dll instances) for each connected device in order to enable parallel connection with multiple dobots. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll/so). This function is not meant to be called explicitly.
 * `ConnectDobotX(port)` function to replace `api = load(); state = ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()` improvement, it allows parallel connections to Dobot Magicians and removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
-```
+```python
 dobot0, state1 = dType.ConnectDobotX("192.168.43.4")
 dobot1, state2 = dType.ConnectDobotX("192.168.43.5")
 
@@ -186,7 +186,7 @@ if state2[0] == dType.DobotConnect.DobotConnect_NoError:
     print("192.168.43.5 name: " + str(dType.GetDeviceName(dobot1)[0]))
 ```
 * `GetAlarmsStateX(api)` function to replace `GetAlarmsState(api, maxLen)` that uses a hardcoded dictionary of bit addresses and alarm descriptions that is used for decoding the byte array returned by the default function and instead return the active alarms per name and description. The decoding of the alarms byte array is achieved by traversing the array by alarm index based on a hardcoded dictionary called alarms with the key being the bit index and the corresponding value the alarm description as described in the Dobot ALARM document. This results in retrieving only the active alarms with a time complexity of O(N) where N is the number of documented alarms and leaves unrelated LOC from the monitoring agent as this is a Dobot matter and is cleaner to be resolved in the Python encapsulation. Example of use:  
-```
+```python
 print("Active alarms:")
 for a in dType.GetAlarmsStateX(dobot0):
     print(a)
@@ -202,5 +202,4 @@ Both additions were due to the `ConnectDobotX(port)` function and their purpose 
 - [Dobot ALARM](http://www.dobot.it/wp-content/uploads/2018/03/dobot-magician-alarm-en.pdf)
 - [JeVois: Standardized serial messages formatting](http://jevois.org/doc/UserSerialStyle.html)
 - [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
-- [Grafana Documentation](https://grafana.com/docs/)
 <br><br>
