@@ -4,7 +4,7 @@ import serial
 import webbrowser
 import configparser
 from prometheus_client import start_http_server, Info, Gauge, Enum
-from device_modules import *
+from device_modules import Dobot, Jevois
 
 config = configparser.ConfigParser()
 

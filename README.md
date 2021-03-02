@@ -6,7 +6,7 @@ Implementation of Data Management and Monitoring System for Industrial IoT Appli
 </div>
 
 ## Overview
-A data management system that collects data from devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Sliding Rail](https://www.dobot.cc/products/sliding-rail-kit-overview.html) and [JeVois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.  
+A data management system that collects data from devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Sliding Rail](https://www.dobot.cc/products/sliding-rail-kit-overview.html) and [JeVois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics. For visualization of such metrics any visualization tool compatible with Prometheus such as [Grafana](https://grafana.com/) can be used to provide insight.  
 The goal of this system is to be a cheap, effective, modular and extensible solution at monitoring such devices. This project aims at doing that while being efficient, without interfering with the normal operations of the devices, and be highly scalable in terms of the number of devices that can be monitored as well as the number of different types of devices it supports. Also provide high monitoring flexibility through a plethora of configuration options for the monitoring agent and what device attributes to be extracted and monitored, configured individually for each device.
 <br><br>
 
@@ -14,11 +14,12 @@ The goal of this system is to be a cheap, effective, modular and extensible solu
 - [Python 3.9+](https://www.python.org/downloads/windows/)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/)
-- [Grafana](https://grafana.com/get)
-<br><br>
+- [prometheus_client](https://github.com/prometheus/client_python)
+- [pyserial](https://pythonhosted.org/pyserial/)
 
 ## Installation
 `git clone https://github.com/akomis/diploma-project.git`
+`pip install prometheus-client pyserial`
 <br><br>
 
 ## Configuration
@@ -27,7 +28,7 @@ For changing the agent's settings you can change the values under the `[Agent]` 
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi. You can connect multiple devices through various ports (serial port/IP address).  
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in caps.  
-For custom device modules in the device_modules e.g. `DeviceType.py` a `[DeviceType:PORT]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
+For custom device modules in the device_modules e.g. ` class DeviceType` a `[DeviceType:PORT]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.
 For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
