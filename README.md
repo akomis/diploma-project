@@ -26,8 +26,8 @@ Change agent's settings and choose which devices and which data/attributes of th
 For changing the agent's settings you can change the values under the `[Agent]` section.  
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi. You can connect multiple devices through various ports (serial port/IP address).  
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
-For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in caps.  
-For custom device modules in the device_modules e.g. `DeviceType.py` a `[DeviceType:PORT]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
+For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in the same format as the class name representing the device module.  
+For custom device modules/classes in the device_modules.py e.g. `DeviceType` a `[DeviceType:PORT]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.
 For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
@@ -145,8 +145,8 @@ The system can scale (monitoring station level) vertically as the agent can conn
 <br><br>
 
 ## Extensibility
-The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device module and place it in the `device_modules` directory. This module should include a class that is a child of the Device class found in the `Device.py` module (`import Device`) and implements all its static fields and methods. The name of the class is determining the name that the agent will use to discover a device through `agent.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
-The static fields that need to be implemented is the configValidOptions[] list and the configIgnoreValueCheck[] list and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
+The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to be a child of the Device class (found in the same file) and implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `agent.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
+The attributes that need to be implemented is the configValidOptions[] list and the configIgnoreValueCheck[] list and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
 ### `configValidOptions[]`
 Includes all the valid fields/options a device can have in the configuration file (monitored attribute fields).
 ### `configIgnoreValueCheck[]`
@@ -158,9 +158,8 @@ Used to extract all enabled monitoring attributes for said device and update the
 ### `_disconnect()`
 Responsible for disconnecting the device, close any open ports/streams and remove any runtime temporary files regarding the device.  
 
-All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot.py` device module) should also be included in the `device_modules` directory for better organization.  
-For a practical example one can review the source code of the included `Dobot.py` and `Jevois.py`.  
-Any runtime files needed for communicating with a device should be placed in the `runtime` directory.  
+All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot.py` device module) and any runtime files should be included in the `runtime` directory.  
+For a practical example one can review the source code in `device_modules.py` and more specifically the `Dobot` and `Jevois` classes (device modules).  
 <br><br>
 
 ## Testing

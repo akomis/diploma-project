@@ -1,6 +1,5 @@
 import sys
 import time
-import serial
 import webbrowser
 import configparser
 from prometheus_client import start_http_server, Info, Gauge, Enum
@@ -100,7 +99,7 @@ def argumentHandler(args):
     if len(args) == 2:
         if args[1] == "-h" or args[1] == "--help":
             # Open latest README.md documentation of project
-            webbrowser.open('https://github.com/akomis/diploma-project/blob/master/README.md')
+            webbrowser.open("../README.md")
             exit(1)
         else:
             print('Unrecognised option \"' + sys.argv[1] + '\"')

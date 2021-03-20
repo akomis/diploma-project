@@ -1,7 +1,28 @@
-import Device
-import DobotDllTypeX as dType
+class Device():
+    configValidOptions = []
+    configIgnoreValueCheck = []
+
+    def __init__(self, port):
+        global config
+        self.__port = port
+        self.__section = config[type(self).__name__ + ':' + self.__port]
+
+    #@abstractmethod
+    def _connect():
+        return None
+
+    #@abstractmethod
+    def _fetch():
+        return None
+
+    #@abstractmethod
+    def _disconnect():
+        return None
+
 
 class Dobot(Device):
+    import runtime.DobotDllTypeX as dType
+
     configValidOptions = ["devicesn","devicename","deviceversion","devicetime","queueindex",
     "posex","posey","posez","poser","anglebase","anglereararm","angleforearm",
     "angleendeffector","alarmsstate","homex","homey","homez","homer","autolevelingresult",
@@ -86,7 +107,7 @@ class Dobot(Device):
             self.__angleEndEffector = Gauge('angle_end_effector','End effector joint angle', ['device'])
 
         if self.__section.getboolean('AlarmsState', fallback=True):
-            self.__alarmsState = Enum('alarms', 'Device alarms', states=list(dType.alarms.values()), ['device'])
+            self.__alarmsState = Enum('alarms', 'Device alarms', ['device'], states=list(dType.alarms.values()))
 
         if self.__section.getboolean('HomeX', fallback=False):
             self.__homeX = Gauge('home_x','Home position for X axis', ['device'])
@@ -113,13 +134,13 @@ class Dobot(Device):
             self.__endEffectorZ = Gauge('end_effector_z','Z-axis offset of end effector', ['device'])
 
         if self.__section.getboolean('LaserStatus', fallback=False):
-            self.__laserStatus = Enum('laser_status','Status (enabled/disabled) of laser', states=['enabled','disabled'], ['device'])
+            self.__laserStatus = Enum('laser_status','Status (enabled/disabled) of laser', ['device'], states=['enabled','disabled'])
 
         if self.__section.getboolean('SuctionCupStatus', fallback=False):
-            self.__suctionCupStatus = Enum('suction_cup_status','Status (enabled/disabled) of suction cup', states=['enabled','disabled'], ['device'])
+            self.__suctionCupStatus = Enum('suction_cup_status','Status (enabled/disabled) of suction cup', ['device'], states=['enabled','disabled'])
 
         if self.__section.getboolean('GripperStatus', fallback=False):
-            self.__gripperStatus = Enum('gripper_status','Status (enabled/disabled) of gripper', states=['enabled','disabled'], ['device'])
+            self.__gripperStatus = Enum('gripper_status','Status (enabled/disabled) of gripper', ['device'], states=['enabled','disabled'])
 
         if self.__section.getboolean('JogBaseVelocity', fallback=False):
             self.__jogBaseVelocity = Gauge('jog_base_velocity','Velocity (°/s) of base joint in jogging mode', ['device'])
@@ -254,7 +275,7 @@ class Dobot(Device):
             self.__angleCoefFront = Gauge('angle_coef_front','Forearm angle sensor linearization parameter', ['device'])
 
         if self.__section.getboolean('SlidingRailStatus', fallback=False):
-            self.__slidingRailStatus = Enum('sliding_rail_status','Sliding rail\'s status (enabled/disabled)', states=['enabled','disabled'], ['device'])
+            self.__slidingRailStatus = Enum('sliding_rail_status','Sliding rail\'s status (enabled/disabled)', ['device'], states=['enabled','disabled'])
 
         if self.__section.getboolean('SlidingRailPose', fallback=False):
             self.__slidingRailPose = Gauge('sliding_rail_pose','Sliding rail\'s real-time pose in mm', ['device'])
@@ -272,10 +293,10 @@ class Dobot(Device):
             self.__slidingRailPtpAcceleration = Gauge('sliding_rail_ptp_acceleration','Acceleration (mm/s^2) of sliding rail in point to point mode', ['device'])
 
         if self.__section.getboolean('WifiModuleStatus', fallback=False):
-            self.__wifiModuleStatus = Enum('wifi_module_status','Wifi module status (enabled/disabled)', states=['enabled','disabled'], ['device'])
+            self.__wifiModuleStatus = Enum('wifi_module_status','Wifi module status (enabled/disabled)', ['device'], states=['enabled','disabled'])
 
         if self.__section.getboolean('WifiConnectionStatus', fallback=False):
-            self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', states=['enabled','disabled'], ['device'])
+            self.__wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', ['device'], states=['enabled','disabled'])
 
     def _fetch(self):
         if self.__section.getboolean('DeviceTime', fallback=False):
@@ -310,7 +331,7 @@ class Dobot(Device):
             self.__angleEndEffector.labels('dobot_'+self.__port).set(pose[7])
 
         if self.__section.getboolean('AlarmsState', fallback=True):
-            for a in dType.GetAlarmsStateX(self.__api)
+            for a in dType.GetAlarmsStateX(self.__api):
                 self.__alarmsState.labels('dobot_'+self.__port).state(a)
 
         home = dType.GetHOMEParams(self.__api)
@@ -538,3 +559,71 @@ class Dobot(Device):
 
     def _disconnect(self):
         dType.DisconnectDobotX(self.__api)
+
+class Jevois(Device):
+    import serial
+
+    configValidOptions = ["objects","objectidentified","objectlocation","objectsize"]
+    configIgnoreValueCheck = ["objects"]
+
+    def _connect(self):
+        try:
+            self.__serial = serial.Serial(self.__port, 115200, timeout=1)
+            self.__prominit()
+            return True
+        except Exception as e:
+            return False
+
+    def __prominit(self):
+        if self.__section.getboolean('ObjectIdentified', fallback=True):
+            if self.__section.get('objects') is not None:
+                self.__options = self.__section["options"].split()
+                self.__objectIdentified = Enum('object_identified', 'Object Identified', ['device'], states=self.__options)
+            else:
+                print('The \"options\" list is necessary for monitoring identified objects')
+                print('Skipping monitoring objects identified for JEVOIS:' + self.__port)
+
+        if self.__section.getboolean('ObjectLocation', fallback=True):
+            self.__objectLocationX = Gauge('object_location_x', 'Identified object\'s x position',['device'])
+            if int(dimension) > 1:
+                self.__objectLocationY = Gauge('object_location_y', 'Identified object\'s y position',['device'])
+            if int(dimension) == 3:
+                self.__objectLocationZ = Gauge('object_location_z', 'Identified object\'s Z position',['device'])
+
+        if self.__section.getboolean('ObjectSize', fallback=False):
+            self.__objectSize = Gauge('object_size','Identified object\'s size', ['device'])
+
+    def _fetch(self):
+        line = self.__serial.readline().rstrip()
+        tok = line.split()
+        dimension = tok[0][1]
+
+        # Abort fetching if timeout or malformed line
+        if len(tok) < 1: return
+        if dimension == '1' and len(tok) != 4: return
+        if dimension == '2' and len(tok) != 6: return
+        if dimension == '3' and len(tok) != 8: return
+
+        if self.__section.getboolean('ObjectIdentified', fallback=True):
+            if self.__options is not None and tok[1] in self.__options:
+                self.__objectIdentified.labels('jevois'+self.__port).state(tok[1])
+
+        if self.__section.getboolean('ObjectLocation', fallback=True):
+            self.__objectLocationX.lables('jevois'+self.__port).set(float(tok[2]))
+
+            if int(dimension) > 1:
+                self.__objectLocationY.labels('jevois'+self.__port).set(float(tok[3]))
+
+            if int(dimension) == 3:
+                self.__objectLOcationZ.labels('jevois'+self.__port).set(float(tok[4]))
+
+        if self.__section.getboolean('ObjectSize', fallback=False):
+            if dimension == '1':
+                self.__objectSize.labels('jevois'+self.__port).set(float(tok[3]))
+            elif dimension == '2':
+                self.__objectSize.labels('jevois'+self.__port).set(float(tok[4])*float(tok[5]))
+            elif dimension == '3':
+                self.__objectSize.labels('jevois'+self.__port).set(float(tok[5])*float(tok[6])*float(tok[7]))
+
+    def _disconnect(self):
+        self.__serial.close()
