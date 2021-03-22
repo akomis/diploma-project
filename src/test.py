@@ -3,7 +3,7 @@ import threading
 import time
 import serial
 import configparser
-import DobotDllTypeX as dType
+import runtime.DobotDllTypeX as dType
 
 def measureSwitchOverhead():
     # Run for 1 minute
@@ -45,7 +45,8 @@ def testJevoisConnectivity(port):
         return
 
     while (1):
-        line = ser.readline().rstrip()
+        time.sleep(1)
+        line = ser.readline().rstrip().decode()
         tok = line.split()
         # Abort fetching if timeout or malformed line
         if len(tok) < 1: print("No data found"); continue
@@ -126,7 +127,7 @@ def testConfigValidation():
                 print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
 
 #measureSwitchOverhead()
-#testJevoisConnectivity("COM12")
+#testJevoisConnectivity("COM14")
 #testAlarms("192.168.43.4")
 #testParallelDobotConnection(["192.168.43.4","192.168.43.5"])
 #testConfigValidation()

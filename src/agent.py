@@ -2,7 +2,7 @@ import sys
 import time
 import webbrowser
 import configparser
-from prometheus_client import start_http_server, Info, Gauge, Enum
+from prometheus_client import start_http_server
 from device_modules import Dobot, Jevois
 
 config = configparser.ConfigParser()
@@ -13,36 +13,36 @@ class Agent():
 
     def __init__(self):
         global config
-        self.__agentName = config.get('Agent', 'AgentName', fallback="Agent0")
-        if self.__agentName == '':
-            self.__agentName = "Agent0"
+
+        self.devices = []
+        self.agentName = config.get('Agent', 'AgentName', fallback="Agent0")
+        if self.agentName == '':
+            self.agentName = "Agent0"
 
         try:
-            self.__routineInterval = config.getint('Agent', 'routineInterval', fallback=100)
-            if (self.__routineInterval < 100):
+            self.routineInterval = config.getint('Agent', 'routineInterval', fallback=100)
+            if (self.routineInterval < 100):
                 raise ValueError
         except ValueError:
             print('RoutineInterval must be a number greater or equal to 100')
             sys.exit(4)
 
         try:
-            self.__prometheusPort = config.getint('Agent', 'PrometheusPort', fallback=8080)
-            if self.__prometheusPort > 65535 or self.__prometheusPort < 0:
-                print(str(self.__prometheusPort) + " is not a valid port")
+            self.prometheusPort = config.getint('Agent', 'PrometheusPort', fallback=8000)
+            if self.prometheusPort > 65535 or self.prometheusPort < 0:
+                print(str(self.prometheusPort) + " is not a valid port")
                 raise ValueError
         except ValueError:
             print('PrometheusPort must be a number from 0 to 65535')
             sys.exit(5)
-
-        self.__devices = []
 
     def __connectDevices(self):
         global config
 
         # Discover through the config which devices should be monitored
         for section in config:
-            # Skip the Agent section as it does not represent a device
-            if section == 'Agent':
+            # Skip the Agent and DEFAULT sections as they do not represent a device
+            if section == 'Agent' or section == 'DEFAULT':
                 continue
 
             try:
@@ -60,35 +60,36 @@ class Agent():
                 continue
 
             constructor = globals()[deviceType]
-            device = constructor(connectionPort)
+            device = constructor(config, connectionPort)
 
             if device._connect():
-                devices.append(device)
+                self.devices.append(device)
                 print("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
             else:
                 print("[ERROR] " + deviceType + " at port " + connectionPort + " cannot be connected.")
                 print("[WARNING] Device " + deviceType + " at " + connectionPort + " will not be monitored.")
 
     def __disconnectDevices(self):
-        for device in devices:
+        for device in self.devices:
             device._disconnect()
 
 
     def startRoutine(self):
-        if len(self.__devices) == 0:
+        print('Connecting to devices listed in agent.conf..')
+        self.__connectDevices()
+
+        if len(self.devices) == 0:
             print("No devices connected to the agent.")
             sys.exit(11)
 
-        print('Connecting to devices listed in agent.conf..')
-        self.__connectDevices()
-        print('Starting prometheus server at port ' + str(self.__prometheusPort) + "..")
-        start_http_server(self.__prometheusPort)
+        print('Starting prometheus server at port ' + str(self.prometheusPort) + "..")
+        start_http_server(self.prometheusPort)
 
         print('Monitoring..')
         try:
             while (1):
-                time.sleep(self.__routineInterval / 1000)
-                for device in self.__devices:
+                time.sleep(self.routineInterval / 1000)
+                for device in self.devices:
                     device._fetch()
         except KeyboardInterrupt:
             print('Disconnecting devices..')
@@ -147,8 +148,8 @@ def readConfig():
 def main():
     argumentHandler(sys.argv)
     readConfig()
-    Agent = MonitoringAgent()
-    Agent.startRoutine()
+    agent = Agent()
+    agent.startRoutine()
 
 if __name__ == '__main__':
     main()
