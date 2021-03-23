@@ -7,7 +7,7 @@ Implementation of Data Management and Monitoring System for Industrial IoT Appli
 
 ## Overview
 A data management system that collects data from devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Sliding Rail](https://www.dobot.cc/products/sliding-rail-kit-overview.html) and [JeVois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.  
-The goal of this system is to be a cheap, effective, modular and extensible solution at monitoring such devices. This project aims at doing that while being efficient, without interfering with the normal operations of the devices, and be highly scalable in terms of the number of devices that can be monitored as well as the number of different types of devices it supports. Also provide high monitoring flexibility through a plethora of configuration options for the monitoring agent and what device attributes to be extracted and monitored, configured individually for each device.
+The goal of this system is to be a cost-effective, efficient, modular and extensible solution at monitoring such devices. This project aims at doing that while being efficient, without interfering with the normal operations of the devices, and be highly scalable in terms of the number of devices that can be monitored as well as the number of different types of devices it supports. Also provide high monitoring flexibility through a plethora of configuration options for the monitoring agent and what device attributes to be extracted and monitored, configured individually for each device.
 <br><br>
 
 ## Dependencies
@@ -27,7 +27,7 @@ For changing the agent's settings you can change the values under the `[Agent]` 
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi. You can connect multiple devices through various ports (serial port/IP address).  
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in the same format as the class name representing the device module.  
-For custom device modules/classes in the device_modules.py e.g. `DeviceType` a `[DeviceType:PORT]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
+For custom device modules/classes in the device_modules.py e.g. `DeviceType` a `[DeviceType:<port>]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.
 For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
@@ -158,7 +158,7 @@ Used to extract all enabled monitoring attributes for said device and update the
 ### `_disconnect()`
 Responsible for disconnecting the device, close any open ports/streams and remove any runtime temporary files regarding the device.  
 
-All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot.py` device module) and any runtime files should be included in the `runtime` directory.  
+All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot` device module) and any runtime files should be included in the `runtime` directory.  
 For a practical example one can review the source code in `device_modules.py` and more specifically the `Dobot` and `Jevois` classes (device modules).  
 <br><br>
 
@@ -173,7 +173,7 @@ Throughout the analysis of the Dobot API, some minor issues arose with fetching 
 ### Improvements
 * `loadX()` function to replace `load()` that implements loading individual dll/so (DobotDll.dll instances) for each connected device in order to enable parallel connection with multiple dobots. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll/so). This function is not meant to be called explicitly.
 * `ConnectDobotX(port)` function to replace `api = load(); state = ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()` improvement, it allows parallel connections to Dobot Magicians and removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
-```
+```python
 dobot0, state0 = dType.ConnectDobotX("192.168.43.4")
 dobot1, state1 = dType.ConnectDobotX("192.168.43.5")
 
@@ -184,7 +184,7 @@ if state1[0] == dType.DobotConnect.DobotConnect_NoError:
     print("192.168.43.5 name: " + str(dType.GetDeviceName(dobot1)[0]))
 ```
 * `GetAlarmsStateX(api)` function to replace `GetAlarmsState(api, maxLen)` that uses a hardcoded dictionary of bit addresses and alarm descriptions that is used for decoding the byte array returned by the default function and instead return the active alarms per name and description. The decoding of the alarms byte array is achieved by traversing the array by alarm index based on a hardcoded dictionary called alarms with the key being the bit index and the corresponding value the alarm description as described in the Dobot ALARM document. This results in retrieving only the active alarms with a time complexity of O(N) where N is the number of documented alarms and leaves unrelated LOC from the monitoring agent as this is a Dobot matter and is cleaner to be resolved in the Python encapsulation. Example of use:  
-```
+```python
 print("Active alarms:")
 for a in dType.GetAlarmsStateX(dobot0):
     print(a)
