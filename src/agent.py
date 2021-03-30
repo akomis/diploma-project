@@ -90,12 +90,11 @@ class Agent():
         try:
             while (1):
                 time.sleep(self.routineInterval / 1000)
+
                 threads = {}
                 for device in self.devices:
                    threads[device] = Thread(target = device._fetch)
-
-                for device in self.devices:
-                    threads[device].start()
+                   threads[device].start()
 
                 for device in self.devices:
                     threads[device].join()
