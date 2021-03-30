@@ -2,6 +2,7 @@ import sys
 import time
 import webbrowser
 import configparser
+from threading import Thread
 from prometheus_client import start_http_server
 from device_modules import Dobot, Jevois
 
@@ -89,8 +90,16 @@ class Agent():
         try:
             while (1):
                 time.sleep(self.routineInterval / 1000)
+                threads = {}
                 for device in self.devices:
-                    device._fetch()
+                   threads[device] = Thread(target = device._fetch)
+
+                for device in self.devices:
+                    threads[device].start()
+
+                for device in self.devices:
+                    threads[device].join()
+
         except KeyboardInterrupt:
             print('Disconnecting devices..')
             self.__disconnectDevices()

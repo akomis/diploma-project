@@ -11,16 +11,19 @@ class Device():
         self.section = config[type(self).__name__ + ':' + self.port]
 
     #@abstractmethod
-    def _connect():
+    def _connect(self):
         return None
 
     #@abstractmethod
-    def _fetch():
+    def _fetch(self):
         return None
 
     #@abstractmethod
-    def _disconnect():
+    def _disconnect(self):
         return None
+
+    def getDeviceName(self):
+        return type(self).__name__ + ":" + self.port
 
 
 class Dobot(Device):
