@@ -150,7 +150,7 @@ The attributes that need to be implemented is the configValidOptions[] list and 
 ### `configValidOptions[]`
 Includes all the valid fields/options a device can have in the configuration file (monitored attribute fields).
 ### `configIgnoreValueCheck[]`
-Includes the fields that are not considered monitoring options (which enables/disables the attributes to be monitorid) and shall skip the enabling/disabling value check. This list must be a subset of the configValidOptions list.
+Includes the fields that are not considered monitoring options (which enables/disables the attributes to be monitored) and shall skip the enabling/disabling value check. This list must be a subset of the configValidOptions list.
 ### `_connect()`
 Responsible for connecting to the device, initialize the prometheus metrics and other necessary device information that is vital for the use of the other methods. If the connection attempt is unsuccessful this method should return False, otherwise it should return True.
 ### `_fetch()`
