@@ -9,6 +9,9 @@ class Device():
     def __init__(self, config, port):
         self.port = port
         self.section = config[type(self).__name__ + ':' + self.port]
+        self.timeout = self.section.getint('Timeout', fallback=100)
+        if (timeout < 100):
+            self.timeout = 100
 
     #@abstractmethod
     def _connect(self):

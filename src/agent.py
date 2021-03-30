@@ -21,14 +21,6 @@ class Agent():
             self.agentName = "Agent0"
 
         try:
-            self.routineInterval = config.getint('Agent', 'routineInterval', fallback=100)
-            if (self.routineInterval < 100):
-                raise ValueError
-        except ValueError:
-            print('RoutineInterval must be a number greater or equal to 100')
-            sys.exit(4)
-
-        try:
             self.prometheusPort = config.getint('Agent', 'PrometheusPort', fallback=8000)
             if self.prometheusPort > 65535 or self.prometheusPort < 0:
                 print(str(self.prometheusPort) + " is not a valid port")
@@ -74,6 +66,11 @@ class Agent():
         for device in self.devices:
             device._disconnect()
 
+    def __fetchFrom(device):
+        while (1):
+            device._fetch()
+            time.sleep(device.timeout / 1000)
+
 
     def startRoutine(self):
         print('Connecting to devices listed in agent.conf..')
@@ -86,19 +83,14 @@ class Agent():
         print('Starting prometheus server at port ' + str(self.prometheusPort) + "..")
         start_http_server(self.prometheusPort)
 
-        print('Monitoring..')
         try:
-            while (1):
-                time.sleep(self.routineInterval / 1000)
-
-                threads = {}
                 for device in self.devices:
-                   threads[device] = Thread(target = device._fetch)
-                   threads[device].start()
+                   thread = Thread(target = __fetchFrom(device))
+                   thread.start()
 
-                for device in self.devices:
-                    threads[device].join()
-
+                print('Monitoring..')
+                while(1):
+                    pass
         except KeyboardInterrupt:
             print('Disconnecting devices..')
             self.__disconnectDevices()

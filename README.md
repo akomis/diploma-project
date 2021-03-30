@@ -30,12 +30,12 @@ For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in 
 For custom device modules/classes in the device_modules.py e.g. `DeviceType` a `[DeviceType:<port>]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.
 For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
+Each device entry support the `Timeout` attribute which sets the timeout period in milliseconds inbetween fetches and defaults to 100.
 
 ### Agent
 |   Config Name   |                        Description                        | Type | Default |
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
 |    AgentName    |                  Symbolic name for agent                  |  str |  Agent0 |
-| RoutineInterval | Timeout period between each routine cycle in milliseconds |  int |   100   |
 |  PrometheusPort |                Port for Prometheus endpoint               |  int |   8000  |
 
 ### Dobot
