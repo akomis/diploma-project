@@ -84,13 +84,13 @@ class Agent():
         start_http_server(self.prometheusPort)
 
         try:
-                for device in self.devices:
-                   thread = Thread(target = __fetchFrom(device))
-                   thread.start()
+            for device in self.devices:
+               thread = Thread(target = __fetchFrom(device))
+               thread.start()
 
-                print('Monitoring..')
-                while(1):
-                    pass
+            print('Monitoring..')
+            while(1):
+                pass
         except KeyboardInterrupt:
             print('Disconnecting devices..')
             self.__disconnectDevices()
