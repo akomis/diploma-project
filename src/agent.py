@@ -94,6 +94,7 @@ class Agent():
         except KeyboardInterrupt:
             print('Disconnecting devices..')
             self.__disconnectDevices()
+            exit(0)
 
 
 def argumentHandler(args):
