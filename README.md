@@ -1,4 +1,4 @@
-# Diploma Project
+<center><h1>Diploma Project</h1></center>
 <div align="center">
 <p>Monitoring System for Industrial IoT Applications</p>
 <img alt="Dobot Magician with Belt" src="/pics/dobot-magician-belt.png">
