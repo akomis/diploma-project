@@ -162,30 +162,34 @@ For a practical example one can review the source code in `device_modules.py` an
 <br><br>
 
 ## Testing
-A small manageable testing utility for the monitoring agent (agent.py) is the `test.py` script which includes a number of functions respective to different functional and performance tests and run examples in comments.
+A small manageable testing utility for the monitoring agent (agent.py) is the `test.py` script which includes a number of functions respective to different functional (f) and performance (p) tests. Each functional test represents a function of the monitoring agent (`agent.py`). Each test returns true in successful completion and false otherwise. Performance tests produce results/statistics to standard output that can be further analyzed.  
+The naming convention for better organization and use of the test functions
+is as follows: `typeOfTest_moduleName_description`
+e.g.    For a performance test regarding the Jevois module => `p_Jevois_DescriptionOfTest()`
+        For a functional test regarding the Dobot module => `f_Dobot_DescriptionOfTest()`
 <br><br>
 
 ## DobotDllType.py Fork (DobotDllTypeX.py)
-Throughout the analysis of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functiones are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the Dobot Demo. For importing and utilizing the fork: `import DobotDllTypeX as dType`
+Throughout the analysis of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functions are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the Dobot Demo. For importing and utilizing the fork place `DobotDllTypeX` inside project's directory and add `import DobotDllTypeX as dTypeX` to the main python script. (for this reading `dType` refers to the original `DobotDllType` and `dTypeX` to the fork)
 ### Fixes
 * Fixed `GetPoseL(api)` function, which returns the position of the sliding rail (if there is one connected to the robot), by importing the math library which is required for the needs of the function, however not included by default.
 ### Improvements
-* `loadX()` function to replace `load()` that implements loading individual dll/so (DobotDll.dll instances) for each connected device in order to enable parallel connection with multiple dobots. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll/so). This function is not meant to be called explicitly.
-* `ConnectDobotX(port)` function to replace `api = load(); state = ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()` improvement, it allows parallel connections to Dobot Magicians and removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
+* `loadX()` function to replace `load()` that implements loading individual dll (DobotDll.dll instances) for each connected device in order to enable parallel connection with multiple dobots. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll/so). This function is not meant to be called explicitly.
+* `ConnectDobotX(port)` function to replace `api = dType.load(); state = dType.ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()` improvement, it allows parallel connections to Dobot Magicians and removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
 ```python
-dobot0, state0 = dType.ConnectDobotX("192.168.43.4")
-dobot1, state1 = dType.ConnectDobotX("192.168.43.5")
+dobot0, state0 = dTypeX.ConnectDobotX("192.168.43.4")
+dobot1, state1 = dTypeX.ConnectDobotX("192.168.43.5")
 
-if state0[0] == dType.DobotConnect.DobotConnect_NoError:
+if state0[0] == dTypeX.DobotConnect.DobotConnect_NoError:
     print("192.168.43.4 name: " + str(dType.GetDeviceName(dobot0)[0]))
 
-if state1[0] == dType.DobotConnect.DobotConnect_NoError:
+if state1[0] == dTypeX.DobotConnect.DobotConnect_NoError:
     print("192.168.43.5 name: " + str(dType.GetDeviceName(dobot1)[0]))
 ```
 * `GetAlarmsStateX(api)` function to replace `GetAlarmsState(api, maxLen)` that uses a hardcoded dictionary of bit addresses and alarm descriptions that is used for decoding the byte array returned by the default function and instead return the active alarms per name and description. The decoding of the alarms byte array is achieved by traversing the array by alarm index based on a hardcoded dictionary called alarms with the key being the bit index and the corresponding value the alarm description as described in the Dobot ALARM document. This results in retrieving only the active alarms with a time complexity of O(N) where N is the number of documented alarms and leaves unrelated LOC from the monitoring agent as this is a Dobot matter and is cleaner to be resolved in the Python encapsulation. Example of use:  
 ```python
 print("Active alarms:")
-for a in dType.GetAlarmsStateX(dobot0):
+for a in dTypeX.GetAlarmsStateX(dobot0):
     print(a)
 ```
 ### Additions

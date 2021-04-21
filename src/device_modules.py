@@ -1,5 +1,5 @@
 from prometheus_client import Info, Gauge, Enum
-import runtime.DobotDllTypeX as dType
+import runtime.DobotDllTypeX as dTypeX
 import serial
 
 class Device():
@@ -57,7 +57,7 @@ class Dobot(Device):
     angleRearArm = Gauge('angle_rear_arm','Rear arm joint angle', ['device'])
     angleForearm = Gauge('angle_forearm','Forearm joint angle', ['device'])
     angleEndEffector = Gauge('angle_end_effector','End effector joint angle', ['device'])
-    alarmsState = Enum('alarms', 'Device alarms', ['device'], states=list(dType.alarms.values()))
+    alarmsState = Enum('alarms', 'Device alarms', ['device'], states=list(dTypeX.alarms.values()))
     homeX = Gauge('home_x','Home position for X axis', ['device'])
     homeY = Gauge('home_y','Home position for Y axis', ['device'])
     homeZ = Gauge('home_z','Home position for Z axis', ['device'])
@@ -123,9 +123,9 @@ class Dobot(Device):
     wifiConnectionStatus = Enum('wifi_connection_status','Wifi connection status (connected/not connected)', ['device'], states=['enabled','disabled'])
 
     def _connect(self):
-        self.api, state = dType.ConnectDobotX(self.port)
+        self.api, state = dTypeX.ConnectDobotX(self.port)
 
-        if state[0] == dType.DobotConnect.DobotConnect_NoError:
+        if state[0] == dTypeX.DobotConnect.DobotConnect_NoError:
             self.__prominit()
             return True
         else:
@@ -134,38 +134,38 @@ class Dobot(Device):
     def __prominit(self):
         enabledDeviceInfo = {}
         if self.section.getboolean('DeviceSN', fallback=True):
-            enabledDeviceInfo["serial_number"] = dType.GetDeviceSN(self.api)[0]
+            enabledDeviceInfo["serial_number"] = dTypeX.GetDeviceSN(self.api)[0]
         if self.section.getboolean('DeviceName', fallback=True):
-            enabledDeviceInfo["device_name"] = dType.GetDeviceName(self.api)[0]
+            enabledDeviceInfo["device_name"] = dTypeX.GetDeviceName(self.api)[0]
         if self.section.getboolean('DeviceVersion', fallback=True):
-            enabledDeviceInfo["version"] = '.'.join(list(map(str, dType.GetDeviceVersion(self.api))))
+            enabledDeviceInfo["version"] = '.'.join(list(map(str, dTypeX.GetDeviceVersion(self.api))))
         if len(enabledDeviceInfo) > 0:
             Dobot.deviceInfo.labels('dobot_'+self.port).info(enabledDeviceInfo)
 
         enabledWifiInfo = {}
         if self.section.getboolean('WifiSSID', fallback=False):
-            enabledWifiInfo["ssid"] = dType.GetWIFISSID(self.api)[0]
+            enabledWifiInfo["ssid"] = dTypeX.GetWIFISSID(self.api)[0]
         if self.section.getboolean('WifiPassword', fallback=False):
-            enabledWifiInfo["password"] = dType.GetWIFIPassword(self.api)[0]
+            enabledWifiInfo["password"] = dTypeX.GetWIFIPassword(self.api)[0]
         if self.section.getboolean('WifiIPAddress', fallback=False):
-            enabledWifiInfo["ip_address"] = '.'.join(list(map(str, dType.GetWIFIIPAddress(self.api)[1:])))
+            enabledWifiInfo["ip_address"] = '.'.join(list(map(str, dTypeX.GetWIFIIPAddress(self.api)[1:])))
         if self.section.getboolean('WifiNetmask', fallback=False):
-            enabledWifiInfo["netmask"] = '.'.join(list(map(str, dType.GetWIFINetmask(self.api))))
+            enabledWifiInfo["netmask"] = '.'.join(list(map(str, dTypeX.GetWIFINetmask(self.api))))
         if self.section.getboolean('WifiGateway', fallback=False):
-            enabledWifiInfo["gateway"] = '.'.join(list(map(str, dType.GetWIFIGateway(self.api))))
+            enabledWifiInfo["gateway"] = '.'.join(list(map(str, dTypeX.GetWIFIGateway(self.api))))
         if self.section.getboolean('WifiDNS', fallback=False):
-            enabledWifiInfo["dns"] = '.'.join(list(map(str, dType.GetWIFIDNS(self.api))))
+            enabledWifiInfo["dns"] = '.'.join(list(map(str, dTypeX.GetWIFIDNS(self.api))))
         if len(enabledWifiInfo) > 0:
             Dobot.wifiInfo.labels('dobot_'+self.port).info(enabledWifiInfo)
 
     def _fetch(self):
         if self.section.getboolean('DeviceTime', fallback=False):
-            Dobot.deviceTime.labels('dobot_'+self.port).set(dType.GetDeviceTime(self.api)[0])
+            Dobot.deviceTime.labels('dobot_'+self.port).set(dTypeX.GetDeviceTime(self.api)[0])
 
         if self.section.getboolean('QueueIndex', fallback=False):
-            Dobot.queueIndex.labels('dobot_'+self.port).set(dType.GetQueuedCmdCurrentIndex(self.api)[0])
+            Dobot.queueIndex.labels('dobot_'+self.port).set(dTypeX.GetQueuedCmdCurrentIndex(self.api)[0])
 
-        pose = dType.GetPose(self.api)
+        pose = dTypeX.GetPose(self.api)
         if self.section.getboolean('PoseX', fallback=True):
             Dobot.poseX.labels('dobot_'+self.port).set(pose[0])
 
@@ -191,10 +191,10 @@ class Dobot(Device):
             Dobot.angleEndEffector.labels('dobot_'+self.port).set(pose[7])
 
         if self.section.getboolean('AlarmsState', fallback=True):
-            for a in dType.GetAlarmsStateX(self.api):
+            for a in dTypeX.GetAlarmsStateX(self.api):
                 Dobot.alarmsState.labels('dobot_'+self.port).state(a)
 
-        home = dType.GetHOMEParams(self.api)
+        home = dTypeX.GetHOMEParams(self.api)
         if self.section.getboolean('HomeX', fallback=False):
             Dobot.homeX.labels('dobot_'+self.port).set(home[0])
 
@@ -208,9 +208,9 @@ class Dobot(Device):
             Dobot.homeR.labels('dobot_'+self.port).set(home[3])
 
         if self.section.getboolean('AutoLevelingResult', fallback=False):
-            Dobot.autoLevelingResult.labels('dobot_'+self.port).set(dType.GetAutoLevelingResult(self.api)[0])
+            Dobot.autoLevelingResult.labels('dobot_'+self.port).set(dTypeX.GetAutoLevelingResult(self.api)[0])
 
-        endEffector = dType.GetEndEffectorParams(self.api)
+        endEffector = dTypeX.GetEndEffectorParams(self.api)
         if self.section.getboolean('EndEffectorX', fallback=False):
             Dobot.endEffectorX.labels('dobot_'+self.port).set(endEffector[0])
 
@@ -221,24 +221,24 @@ class Dobot(Device):
             Dobot.endEffectorZ.labels('dobot_'+self.port).set(endEffector[2])
 
         if self.section.getboolean('LaserStatus', fallback=False):
-            if bool(dType.GetEndEffectorLaser(self.api)[0]):
+            if bool(dTypeX.GetEndEffectorLaser(self.api)[0]):
                 Dobot.laserStatus.labels('dobot_'+self.port).state('enabled')
             else:
                 Dobot.laserStatus.labels('dobot_'+self.port).state('disabled')
 
         if self.section.getboolean('SuctionCupStatus', fallback=False):
-            if bool(dType.GetEndEffectorSuctionCup(self.api)[0]):
+            if bool(dTypeX.GetEndEffectorSuctionCup(self.api)[0]):
                 Dobot.suctionCupStatus.labels('dobot_'+self.port).state('enabled')
             else:
                 Dobot.suctionCupStatus.labels('dobot_'+self.port).state('disabled')
 
         if self.section.getboolean('GripperStatus', fallback=False):
-            if bool(dType.GetEndEffectorGripper(self.api)[0]):
+            if bool(dTypeX.GetEndEffectorGripper(self.api)[0]):
                 Dobot.gripperStatus.labels('dobot_'+self.port).state('enabled')
             else:
                 Dobot.gripperStatus.labels('dobot_'+self.port).state('disabled')
 
-        jogJoints = dType.GetJOGJointParams(self.api)
+        jogJoints = dTypeX.GetJOGJointParams(self.api)
         if self.section.getboolean('JogBaseVelocity', fallback=False):
             Dobot.jogBaseVelocity.labels('dobot_'+self.port).set(jogJoints[0])
 
@@ -263,7 +263,7 @@ class Dobot(Device):
         if self.section.getboolean('JogEndEffectorAcceleration', fallback=False):
             Dobot.jogEndEffectorAcceleration.labels('dobot_'+self.port).set(jogJoints[7])
 
-        jogCoords = dType.GetJOGCoordinateParams(self.api)
+        jogCoords = dTypeX.GetJOGCoordinateParams(self.api)
         if self.section.getboolean('JogAxisXVelocity', fallback=False):
             Dobot.jogAxisXVelocity.labels('dobot_'+self.port).set(jogCoords[0])
 
@@ -288,14 +288,14 @@ class Dobot(Device):
         if self.section.getboolean('JogAxisRAcceleration', fallback=False):
             Dobot.jogAxisRAcceleration.labels('dobot_'+self.port).set(jogCoords[7])
 
-        jogCommon = dType.GetJOGCommonParams(self.api)
+        jogCommon = dTypeX.GetJOGCommonParams(self.api)
         if self.section.getboolean('JogVelocityRatio', fallback=False):
             Dobot.jogVelocityRatio.labels('dobot_'+self.port).set(jogCommon[0])
 
         if self.section.getboolean('JogAccelerationRatio', fallback=False):
             Dobot.jogAccelerationRatio.labels('dobot_'+self.port).set(jogCommon[1])
 
-        ptpJoints = dType.GetPTPJointParams(self.api)
+        ptpJoints = dTypeX.GetPTPJointParams(self.api)
         if self.section.getboolean('PtpBaseVelocity', fallback=False):
             Dobot.ptpBaseVelocity.labels('dobot_'+self.port).set(ptpJoints[0])
 
@@ -320,7 +320,7 @@ class Dobot(Device):
         if self.section.getboolean('PtpEndEffectorAcceleration', fallback=False):
             Dobot.ptpEndEffectorAcceleration.labels('dobot_'+self.port).set(ptpJoints[7])
 
-        ptpCoords = dType.GetPTPCoordinateParams(self.api)
+        ptpCoords = dTypeX.GetPTPCoordinateParams(self.api)
         if self.section.getboolean('PtpXYZVelocity', fallback=False):
             Dobot.ptpXYZVelocity.labels('dobot_'+self.port).set(ptpCoords[0])
 
@@ -333,28 +333,28 @@ class Dobot(Device):
         if self.section.getboolean('PtpRAcceleration', fallback=False):
             Dobot.ptpRAcceleration.labels('dobot_'+self.port).set(ptpCoords[3])
 
-        ptpCommon = dType.GetPTPCommonParams(self.api)
+        ptpCommon = dTypeX.GetPTPCommonParams(self.api)
         if self.section.getboolean('PtpVelocityRatio', fallback=False):
             Dobot.ptpVelocityRatio.labels('dobot_'+self.port).set(ptpCommon[0])
 
         if self.section.getboolean('PtpAccelerationRatio', fallback=False):
             Dobot.ptpAccelerationRatio.labels('dobot_'+self.port).set(ptpCommon[1])
 
-        ptpJump = dType.GetPTPJumpParams(self.api)
+        ptpJump = dTypeX.GetPTPJumpParams(self.api)
         if self.section.getboolean('LiftingHeight', fallback=False):
             Dobot.liftingHeight.labels('dobot_'+self.port).set(ptpJump[0])
 
         if self.section.getboolean('HeighLimit', fallback=False):
             Dobot.heightLimit.labels('dobot_'+self.port).set(ptpJump[1])
 
-        cp = dType.GetCPParams(self.api)
+        cp = dTypeX.GetCPParams(self.api)
         if self.section.getboolean('CpVelocity', fallback=False):
             Dobot.cpVelocity.labels('dobot_'+self.port).set(cp[0])
 
         if self.section.getboolean('CpAcceleration', fallback=False):
             Dobot.cpAcceleration.labels('dobot_'+self.port).set(cp[1])
 
-        arc = dType.GetARCParams(self.api)
+        arc = dTypeX.GetARCParams(self.api)
         if self.section.getboolean('ArcXYZVelocity', fallback=False):
             Dobot.arcXYZVelocity.labels('dobot_'+self.port).set(arc[0])
 
@@ -367,14 +367,14 @@ class Dobot(Device):
         if self.section.getboolean('ArcRAcceleration', fallback=False):
             Dobot.arcRAcceleration.labels('dobot_'+self.port).set(arc[3])
 
-        angleStaticErr = dType.GetAngleSensorStaticError(self.api)
+        angleStaticErr = dTypeX.GetAngleSensorStaticError(self.api)
         if self.section.getboolean('AngleStaticErrRear', fallback=False):
             Dobot.angleStaticErrRear.labels('dobot_'+self.port).set(angleStaticErr[0])
 
         if self.section.getboolean('AngleStaticErrFront', fallback=False):
             Dobot.angleStaticErrFront.labels('dobot_'+self.port).set(angleStaticErr[1])
 
-        angleCoef = dType.GetAngleSensorCoef(self.api)
+        angleCoef = dTypeX.GetAngleSensorCoef(self.api)
         if self.section.getboolean('AngleCoefRear', fallback=False):
             Dobot.angleCoefRear.labels('dobot_'+self.port).set(angleCoef[0])
 
@@ -382,22 +382,22 @@ class Dobot(Device):
             Dobot.angleCoefFront.labels('dobot_'+self.port).set(angleCoef[1])
 
         if self.section.getboolean('SlidingRailStatus', fallback=False):
-            if bool(dType.GetDeviceWithL(self.api)[0]):
+            if bool(dTypeX.GetDeviceWithL(self.api)[0]):
                 Dobot.slidingRailStatus.labels('dobot_'+self.port).state('enabled')
             else:
                 Dobot.slidingRailStatus.labels('dobot_'+self.port).state('disabled')
 
         if self.section.getboolean('SlidingRailPose', fallback=False):
-            Dobot.slidingRailPose.labels('dobot_'+self.port).set(dType.GetPoseL(self.api)[0])
+            Dobot.slidingRailPose.labels('dobot_'+self.port).set(dTypeX.GetPoseL(self.api)[0])
 
-        jogRail = dType.GetJOGLParams(self.api)
+        jogRail = dTypeX.GetJOGLParams(self.api)
         if self.section.getboolean('SlidingRailJogVelocity', fallback=False):
             Dobot.slidingRailJogVelocity.labels('dobot_'+self.port).set(jogRail[0])
 
         if self.section.getboolean('SlidingRailJogAcceleration', fallback=False):
             Dobot.slidingRailJogAcceleration.labels('dobot_'+self.port).set(jogRail[1])
 
-        ptpRail = dType.GetPTPLParams(self.api)
+        ptpRail = dTypeX.GetPTPLParams(self.api)
         if self.section.getboolean('SlidingRailPtpVelocity', fallback=False):
             Dobot.slidingRailPtpVelocity.labels('dobot_'+self.port).set(ptpRail[0])
 
@@ -406,19 +406,19 @@ class Dobot(Device):
 
 
         if self.section.getboolean('WifiModuleStatus', fallback=False):
-            if bool(dType.GetWIFIConfigMode(self.api)[0]):
+            if bool(dTypeX.GetWIFIConfigMode(self.api)[0]):
                 Dobot.wifiModuleStatus.labels('dobot_'+self.port).state('enabled')
             else:
                 Dobot.wifiModuleStatus.labels('dobot_'+self.port).state('disabled')
 
         if self.section.getboolean('WifiConnectionStatus', fallback=False):
-            if bool(dType.GetWIFIConnectStatus(self.api)[0]):
+            if bool(dTypeX.GetWIFIConnectStatus(self.api)[0]):
                 Dobot.wifiConnectionStatus.labels('dobot_'+self.port).state('enabled')
             else:
                 Dobot.wifiConnectionStatus.labels('dobot_'+self.port).state('disabled')
 
     def _disconnect(self):
-        dType.DisconnectDobotX(self.api)
+        dTypeX.DisconnectDobotX(self.api)
 
 class Jevois(Device):
     configValidOptions = ["objects","objectidentified","objectlocation","objectsize"]
