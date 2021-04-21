@@ -162,7 +162,7 @@ For a practical example one can review the source code in `device_modules.py` an
 <br><br>
 
 ## Testing
-A small manageable testing utility for the monitoring agent (agent.py) is the `test.py` script which includes a number of functions respective to different functional (f) and performance (p) tests. Each functional test represents a function of the monitoring agent (`agent.py`). Each test returns true in successful completion and false otherwise. Performance tests produce results/statistics to standard output that can be further analyzed.  
+A small manageable testing utility for the monitoring agent (`agent.py`) is the `test.py` script which includes a number of functions respective to different functional (f) and performance (p) tests. Each functional test represents a function of the monitoring agent. Each test returns true in successful completion and false otherwise. Performance tests produce results/statistics to standard output that can be further analyzed.  
 The naming convention for better organization and use of the test functions
 is as follows: `typeOfTest_moduleName_description`  
 e.g.    For a performance test regarding the Jevois module => `p_Jevois_DescriptionOfTest()`  
