@@ -28,7 +28,7 @@ def _execute(func, arg):
     start = time.time()
     func(arg)
     stop = time.time()
-    return (stop - start) / 1000
+    return (stop - start) * 1000
 
 '''
 Description: Measure fetching times (in ms) for each attribute through multiple iterations
@@ -94,10 +94,10 @@ def p_Dobot_FetchingOverhead(port, n):
         attributes["GetWIFIConfigMode"].append(_execute(dTypeX.GetWIFIConfigMode, dobot))
         attributes["GetWIFIConnectStatus"].append(_execute(dTypeX.GetWIFIConnectStatus, dobot))
 
-    print("Results for " + str(iterations) + " iterations (attribute_name = avg:min:max ms)")
+    print("\nResults for " + str(iterations) + " iterations (attribute_name, avg, min, max (in milliseconds))")
     for attr in attributes:
         max = 0
-        min = sys.maxzise
+        min = sys.maxsize
         sum = 0
         for i in range(iterations):
             ms = attributes[attr][i]
@@ -107,7 +107,7 @@ def p_Dobot_FetchingOverhead(port, n):
             if ms < min:
                 min = ms
 
-        print(attr + " = " + str(sum/iterations) + ":" + str(min) + ":" + str(max))
+        print(str(attr) + "," + str(round(sum/iterations)) + "," + str(round(min)) + "," + str(round(max)))
 
     return True
 
@@ -119,7 +119,7 @@ Parameters:
 '''
 def p_Jevois_FetchingRate(port, n):
     try:
-        ser = serial.Serial(port, 115200, timeout=1)
+        ser = serial.Serial(port, 115200, timeout=0)
         line = ser.readline().rstrip()
         tok = line.split()
         print("Jevois Camera at port " + port + " connected succesfully!")
@@ -131,23 +131,24 @@ def p_Jevois_FetchingRate(port, n):
         print("Iterations number must be a positive integer.")
         return False
 
+    iterations = n
 
     max = 0
-    min = sys.maxzise
+    min = sys.maxsize
     sum = 0
     for i in range(iterations):
         start = time.time()
         line = ser.readline().rstrip().decode()
         stop = time.time()
-        ms = (start - stop) / 1000
+        ms = (stop - start) * 1000
         sum += ms
         if ms > max:
             max = ms
         if ms < min:
             min = ms
 
-    print("avg:min:max ms)")
-    print(attr + " = " + str(sum/n) + ":" + str(min) + ":" + str(max))
+    print("\nResults for " + str(iterations) + " iterations (attribute_name, avg, min, max (in milliseconds))")
+    print(str(round(sum/iterations)) + "," + str(round(min)) + "," + str(round(max)))
     return True
 
 '''
@@ -177,7 +178,7 @@ def p_Dobot_SwitchOverhead(port1, port2):
         end = time.time()
         sum += end - start
         count += 1
-        print(f"Switching overhead is {end - start}\n")
+        print(f"Switching overhead is {end - start} \n")
 
     print("Recorded %3d switches\n"% (count))
     print("Total overhead: %5.2f seconds\n"% (sum))
@@ -189,7 +190,7 @@ def p_Dobot_SwitchOverhead(port1, port2):
 '''
 Description: Test connecting to a JeVois camera device
 Parameters:
-    port: jevois device port (e.g. "COM14")
+    port: jevois device port (e.g. "COM3")
 '''
 def f_Jevois_Connectivity(port):
     try:
@@ -203,7 +204,6 @@ def f_Jevois_Connectivity(port):
 
     stop = time.time() + 5
     while (time.time() < stop):
-        time.sleep(1)
         line = ser.readline().rstrip().decode()
         tok = line.split()
         # Abort fetching if timeout or malformed line
@@ -319,9 +319,10 @@ def f_Agent_ConfigValidation(filename):
     return True
 
 ### Enable/Disable Tests ###
-#p_Dobot_FetchingOverhead("192.168.43.4", 10)
+p_Dobot_FetchingOverhead("COM5", 30)
+#p_Jevois_FetchingRate("COM4", 50)
 #p_Dobot_SwitchOverhead("192.168.43.4","192.168.43.5")
-#f_Jevois_Connectivity("COM14")
+#f_Jevois_Connectivity("COM4")
 #f_Dobot_Alarms("192.168.43.4")
 #f_Dobot_ParallelConnection(["192.168.43.4","192.168.43.5"])
 #f_Agent_ConfigValidation()

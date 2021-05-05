@@ -17,7 +17,7 @@ class Agent():
 
         self.devices = []
         self.agentName = config.get('Agent', 'AgentName', fallback="Agent0")
-        if self.agentName == '':
+        if self.agentName == "":
             self.agentName = "Agent0"
 
         try:
@@ -100,7 +100,6 @@ class Agent():
 def argumentHandler(args):
     if len(args) == 2:
         if args[1] == "-h" or args[1] == "--help":
-            # Open latest README.md documentation of project
             webbrowser.open("../README.md")
             exit(1)
         else:

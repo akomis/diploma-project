@@ -431,7 +431,7 @@ class Jevois(Device):
 
     def _connect(self):
         try:
-            self.serial = serial.Serial(self.port, 115200, timeout=1)
+            self.serial = serial.Serial(self.port, 115200, timeout=0)
             self.__prominit()
             return True
         except Exception as e:
