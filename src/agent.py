@@ -5,6 +5,7 @@ import configparser
 from threading import Thread
 from prometheus_client import start_http_server
 from device_modules import Dobot, Jevois
+import cProfile
 
 config = configparser.ConfigParser()
 
@@ -66,11 +67,14 @@ class Agent():
         for device in self.devices:
             device._disconnect()
 
-    def __fetchFrom(device):
-        while (1):
-            device._fetch()
-            time.sleep(device.timeout / 1000)
 
+    def __fetchFrom(self, device):
+        while (1):
+            start = time.time()
+            device._fetch()
+            elapsed = time.time() - start
+            print("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
+            time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
         print('Connecting to devices listed in agent.conf..')
@@ -84,12 +88,15 @@ class Agent():
         start_http_server(self.prometheusPort)
 
         try:
+            threads = []
             for device in self.devices:
-               thread = Thread(target = __fetchFrom(device))
-               thread.start()
+                threads.append(Thread(target = self.__fetchFrom, args=(device,)))
+
+            for thread in threads:
+                thread.start()
 
             print('Monitoring..')
-            while(1):
+            while (1):
                 pass
         except KeyboardInterrupt:
             print('Disconnecting devices..')
@@ -117,17 +124,16 @@ def validateConfig():
         try:
             entityClass = globals()[entityType]
 
-            if entityClass.configValidOptions is None:
+            if entityClass.configValidOptions is None or len(entityClass.configValidOptions) == 0:
                 raise Exception()
         except:
             print("[WARNING] \"" + section + "\" cannot be recognised for validation. Make sure " + entityType + "'s module exists in device_modules and that it implements the static configValidOptions list.")
             continue
 
         for option in config[section]:
-            if option not in entityClass.configValidOptions:
+            if option not in entityClass.configValidOptions and option not in entityClass.globals:
                 print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
-
-            if option not in entityClass.configIgnoreValueCheck and config[section][option] not in validValues:
+            elif option not in entityClass.configIgnoreValueCheck and config[section][option] not in validValues:
                 print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
 
 def readConfig():

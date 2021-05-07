@@ -293,9 +293,7 @@ def f_Agent_ConfigValidation(filename):
                     "slidingrailptpvelocity","slidingrailptpacceleration","wifimodulestatus","wificonnectionstatus","wifissid","wifipassword","wifiipaddress",
                     "wifinetmask","wifigateway","wifidns"],
                     "JEVOIS":["objects","objectidentified","objectlocation","objectsize"]}
-
     ignoreValueCheck = ["agentname","routineinterval","prometheusport","objects"]
-
     validValues = ["1","yes","true","on","0","no","false","off"]
 
     try:
@@ -319,7 +317,7 @@ def f_Agent_ConfigValidation(filename):
     return True
 
 ### Enable/Disable Tests ###
-p_Dobot_FetchingOverhead("COM5", 30)
+p_Dobot_FetchingOverhead("192.168.43.4", 1)
 #p_Jevois_FetchingRate("COM4", 50)
 #p_Dobot_SwitchOverhead("192.168.43.4","192.168.43.5")
 #f_Jevois_Connectivity("COM4")
