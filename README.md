@@ -144,11 +144,9 @@ The system can scale (monitoring station level) vertically as the agent can conn
 
 ## Extensibility
 The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to be a child of the Device class (found in the same file) and implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `agent.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
-The attributes that need to be implemented is the configValidOptions[] list and the configIgnoreValueCheck[] list and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
-### `configValidOptions[]`
-Includes all the valid fields/options a device can have in the configuration file (monitored attribute fields).
-### `configIgnoreValueCheck[]`
-Includes the fields that are not considered monitoring options (which enables/disables the attributes to be monitored) and shall skip the enabling/disabling value check. This list must be a subset of the configValidOptions list.
+The attributes that need to be implemented is the options dictionary and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
+### `options{}`
+A dictrionary that includes all the valid fields/options a device can have in the configuration file (monitored attribute fields) as keys and their default value (also used to validate the type of the value in the configuration file) as values.
 ### `_connect()`
 Responsible for connecting to the device, initialize the prometheus metrics and other necessary device information that is vital for the use of the other methods. If the connection attempt is unsuccessful this method should return False, otherwise it should return True.
 ### `_fetch()`

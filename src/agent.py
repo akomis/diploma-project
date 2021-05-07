@@ -10,24 +10,23 @@ import cProfile
 config = configparser.ConfigParser()
 
 class Agent():
-    configValidOptions = ["agentname","routineinterval","prometheusport"]
-    configIgnoreValueCheck = ["agentname","routineinterval","prometheusport"]
+    options = {"agentname":"Agent0","prometheusport":8000}
 
     def __init__(self):
         global config
 
         self.devices = []
-        self.agentName = config.get('Agent', 'AgentName', fallback="Agent0")
+        self.agentName = config.get("Agent", "agentname", fallback=Agent.options["agentname"])
         if self.agentName == "":
             self.agentName = "Agent0"
 
         try:
-            self.prometheusPort = config.getint('Agent', 'PrometheusPort', fallback=8000)
+            self.prometheusPort = config.getint("Agent", "prometheusport", fallback=Agent.options["prometheusport"])
             if self.prometheusPort > 65535 or self.prometheusPort < 0:
                 print(str(self.prometheusPort) + " is not a valid port")
                 raise ValueError
         except ValueError:
-            print('PrometheusPort must be a number from 0 to 65535')
+            print("PrometheusPort must be a number from 0 to 65535")
             sys.exit(5)
 
     def __connectDevices(self):
@@ -36,13 +35,13 @@ class Agent():
         # Discover through the config which devices should be monitored
         for section in config:
             # Skip the Agent and DEFAULT sections as they do not represent a device
-            if section == 'Agent' or section == 'DEFAULT':
+            if section == "Agent" or section == "DEFAULT":
                 continue
 
             try:
-                part = section.split(':')
+                part = section.split(":")
                 if (len(part) != 2):
-                    raise Exception("[ERROR] " + section + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]'")
+                    raise Exception("[ERROR] " + section + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
                 deviceType = part[0]
                 connectionPort = part[1]
 
@@ -50,7 +49,7 @@ class Agent():
                     raise Exception("[ERROR] The agent does not support " + deviceType)
             except Exception as e:
                 print(str(e))
-                print('For more information use --help')
+                print("For more information use --help")
                 continue
 
             constructor = globals()[deviceType]
@@ -77,14 +76,14 @@ class Agent():
             time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
-        print('Connecting to devices listed in agent.conf..')
+        print("Connecting to devices listed in agent.conf..")
         self.__connectDevices()
 
         if len(self.devices) == 0:
             print("No devices connected to the agent.")
             sys.exit(11)
 
-        print('Starting prometheus server at port ' + str(self.prometheusPort) + "..")
+        print("Starting prometheus server at port " + str(self.prometheusPort) + "..")
         start_http_server(self.prometheusPort)
 
         try:
@@ -95,11 +94,11 @@ class Agent():
             for thread in threads:
                 thread.start()
 
-            print('Monitoring..')
+            print("Monitoring..")
             while (1):
                 pass
         except KeyboardInterrupt:
-            print('Disconnecting devices..')
+            print("Disconnecting devices..")
             self.__disconnectDevices()
             exit(0)
 
@@ -110,52 +109,71 @@ def argumentHandler(args):
             webbrowser.open("../README.md")
             exit(1)
         else:
-            print('Unrecognised option \"' + sys.argv[1] + '\"')
-            print('For more information: $ agent.py --help')
+            print("Unrecognised option \"" + sys.argv[1] + "\"")
+            print("For more information: $ agent.py --help")
             exit(2)
 
 def validateConfig():
     global config
-    validValues = ["1","yes","true","on","0","no","false","off"]
+    validBooleanValues = ["1","yes","true","on","0","no","false","off"]
+    flag = False
 
     for section in config.sections():
-        entityType = section.split(':')[0]
+        entityType = section.split(":")[0]
 
         try:
             entityClass = globals()[entityType]
 
-            if entityClass.configValidOptions is None or len(entityClass.configValidOptions) == 0:
+            if entityClass.options is None:
                 raise Exception()
-        except:
-            print("[WARNING] \"" + section + "\" cannot be recognised for validation. Make sure " + entityType + "'s module exists in device_modules and that it implements the static configValidOptions list.")
+        except Exception as e:
+            print("[ERROR] \"" + section + "\" cannot be recognised for validation. Make sure " + entityType + "'s module exists in device_modules and that it implements the static options dictionary (" + str(e) + ")")
             continue
 
         for option in config[section]:
-            if option not in entityClass.configValidOptions and option not in entityClass.globals:
-                print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
-            elif option not in entityClass.configIgnoreValueCheck and config[section][option] not in validValues:
-                print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
+            configValue = config[section][option]
+            optionsValue = entityClass.options[option]
+
+            if option not in entityClass.options:
+                print("[ERROR] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
+                flag = True
+                continue
+
+            if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
+                print("[ERROR] Value \"" +  + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+                flag = True
+                continue
+
+            try:
+                type(optionsValue)(configValue)
+            except:
+                print("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid (must be of type " + str(type(optionsValue)) + ") and the option will be set to default (" + str(optionsValue) + ")")
+                flag = True
+                continue
+
+    if flag:
+        print("Please resolve the errors in the configuration file in order for the agent to run properly.")
+        exit(10)
 
 def readConfig():
     global config
 
     try:
-        check = config.read('agent.conf')[0]
-        if check == '':
+        check = config.read("agent.conf")[0]
+        if check == "":
             raise Exception("Couldn't find agent.conf")
 
         print("Reading agent.conf..")
-        validateConfig()
-    except:
-        print("Can't open configuration file. Make sure agent.conf is in the same directory as agent.py")
+    except Exception as e:
+        print("Can't open configuration file. Make sure agent.conf is in the same directory as agent.py (" + str(e) + ")")
         exit(3)
-
 
 def main():
     argumentHandler(sys.argv)
     readConfig()
+    validateConfig()
     agent = Agent()
     agent.startRoutine()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
