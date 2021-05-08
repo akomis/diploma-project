@@ -49,7 +49,7 @@ def p_Dobot_FetchingOverhead(port, n):
     iterations = n
     attributes = {"GetDeviceSN":[],"GetDeviceName":[],"GetDeviceVersion":[],"GetWIFISSID":[],"GetWIFIPassword":[],"GetWIFIIPAddress":[],
     "GetWIFINetmask":[],"GetWIFIGateway":[],"GetWIFIDNS":[],"GetDeviceTime":[],"GetQueuedCmdCurrentIndex":[],
-    "GetPose":[],"GetAlarmsStateX":[],"GetHOMEParams":[],"GetAutoLevelingResult":[],"GetEndEffectorParams":[],
+    "GetPose":[],"GetAlarmsStateX":[],"GetHOMEParams":[],"GetEndEffectorParams":[],
     "GetEndEffectorLaser":[],"GetEndEffectorSuctionCup":[],"GetEndEffectorGripper":[],"GetJOGJointParams":[],
     "GetJOGCoordinateParams":[],"GetJOGCommonParams":[],"GetPTPJointParams":[],"GetPTPCoordinateParams":[],
     "GetPTPCommonParams":[],"GetPTPJumpParams":[],"GetCPParams":[],"GetARCParams":[],"GetAngleSensorStaticError":[],
@@ -71,7 +71,6 @@ def p_Dobot_FetchingOverhead(port, n):
         attributes["GetPose"].append(_execute(dTypeX.GetPose, dobot))
         attributes["GetAlarmsStateX"].append(_execute(dTypeX.GetAlarmsStateX, dobot))
         attributes["GetHOMEParams"].append(_execute(dTypeX.GetHOMEParams, dobot))
-        attributes["GetAutoLevelingResult"].append(_execute(dTypeX.GetAutoLevelingResult, dobot))
         attributes["GetEndEffectorParams"].append(_execute(dTypeX.GetEndEffectorParams, dobot))
         attributes["GetEndEffectorLaser"].append(_execute(dTypeX.GetEndEffectorLaser, dobot))
         attributes["GetEndEffectorSuctionCup"].append(_execute(dTypeX.GetEndEffectorSuctionCup, dobot))
@@ -223,17 +222,17 @@ Parameters:
     port: dobot device port (e.g. "COM4" / "192.168.43.4")
 '''
 def f_Dobot_Alarms(port):
-    dobot0, state1 = dTypeX.ConnectDobotX(port)
+    dobot, state = dTypeX.ConnectDobotX(port)
 
-    if state1[0] != dTypeX.DobotConnect.DobotConnect_NoError:
+    if state[0] != dTypeX.DobotConnect.DobotConnect_NoError:
         return False
 
-    print(port + "\'s name: " + str(dTypeX.GetDeviceName(dobot0)[0]))
+    print(port + "\'s name: " + str(dTypeX.GetDeviceName(dobot)[0]))
 
     stop = time.time() + 60
     while (time.time() < stop):
         print(time.time + "Active alarms:")
-        for a in dTypeX.GetAlarmsStateX(dobot0):
+        for a in dTypeX.GetAlarmsStateX(dobot):
             print(a)
         time.sleep(0.2)
 
@@ -268,59 +267,10 @@ def f_Dobot_ParallelConnection(portList):
     dTypeX.DisconnectAll()
     return True
 
-'''
-Description: Test that the validation of the configuration in agent.conf
-works as expected (manual review)
-Parameters:
-    filename: filename of config file (must be in current dir)
-'''
-def f_Agent_ConfigValidation(filename):
-    config = configparser.ConfigParser()
-    config.read(filename)
-
-    validOptions = {"AGENT":["agentname","routineinterval","prometheusport"],
-                    "DOBOT":["devicesn","devicename","deviceversion","devicetime","queueindex",
-                    "posex","posey","posez","poser","anglebase","anglereararm","angleforearm",
-                    "angleendeffector","alarmsstate","homex","homey","homez","homer","autolevelingresult",
-                    "endeffectorx","endeffectory","endeffectorz","laserstatus","suctioncupstatus","gripperstatus","jogbasevelocity",
-                    "jogreararmvelocity","jogforearmvelocity","jogendeffectorvelocity","jogbaseacceleration","jogreararmacceleration",
-                    "jogforearmacceleration","jogendeffectoracceleration","jogaxisxvelocity","jogaxisyvelocity","jogaxiszvelocity","jogaxisrvelocity","jogaxisxacceleration",
-                    "jogaxisyacceleration","jogaxiszacceleration","jogaxisracceleration","jogvelocityratio","jogaccelerationratio","ptpbasevelocity","ptpreararmvelocity",
-                    "ptpforearmvelocity","ptpendeffectorvelocity","ptpbaseacceleration","ptpreararmacceleration","ptpforearmacceleration","ptpendeffectoracceleration","ptpaxisxyzvelocity",
-                    "ptpaxisrvelocity","ptpaxisxyzacceleration","ptpaxisracceleration","ptpvelocityratio","ptpaccelerationratio","liftingheight","heightlimit",
-                    "cpvelocity","cpacceleration","arcxyzvelocity","arcrvelocity","arcxyzacceleration","arcracceleration","anglestaticerrrear",
-                    "anglestaticerrfront","anglecoefrear","anglecoeffront","slidingrailstatus","slidingrailpose","slidingrailjogvelocity","slidingrailjogacceleration",
-                    "slidingrailptpvelocity","slidingrailptpacceleration","wifimodulestatus","wificonnectionstatus","wifissid","wifipassword","wifiipaddress",
-                    "wifinetmask","wifigateway","wifidns"],
-                    "JEVOIS":["objects","objectidentified","objectlocation","objectsize"]}
-    ignoreValueCheck = ["agentname","routineinterval","prometheusport","objects"]
-    validValues = ["1","yes","true","on","0","no","false","off"]
-
-    try:
-        for section in config.sections():
-            sectionType = section.split(':')[0]
-
-            if sectionType not in validOptions.keys():
-                print("[WARNING] \"" + section + "\" cannot be recognised for validation.")
-                continue
-
-            for option in config[section]:
-                if option not in validOptions[sectionType]:
-                    print("[WARNING] \"" + option + "\" is not a valid option for section \"" + section + "\" and will be ignored.")
-
-                if option not in ignoreValueCheck and config[section][option] not in validValues:
-                    print("[WARNING] Value \"" + config[section][option] + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid and the option will be set to default")
-    except Exception as e:
-        print(str(e))
-        return False
-
-    return True
-
 ### Enable/Disable Tests ###
-p_Dobot_FetchingOverhead("192.168.43.4", 1)
+#p_Dobot_FetchingOverhead("192.168.43.4", 30)
 #p_Jevois_FetchingRate("COM4", 50)
 #p_Dobot_SwitchOverhead("192.168.43.4","192.168.43.5")
 #f_Jevois_Connectivity("COM4")
 #f_Dobot_Alarms("192.168.43.4")
 #f_Dobot_ParallelConnection(["192.168.43.4","192.168.43.5"])
-#f_Agent_ConfigValidation()

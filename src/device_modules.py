@@ -3,7 +3,7 @@ import runtime.DobotDllTypeX as dTypeX
 import serial
 
 class Device():
-    options = {"timeout":100}
+    options = {"timeout":100} # Default device options/attributes
 
     def __init__(self, config, port):
         self.port = port
@@ -46,7 +46,6 @@ class Dobot(Device):
     "slidingrailptpvelocity":False,"slidingrailptpacceleration":False,"wifimodulestatus":False,
     "wificonnectionstatus":False,"wifissid":False,"wifipassword":False,"wifiipaddress":False,
     "wifinetmask":False,"wifigateway":False,"wifidns":False}
-    options.update(Device.options)
 
     deviceInfo = Info("dobot_magician", "General information about monitored Dobot Magician device", ["device"])
     wifiInfo = Info("wifi_info", "Information regarding the device\"s wifi connection", ["device"])
@@ -422,7 +421,6 @@ class Dobot(Device):
 
 class Jevois(Device):
     options = {"objects":"","objectidentified":True,"objectlocation":True,"objectsize":False}
-    options.update(Device.options)
 
     objectLocationX = Gauge("object_location_x", "Identified object\"s x position", ["device"])
     objectLocationY = Gauge("object_location_y", "Identified object\"s y position", ["device"])

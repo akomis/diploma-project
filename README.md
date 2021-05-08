@@ -5,7 +5,7 @@
 </div>
 
 ## Overview
-A monitoring system that collects data from devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Sliding Rail](https://www.dobot.cc/products/sliding-rail-kit-overview.html) and [JeVois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics, which is natively compatible with [Grafana](https://grafana.com/) to visualize them and provide insight.  
+A monitoring system that collects data from devices such as the [Dobot Magician](https://www.dobot.cc/dobot-magician/product-overview.html), [Sliding Rail](https://www.dobot.cc/products/sliding-rail-kit-overview.html) and [JeVois Camera](http://www.jevois.org/) that are used in an industrial setting and monitors them. Using [Prometheus](https://prometheus.io/) for monitoring device metrics. By using a visualization software compatible with Prometheus such as [Grafana](https://grafana.com/) to visualize the metrics and provide insight.  
 The goal of this system is to be a cost-effective, modular and extensible solution at monitoring such devices. This project aims at doing that while being efficient, without interfering with the normal operations of the devices, and be highly scalable in terms of the number of devices that can be monitored as well as the number of different types of devices it supports. Also provide high monitoring flexibility through a plethora of configuration options for the monitoring agent and what device attributes to be extracted and monitored, configured individually for each device.
 <br><br>
 
@@ -13,7 +13,6 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 - [Python 3.9+](https://www.python.org/downloads/windows/)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/)
-- [Grafana](https://grafana.com/get)
 <br><br>
 
 ## Installation
@@ -23,7 +22,7 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 ## Configuration
 Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
 For changing the agent's settings you can change the values under the `[Agent]` section.  
-In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi. You can connect multiple devices through various ports (serial port/IP address).  
+In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN). You can connect multiple devices through various ports (serial port/IP address).  
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in the same format as the class name representing the device module.  
 For custom device modules/classes in the device_modules.py e.g. `DeviceType` a `[DeviceType:<port>]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
@@ -144,9 +143,9 @@ The system can scale (monitoring station level) vertically as the agent can conn
 
 ## Extensibility
 The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to be a child of the Device class (found in the same file) and implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `agent.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
-The attributes that need to be implemented is the options dictionary and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
+The attributes that need to be implemented is the options{} dictionary and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
 ### `options{}`
-A dictrionary that includes all the valid fields/options a device can have in the configuration file (monitored attribute fields) as keys and their default value (also used to validate the type of the value in the configuration file) as values.
+A dictionary that includes all the valid fields/options a device can have in the configuration file (monitored attribute fields) as keys and their default value (also used to validate the type of the value in the configuration file) as values.
 ### `_connect()`
 Responsible for connecting to the device, initialize the prometheus metrics and other necessary device information that is vital for the use of the other methods. If the connection attempt is unsuccessful this method should return False, otherwise it should return True.
 ### `_fetch()`
@@ -192,7 +191,7 @@ for a in dTypeX.GetAlarmsStateX(dobot0):
 ### Additions
 * `GetActiveDobots()` function that returns the amount of currently connected Dobot Magicians  
 * `DisconnectAll()` function to disconnect from all connected Dobot Magician devices and clean up any runtime files  
-Both additions were due to the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
+Both additions were due to the addition of the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
 <br><br>
 
 ## Resources
@@ -200,5 +199,4 @@ Both additions were due to the `ConnectDobotX(port)` function and their purpose 
 - [Dobot ALARM](http://www.dobot.it/wp-content/uploads/2018/03/dobot-magician-alarm-en.pdf)
 - [JeVois: Standardized serial messages formatting](http://jevois.org/doc/UserSerialStyle.html)
 - [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
-- [Grafana Documentation](https://grafana.com/docs/)
 <br><br>
