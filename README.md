@@ -12,7 +12,7 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 ## Dependencies
 - [Python 3.9+](https://www.python.org/downloads/windows/)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
-- [Prometheus Monitoring System](https://prometheus.io/download/#prometheus)
+- [Prometheus](https://prometheus.io/download/#prometheus)
 - [prometheus-client](https://pypi.org/project/prometheus-client/)
 <br><br>
 
