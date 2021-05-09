@@ -12,11 +12,16 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 ## Dependencies
 - [Python 3.9+](https://www.python.org/downloads/windows/)
 - [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
-- [Prometheus](https://prometheus.io/download/)
+- [Prometheus Monitoring System](https://prometheus.io/download/#prometheus)
+- [prometheus-client](https://pypi.org/project/prometheus-client/)
 <br><br>
 
 ## Installation
-`git clone https://github.com/akomis/diploma-project.git`
+- Install Python 3.9+
+- Install Magician Studio (which includes the Dobot Robot Driver)
+- Install Prometheus Monitoring System
+- `pip3 install prometheus-client`
+- `git clone https://github.com/akomis/diploma-project.git`
 <br><br>
 
 ## Configuration
