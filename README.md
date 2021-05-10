@@ -40,6 +40,7 @@ For more details on the configuration settings for the Agent, Dobot Magician and
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
 |    AgentName    |                  Symbolic name for agent                  |  str |  Agent0 |
 |  PrometheusPort |                Port for Prometheus endpoint               |  int |   8000  |
+|     Verbose     |            Print actions and fetch times in stdout        | bool |   off   |
 
 ### Dobot
 |         Config Name        |                                          Description                                          | Prometheus Type |     Default     |            API Call            |
