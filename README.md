@@ -25,7 +25,7 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 <br><br>
 
 ## Configuration
-Choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
+Choose which devices and which data/attributes of those will be monitored by changing the `devices.conf` file.  
 For monitoring a device the corresponding class in device_modules.py must exist. For the agent to discover the device and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section), a device entry must exist in the configuration file e.g. `class DeviceType` a `[DeviceType:<port>]`. One can connect multiple devices through various ports (serial port/IP address).  
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN).
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
@@ -128,17 +128,17 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 |  ObjectLocation  | Identified object's location | gauge(s) (float) |      Normal      |    on   |
 |    ObjectSize    |   Identified object's size   |   gauge (float)  |      Normal      |   off   |
 
-For a more practical insight check the default `agent.conf` included.
+For a more practical insight check the default `devices.conf` included.
 <br><br>
 
 ## Usage
-When using the default configuration file location, make sure that `agent.conf` is properly setup and in the same directory as the executable.  
+When using the default configuration file location, make sure that `devices.conf` is properly setup and in the same directory as the executable.  
 ```
 $ agent.py [-h] [-c CONFIG] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
 
 Optional arguments:
   -h, --help                        show this help message and exit
-  -c CONFIG, --config CONFIG        specify configuration file path (default: "agent.conf")
+  -c CONFIG, --config CONFIG        specify configuration file path (default: "devices.conf")
   -n NAME, --name NAME              specify symbolic agent/station name used for seperation/grouping of stations (default: "Agent0")
   -p PROMPORT, --promport PROMPORT  specify port number for the Prometheus endpoint (default: 8000)
   -k, --killswitch                  exit agent if at least 1 error exists in configuration file
@@ -152,7 +152,7 @@ The system can scale (monitoring station level) vertically as the agent can conn
 <br><br>
 
 ## Extensibility
-The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to be a child of the Device class (found in the same file) and implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `agent.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
+The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to be a child of the Device class (found in the same file) and implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
 The attributes that need to be implemented is the options{} dictionary and the methods are the _connect(), _fetch() and _disconnect() methods. More specifically
 ### `options{}`
 A dictionary that includes all the valid fields/options a device can have in the configuration file (monitored attribute fields) as keys and their default value (also used to validate the type of the value in the configuration file) as values.

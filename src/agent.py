@@ -7,41 +7,64 @@ from threading import Thread
 from prometheus_client import start_http_server
 from device_modules import *
 
+class termcolors:
+    B = "\033[1m"
+    U = "\033[4m"
+    OK = "\033[92m"
+    INFO = "\033[94m"
+    HEADER = "\033[95m"
+    WARNING = "\033[93m"
+    ERROR = "\033[91m"
+    END = "\033[0m"
+
+
 class Agent():
-    def __init__(self, configFileName, name, prometheusPort, killSwitch, verbose):
+    def __init__(self, devicesFilename, name, prometheusPort, killSwitch, verbose):
         self.config = configparser.ConfigParser()
         self.name = name
         self.prometheusPort = prometheusPort
         self.verbose = verbose
         self.killSwitch = killSwitch
-        self.__readConfig(configFileName)
+        self.__readConfig(devicesFilename)
         self.validSections = self.__validateConfig()
         self.devices = []
 
-    def agentPrint(self, s, isError=False):
-        if isError:
-            print(self.name + " (" + time.ctime() + "): [ERROR] " + s, file=sys.stderr)
+    def agentPrint(self, s, type=""):
+        prefix = self.name + " (" + time.ctime() + "): "
+        body = s + termcolors.END
+
+        if type == "i":
+            print(prefix + termcolors.INFO +  "[INFO] " + body)
+        elif type == "o":
+            print(prefix + termcolors.OK + "[OK] " + body)
+        elif type == "w":
+            print(prefix + termcolors.WARNING + "[WARNING] " + body)
+        elif type == "e":
+            print(prefix + termcolors.ERROR + "[ERROR] " + body, file=sys.stderr)
+        elif type == "f":
+            print(prefix + termcolors.ERROR + "[" + termcolors.U + "FATAL" + termcolors.END + termcolors.ERROR + "] " + body, file=sys.stderr)
         else:
-            print(self.name + " (" + time.ctime() + "): " + s)
+            print(prefix + s)
 
     def __readConfig(self, filename):
         try:
-            check = self.config.read(filename)[0]
-            if check == "":
+            check = self.config.read(filename)
+
+            if len(check) == 0:
                 raise Exception("Couldn't find \"" + filename + "\"")
 
-            self.agentPrint("Reading configuration file..")
+            self.agentPrint("Reading configuration file..", type="i")
         except Exception as e:
-            self.agentPrint("Can't read configuration file \"" + filename + "\" (" + str(e) + ")", isError=True)
+            self.agentPrint("Can't read configuration file \"" + filename + "\" (" + str(e) + ")", type="e")
             exit(3)
 
     def __validateConfig(self):
-        self.agentPrint("Validating configuration file..")
+        self.agentPrint("Validating configuration file..", type="i")
 
         validBooleanValues = ["1","yes","true","on","0","no","false","off"]
         validSections = {}
 
-        # Check configuration validity for the defined (for monitoring) devices
+        # Check configuration validity for each defined devices
         flag = False
         for sectionName in self.config.sections():
             try:
@@ -63,17 +86,17 @@ class Agent():
                     raise Exception("Cannot validate \"" + deviceType + "\". Make sure the options{} dictionary is implemented.")
             except Exception as e:
                 flag = True
-                self.agentPrint(str(e), isError=True)
-                self.agentPrint("[WARNING] \"" + sectionName + "\" device will not be monitored.")
+                self.agentPrint(str(e), type="e")
+                self.agentPrint("\"" + sectionName + "\" device will not be monitored.", type="w")
                 continue
 
-            errorCount = 0
+            # Check if device fields in configuration are valid (supported by module)
             options = {}
             options.update(entityClass.options)
             options.update(Device.options)
+            errorCount = 0
             for option in section:
                 try:
-                    # Check if key is valid (supported by module)
                     if option not in options:
                         raise Exception("\"" + option + "\" is not a valid option for section \"" + sectionName + "\".")
 
@@ -91,25 +114,25 @@ class Agent():
                 except Exception as e:
                     flag = True
                     errorCount += 1
-                    self.agentPrint(str(e), isError=True)
+                    self.agentPrint(str(e), type="e")
 
             if errorCount > 0:
-                self.agentPrint("[WARNING] " + str(errorCount) + " error(s) in \"" + sectionName + "\" section. The device will not be monitored. Please resolve the errors in order for this device to be monitored.")
+                self.agentPrint(str(errorCount) + " error(s) in \"" + sectionName + "\" section. The device will not be monitored. Please resolve the errors in order for this device to be monitored.", type="w")
             else:
                 try:
                     device = entityClass(section, connectionPort)
                 except:
                     flag = True
-                    self.agentPrint("\"" + deviceType +"\" device module does not properly implement the Device interface", isError=True)
-                    self.agentPrint("[WARNING] \"" + sectionName + "\" device will not be monitored.")
+                    self.agentPrint("\"" + deviceType +"\" device module does not properly implement the Device interface", type="e")
+                    self.agentPrint("\"" + sectionName + "\" device will not be monitored.", type="w")
                     continue
 
                 validSections[sectionName] = device
 
         if flag:
-            print("For more information use --help.")
+            self.agentPrint("For more information use --more.", type="i")
             if self.killSwitch:
-                self.agentPrint("Killswitch is enabled. Exiting..")
+                self.agentPrint("Killswitch is enabled. Exiting..", type="f")
                 exit(6)
 
         return validSections
@@ -117,20 +140,31 @@ class Agent():
     def __connectDevices(self):
         # Discover through the validated config which devices should be monitored
         for sectionName in self.validSections:
+            start = None
             device = self.validSections[sectionName]
+
+            if self.verbose:
+                start = time.time()
+                self.agentPrint("Connecting to " + device.id + "..", type="i")
+
             if device._connect():
+                elapsed = time.time() - start
+
                 self.devices.append(device)
-                self.agentPrint("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
+                if self.verbose:
+                    self.agentPrint("Device " + device.type + " at " + device.port + " connected succesfully! (" + str(round(elapsed*1000)) + "ms)", type="o")
+                else:
+                    self.agentPrint("Device " + device.type + " at " + device.port + " connected succesfully!", type="o")
             else:
-                self.agentPrint(deviceType + " at port " + connectionPort + " cannot be connected.", isError=True)
-                self.agentPrint("[WARNING] Device " + deviceType + " at " + connectionPort + " will not be monitored.")
+                self.agentPrint(device.type + " at " + device.port + " cannot be connected.", type="e")
+                self.agentPrint("Device " + device.type + " at " + device.port + " will not be monitored.", type="w")
 
     def __disconnectDevices(self):
         for device in self.devices:
             device._disconnect()
 
             if self.verbose:
-                self.agentPrint("Disconnected device " + device.id)
+                self.agentPrint("Disconnected device " + device.id, type="o")
 
     def __fetchFrom(self, device):
         while 1:
@@ -138,37 +172,36 @@ class Agent():
                 start = time.time()
                 device._fetch(fetchedBy = self.name)
                 elapsed = time.time() - start
-                self.agentPrint("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
+                self.agentPrint("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms", type="o")
             else:
                 device._fetch(fetchedBy = self.name)
 
             time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
-        self.agentPrint("Connecting to devices listed in agent.conf..")
+        self.agentPrint("Connecting to devices listed in devices.conf..", type="i")
         self.__connectDevices()
 
         if len(self.devices) == 0:
-            print("No devices connected to the agent.")
-            print("Exiting..")
+            self.agentPrint("No devices connected to the agent. Exiting..", type="f")
             sys.exit(11)
 
-        self.agentPrint("Starting prometheus server at port " + str(self.prometheusPort) + "..")
+        self.agentPrint("Starting prometheus server at port " + str(self.prometheusPort) + "..", type="i")
         start_http_server(self.prometheusPort)
 
         try:
             for device in self.devices:
                 Thread(target = self.__fetchFrom, args=(device,)).start()
                 if self.verbose:
-                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
+                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes", type="o")
 
             if not self.verbose:
-                self.agentPrint("Monitoring.. ")
+                self.agentPrint("Monitoring.. ", type="i")
 
             while 1:
                 pass
         except KeyboardInterrupt:
-            self.agentPrint("Disconnecting devices..")
+            self.agentPrint("Disconnecting devices..", type="i")
             self.__disconnectDevices()
             exit(0)
 
@@ -185,7 +218,7 @@ def isPort(value):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--config", default="agent.conf", help="specify configuration file path (default: \".\\agent.conf\")")
+    parser.add_argument("-d", "--devices", default="devices.conf", help="specify discovery/configuration file absolute path (default: \".\\devices.conf\")")
     parser.add_argument("-n", "--name", default="Agent0", help="specify symbolic agent/station name used for seperation/grouping of stations (default: \"Agent0\")")
     parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for the Prometheus endpoint (default: 8000)")
     parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if at least 1 error exists in configuration file")
@@ -194,9 +227,9 @@ def main():
     args = parser.parse_args()
 
     if args.more:
-        webbrowser.open("../README.md")
+        webbrowser.open("..\README.md")
 
-    Agent(args.config, args.name, args.promport, args.killswitch, args.verbose).startRoutine()
+    Agent(args.devices, args.name, args.promport, args.killswitch, args.verbose).startRoutine()
 
 if __name__ == "__main__":
     main()
