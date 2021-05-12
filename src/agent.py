@@ -9,7 +9,8 @@ from device_modules import *
 class Agent():
     options = {"agentname":"Agent0","prometheusport":8000,"verbose":False}
 
-    def __init__(self):
+    def __init__(self, ks):
+        self.killSwitch = ks
         self.config = configparser.ConfigParser()
         self.__readConfig()
         self.validSections = self.__validateConfig()
@@ -45,27 +46,34 @@ class Agent():
         validBooleanValues = ["1","yes","true","on","0","no","false","off"]
         validSections = {}
 
-        # Check Agent section first and seperately from device sections
+        # Check Agent section's validity first and seperately from device sections
         try:
             if "Agent" not in self.config.sections():
-                raise Exception("[ERROR] Missing mandatory \"Agent\" section in \"agent.conf\"")
+                raise Exception("Missing mandatory \"Agent\" section in \"agent.conf\"")
 
             for option in self.config["Agent"]:
                 if option not in Agent.options:
-                    raise Exception("[ERROR] Agent does not support the \"" + option + "\" option")
+                    raise Exception("Agent does not support the \"" + option + "\" option")
 
                 configValue = self.config["Agent"][option]
                 optionsValue = Agent.options[option]
 
                 if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
-                    raise Exception("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"Agent\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+                    raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"Agent\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+
+                try:
+                    type(optionsValue)(configValue)
+                except:
+                    raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"Agent\" is not valid (must be of type " + str(type(optionsValue).__name__) + ").")
 
                 type(optionsValue)(configValue)
         except Exception as e:
-            print(str(e))
+            print("[ERROR] " + str(e), file=sys.stderr)
             print("Exiting..")
             exit(4)
 
+        # Check configuration validity for the monitored devices
+        flag = False
         deviceSections = self.config.sections()
         deviceSections.remove("Agent")
         for sectionName in deviceSections:
@@ -73,22 +81,23 @@ class Agent():
                 part = sectionName.split(":")
 
                 if len(part) != 2:
-                    raise Exception("[ERROR] " + sectionName + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
+                    raise Exception(sectionName + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
 
                 deviceType = part[0]
                 connectionPort = part[1]
 
                 if deviceType not in globals():
-                    raise Exception("[ERROR] The agent does not support the \"" + deviceType + "\" device type. Make sure the appropriate device module exists in device_module.py (case-sensitive)")
+                    raise Exception("The agent does not support the \"" + deviceType + "\" device type. Make sure the appropriate device module exists in device_module.py (case-sensitive)")
 
                 section = self.config[sectionName]
                 entityClass = globals()[deviceType]
-                device = entityClass(section, connectionPort)
 
                 if entityClass.options == Device.options or len(entityClass.options) == 0:
-                    raise Exception("[ERROR] Cannot validate \"" + deviceType + "\". Make sure the options{} dictionary is implemented.")
+                    raise Exception("Cannot validate \"" + deviceType + "\". Make sure the options{} dictionary is implemented.")
             except Exception as e:
-                print(str(e) + ". " + sectionName + " entry will be ignored. For more information use --help.")
+                flag = True
+                print("[ERROR] " + str(e), file=sys.stderr)
+                print("[WARNING] \"" + sectionName + "\" device will not be monitored.")
                 continue
 
             errorCount = 0
@@ -96,32 +105,45 @@ class Agent():
             options.update(entityClass.options)
             options.update(Device.options)
             for option in section:
-                # Check if key is valid (supported by module)
-                if option not in options:
-                    print("[ERROR] \"" + option + "\" is not a valid option for section \"" + sectionName + "\".")
-                    errorCount += 1
-                    continue
-
-                configValue = section[option]
-                optionsValue = options[option]
-
-                # Check if value type is correct
-                if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
-                    print("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
-                    errorCount += 1
-                    continue
-
                 try:
-                    type(optionsValue)(configValue)
-                except:
-                    print("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be of type " + str(type(optionsValue).__name__) + ").")
+                    # Check if key is valid (supported by module)
+                    if option not in options:
+                        raise Exception(option + "\" is not a valid option for section \"" + sectionName + "\".")
+
+                    configValue = section[option]
+                    optionsValue = options[option]
+
+                    # Check if value type is correct
+                    if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
+                        raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+
+                    try:
+                        type(optionsValue)(configValue)
+                    except:
+                        raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be of type " + str(type(optionsValue).__name__) + ").")
+                except Exception as e:
+                    flag = True
                     errorCount += 1
-                    continue
+                    print("[ERROR] " + str(e), file=sys.stderr)
 
             if errorCount > 0:
-                print(str(errorCount) + " errors in " + sectionName + ". Please resolve the errors in order for " + sectionName + " to be monitored.")
+                print("[WARNING] " + str(errorCount) + " error(s) in \"" + sectionName + "\" section. The device will not be monitored. Please resolve the errors in order for " + sectionName + " to be monitored.")
             else:
+                try:
+                    device = entityClass(section, connectionPort)
+                except:
+                    flag = True
+                    print("[ERROR] \"" + deviceType +"\" device module does not properly implement the Device interface", file=sys.stderr)
+                    print("[WARNING] \"" + sectionName + "\" device will not be monitored.")
+                    continue
+
                 validSections[sectionName] = device
+
+        if flag:
+            print("For more information use --help.")
+            if self.killSwitch:
+                print("Killswitch enabled. Exiting..")
+                exit(6)
 
         return validSections
 
@@ -133,7 +155,7 @@ class Agent():
                 self.devices.append(device)
                 print("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
             else:
-                print("[ERROR] " + deviceType + " at port " + connectionPort + " cannot be connected.")
+                sys.stderr.write("[ERROR] " + deviceType + " at port " + connectionPort + " cannot be connected.")
                 print("[WARNING] Device " + deviceType + " at " + connectionPort + " will not be monitored.")
 
     def __disconnectDevices(self):
@@ -173,7 +195,7 @@ class Agent():
                 if self.verbose:
                     print("[" + self.agentName + "] Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
 
-            if !self.verbose:
+            if not self.verbose:
                 print("[" + self.agentName + "] Monitoring.. ")
 
             while 1:
@@ -184,19 +206,28 @@ class Agent():
             exit(0)
 
 
-def argumentHandler(args):
-    if len(args) == 2:
-        if args[1] == "-h" or args[1] == "--help":
-            webbrowser.open("../README.md")
-            exit(1)
-        else:
-            print("Unrecognised option \"" + sys.argv[1] + "\"")
-            print("For more information: $ agent.py --help")
-            exit(2)
+def agentInit(args):
+    try:
+        if len(args) > 2:
+            raise Exception("Too many arguments")
+        elif len(args) == 2:
+            if args[1] == "-h" or args[1] == "--help":
+                webbrowser.open("../README.md")
+                exit(1)
+            elif args[1] == "-k" or args[1] == "--killswitch":
+                return Agent(True)
+            else:
+                raise Exception("Unrecognised option \"" + sys.argv[1] + "\"")
+    except Exception as e:
+        print(str(e))
+        print("For more information: $ agent.py --help")
+        exit(2)
+
+    return Agent(False)
 
 def main():
-    argumentHandler(sys.argv)
-    Agent().startRoutine()
+    agent = agentInit(sys.argv)
+    agent.startRoutine()
 
 if __name__ == "__main__":
     main()

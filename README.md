@@ -40,7 +40,7 @@ For more details on the configuration settings for the Agent, Dobot Magician and
 |:---------------:|:---------------------------------------------------------:|:----:|:-------:|
 |    AgentName    |                  Symbolic name for agent                  |  str |  Agent0 |
 |  PrometheusPort |                Port for Prometheus endpoint               |  int |   8000  |
-|     Verbose     |            Print actions and fetch times in stdout        | bool |   off   |
+|     Verbose     |             Print actions with details in stdout          | bool |   off   |
 
 ### Dobot
 |         Config Name        |                                          Description                                          | Prometheus Type |     Default     |            API Call            |
@@ -140,7 +140,9 @@ For a more practical insight check the default `agent.conf` included.
 
 ## Usage
 Make sure that `agent.conf` is properly setup and in the same directory as the executable.  
-`$ python3 agent.py`
+`$ python3 agent.py [-k|--killswitch|-h|--help]`  
+`-k / --killswitch : Exit agent if error(s) exist in agent.conf`  
+`-h / --help : Displays this (README.md)`  
 <br><br>
 
 ## Scalability

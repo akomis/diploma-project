@@ -27,7 +27,6 @@ class Device(ABC):
     def _disconnect(self):
         pass
 
-
 class Dobot(Device):
     options = {"devicesn":True,"devicename":True,"deviceversion":True,"devicetime":False,"queueindex":False,
     "posex":True,"posey":True,"posez":True,"poser":True,"anglebase":True,"anglereararm":True,"angleforearm":True,
