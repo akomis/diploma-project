@@ -10,7 +10,7 @@ class Device(ABC):
         self.section = config_section
         self.type = type(self).__name__
         self.port = port
-        self.id = self.name + ":" + self.port
+        self.id = self.type + ":" + self.port
 
         self.timeout = self.section.getint("timeout", fallback=Device.options["timeout"])
         if (self.timeout < 100):
