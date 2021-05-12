@@ -132,7 +132,7 @@ For a more practical insight check the default `agent.conf` included.
 <br><br>
 
 ## Usage
-Make sure that `agent.conf` is properly setup and in the same directory as the executable.  
+When using the default configuration file location, make sure that `agent.conf` is properly setup and in the same directory as the executable.  
 ```
 $ agent.py [-h] [-c CONFIG] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
 
