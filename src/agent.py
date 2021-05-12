@@ -12,7 +12,7 @@ class Agent():
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.__readConfig()
-        self.__validateConfig()
+        self.validSections = self.__validateConfig()
 
         self.devices = []
         self.agentName = self.config.get("Agent", "agentname", fallback=Agent.options["agentname"])
@@ -38,79 +38,97 @@ class Agent():
 
             print("Reading agent.conf..")
         except Exception as e:
-            print("Can't open configuration file. Make sure agent.conf is in the same directory as agent.py (" + str(e) + ")")
+            print("Can't read configuration file. Make sure agent.conf is in the same directory as agent.py (error: " + str(e) + ")")
             exit(3)
 
     def __validateConfig(self):
         validBooleanValues = ["1","yes","true","on","0","no","false","off"]
-        errorCount = 0
+        validSections = {}
 
-        for section in self.config.sections():
-            entityType = section.split(":")[0]
+        # Check Agent section first and seperately from device sections
+        try:
+            if "Agent" not in self.config.sections():
+                raise Exception("[ERROR] Missing mandatory \"Agent\" section in \"agent.conf\"")
 
+            for option in self.config["Agent"]:
+                if option not in Agent.options:
+                    raise Exception("[ERROR] Agent does not support the \"" + option + "\" option")
+
+                configValue = self.config["Agent"][option]
+                optionsValue = Agent.options[option]
+
+                if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
+                    raise Exception("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"Agent\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+
+                type(optionsValue)(configValue)
+        except Exception as e:
+            print(str(e))
+            print("Exiting..")
+            exit(4)
+
+        deviceSections = self.config.sections()
+        deviceSections.remove("Agent")
+        for sectionName in deviceSections:
             try:
-                entityClass = globals()[entityType]
+                part = sectionName.split(":")
+
+                if len(part) != 2:
+                    raise Exception("[ERROR] " + sectionName + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
+
+                deviceType = part[0]
+                connectionPort = part[1]
+
+                if deviceType not in globals():
+                    raise Exception("[ERROR] The agent does not support the \"" + deviceType + "\" device type. Make sure the appropriate device module exists in device_module.py (case-sensitive)")
+
+                section = self.config[sectionName]
+                entityClass = globals()[deviceType]
+                device = entityClass(section, connectionPort)
+
                 if entityClass.options == Device.options or len(entityClass.options) == 0:
-                    raise Exception()
+                    raise Exception("[ERROR] Cannot validate \"" + deviceType + "\". Make sure the options{} dictionary is implemented.")
             except Exception as e:
-                print("[ERROR] \"" + section + "\" cannot be recognised for validation. Make sure " + entityType + "'s module exists in device_modules and that it implements the static options dictionary")
+                print(str(e) + ". " + sectionName + " entry will be ignored. For more information use --help.")
                 continue
 
+            errorCount = 0
             options = {}
             options.update(entityClass.options)
             options.update(Device.options)
-            for option in self.config[section]:
+            for option in section:
+                # Check if key is valid (supported by module)
                 if option not in options:
-                    print("[ERROR] \"" + option + "\" is not a valid option for section \"" + section + "\".")
+                    print("[ERROR] \"" + option + "\" is not a valid option for section \"" + sectionName + "\".")
                     errorCount += 1
                     continue
 
-                configValue = self.config[section][option]
+                configValue = section[option]
                 optionsValue = options[option]
 
+                # Check if value type is correct
                 if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
-                    print("[ERROR] Value \"" +  + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+                    print("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
                     errorCount += 1
                     continue
 
                 try:
                     type(optionsValue)(configValue)
                 except:
-                    print("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + section +"\" is not valid (must be of type " + str(type(optionsValue).__name__) + ").")
+                    print("[ERROR] Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be of type " + str(type(optionsValue).__name__) + ").")
                     errorCount += 1
                     continue
 
-        if errorCount > 0:
-            print(str(errorCount) + " errors in agent.conf")
-            print("Please resolve the errors in the configuration file in order for the agent to run properly.")
-            exit(10)
+            if errorCount > 0:
+                print(str(errorCount) + " errors in " + sectionName + ". Please resolve the errors in order for " + sectionName + " to be monitored.")
+            else:
+                validSections[sectionName] = device
+
+        return validSections
 
     def __connectDevices(self):
-        global config
-
-        # Discover through the config which devices should be monitored
-        for section in self.config:
-            # Skip the Agent and DEFAULT sections as they do not represent a device
-            if section == "Agent" or section == "DEFAULT":
-                continue
-
-            try:
-                part = section.split(":")
-                if (len(part) != 2):
-                    raise Exception("[ERROR] " + section + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
-                deviceType = part[0]
-                connectionPort = part[1]
-
-                if deviceType not in globals():
-                    raise Exception("[ERROR] The agent does not support " + deviceType)
-            except Exception as e:
-                print(str(e))
-                print("For more information use --help")
-                continue
-
-            constructor = globals()[deviceType]
-            device = constructor(self.config, connectionPort)
-
+        # Discover through the validated config which devices should be monitored
+        for sectionName in self.validSections:
+            device = self.validSections[sectionName]
             if device._connect():
                 self.devices.append(device)
                 print("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
@@ -122,15 +140,18 @@ class Agent():
         for device in self.devices:
             device._disconnect()
 
+            if self.verbose:
+                print("Disconnected device " + device.id)
+
     def __fetchFrom(self, device):
-        while (1):
+        while 1:
             if self.verbose:
                 start = time.time()
-                device._fetch()
+                device._fetch(fetchedBy = self.agentName)
                 elapsed = time.time() - start
                 print("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
             else:
-                device._fetch()
+                device._fetch(fetchedBy = self.agentName)
 
             time.sleep(device.timeout / 1000)
 
@@ -140,6 +161,7 @@ class Agent():
 
         if len(self.devices) == 0:
             print("No devices connected to the agent.")
+            print("Exiting..")
             sys.exit(11)
 
         print("Starting prometheus server at port " + str(self.prometheusPort) + "..")
@@ -149,10 +171,12 @@ class Agent():
             for device in self.devices:
                 Thread(target = self.__fetchFrom, args=(device,)).start()
                 if self.verbose:
-                    print("Started monitoring " + device.id)
+                    print("[" + self.agentName + "] Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
 
-            print("Monitoring..")
-            while (1):
+            if !self.verbose:
+                print("[" + self.agentName + "] Monitoring.. ")
+
+            while 1:
                 pass
         except KeyboardInterrupt:
             print("Disconnecting devices..")

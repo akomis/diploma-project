@@ -26,7 +26,7 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 
 ## Configuration
 Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
-For changing the agent's settings you can change the values under the `[Agent]` section.  
+For changing the agent's settings you can change the values under the `[Agent]` section which must exist in the file.  
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN). You can connect multiple devices through various ports (serial port/IP address).  
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in the same format as the class name representing the device module.  
@@ -129,11 +129,11 @@ For more details on the configuration settings for the Agent, Dobot Magician and
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
 
 ### Jevois
-|    Config Name   |          Description         |  Prometheus Type | Default |
-|:----------------:|:----------------------------:|:----------------:|:-------:|
-| ObjectIdentified |   Identified object's name   |    enum (str)    |    on   |
-|  ObjectLocation  | Identified object's location | gauge(s) (float) |    on   |
-|    ObjectSize    |   Identified object's size   |   gauge (float)  |   off   |
+|    Config Name   |          Description         |  Prometheus Type | Message Type | Default |
+|:----------------:|:----------------------------:|:----------------:|:----------------------:|
+| ObjectIdentified |   Identified object's name   |    enum (str)    |    Normal    |    on   |
+|  ObjectLocation  | Identified object's location | gauge(s) (float) |    Normal    |    on   |
+|    ObjectSize    |   Identified object's size   |   gauge (float)  |    Normal    |   off   |
 
 For a more practical insight check the default `agent.conf` included.
 <br><br>

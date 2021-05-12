@@ -701,8 +701,7 @@ def DisconnectDobot(api):
 def free_library(api):
     kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
     kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
-    handle = api._handle
-    kernel32.FreeLibrary(handle)
+    kernel32.FreeLibrary(api._handle)
 
 def DisconnectDobotX(api):
     #api.DisconnectDobot(c_int(masterId))
