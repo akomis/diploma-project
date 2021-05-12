@@ -146,12 +146,10 @@ class Agent():
         start_http_server(self.prometheusPort)
 
         try:
-            threads = []
             for device in self.devices:
-                threads.append(Thread(target = self.__fetchFrom, args=(device,)))
-
-            for thread in threads:
-                thread.start()
+                Thread(target = self.__fetchFrom, args=(device,)).start()
+                if self.verbose:
+                    print("Started monitoring " + device.id)
 
             print("Monitoring..")
             while (1):
