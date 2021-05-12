@@ -187,7 +187,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", default="agent.conf", help="specify configuration file path (default: \".\\agent.conf\")")
     parser.add_argument("-n", "--name", default="Agent0", help="specify symbolic agent/station name used for seperation/grouping of stations (default: \"Agent0\")")
-    parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for Prometheus endpoint (default: 8000)")
+    parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for the Prometheus endpoint (default: 8000)")
     parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if at least 1 error exists in configuration file")
     parser.add_argument("-v", "--verbose", action="store_true", help="print actions with details in standard output")
     parser.add_argument("-m", "--more", action="store_true", help="open README.md with configuration and implementation details")
