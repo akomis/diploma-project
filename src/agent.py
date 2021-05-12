@@ -10,13 +10,19 @@ from device_modules import *
 class Agent():
     def __init__(self, configFileName, name, prometheusPort, killSwitch, verbose):
         self.config = configparser.ConfigParser()
-        self.__readConfig(configFileName)
-        self.validSections = self.__validateConfig()
-
         self.name = name
         self.prometheusPort = prometheusPort
         self.verbose = verbose
         self.killSwitch = killSwitch
+        self.__readConfig(configFileName)
+        self.validSections = self.__validateConfig()
+        self.devices = []
+
+    def agentPrint(self, s, isError=False):
+        if isError:
+            print(self.name + " (" + time.ctime() + "): [ERROR] " + s, file=sys.stderr)
+        else:
+            print(self.name + " (" + time.ctime() + "): " + s)
 
     def __readConfig(self, filename):
         try:
@@ -24,25 +30,25 @@ class Agent():
             if check == "":
                 raise Exception("Couldn't find \"" + filename + "\"")
 
-            print("Reading configuration file..")
+            self.agentPrint("Reading configuration file..")
         except Exception as e:
-            print("Can't read configuration file \"" + filename + "\" (error: " + str(e) + ")")
+            self.agentPrint("Can't read configuration file \"" + filename + "\" (" + str(e) + ")", isError=True)
             exit(3)
 
     def __validateConfig(self):
+        self.agentPrint("Validating configuration file..")
+
         validBooleanValues = ["1","yes","true","on","0","no","false","off"]
         validSections = {}
 
         # Check configuration validity for the defined (for monitoring) devices
         flag = False
-        deviceSections = self.config.sections()
-        deviceSections.remove("Agent")
-        for sectionName in deviceSections:
+        for sectionName in self.config.sections():
             try:
                 part = sectionName.split(":")
 
                 if len(part) != 2:
-                    raise Exception(sectionName + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
+                    raise Exception("\"" + sectionName + " is not a valid device entry. All device entries should follow this format [DEVICE_TYPE:PORT]")
 
                 deviceType = part[0]
                 connectionPort = part[1]
@@ -57,8 +63,8 @@ class Agent():
                     raise Exception("Cannot validate \"" + deviceType + "\". Make sure the options{} dictionary is implemented.")
             except Exception as e:
                 flag = True
-                print("[ERROR] " + str(e), file=sys.stderr)
-                print("[WARNING] \"" + sectionName + "\" device will not be monitored.")
+                self.agentPrint(str(e), isError=True)
+                self.agentPrint("[WARNING] \"" + sectionName + "\" device will not be monitored.")
                 continue
 
             errorCount = 0
@@ -69,14 +75,14 @@ class Agent():
                 try:
                     # Check if key is valid (supported by module)
                     if option not in options:
-                        raise Exception(option + "\" is not a valid option for section \"" + sectionName + "\".")
+                        raise Exception("\"" + option + "\" is not a valid option for section \"" + sectionName + "\".")
 
                     configValue = section[option]
                     optionsValue = options[option]
 
                     # Check if value type is correct
                     if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
-                        raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
+                        raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"" + sectionName +"\" is not valid (can only be 1|yes|true|on|0|no|false|off)")
 
                     try:
                         type(optionsValue)(configValue)
@@ -85,17 +91,17 @@ class Agent():
                 except Exception as e:
                     flag = True
                     errorCount += 1
-                    print("[ERROR] " + str(e), file=sys.stderr)
+                    self.agentPrint(str(e), isError=True)
 
             if errorCount > 0:
-                print("[WARNING] " + str(errorCount) + " error(s) in \"" + sectionName + "\" section. The device will not be monitored. Please resolve the errors in order for " + sectionName + " to be monitored.")
+                self.agentPrint("[WARNING] " + str(errorCount) + " error(s) in \"" + sectionName + "\" section. The device will not be monitored. Please resolve the errors in order for this device to be monitored.")
             else:
                 try:
                     device = entityClass(section, connectionPort)
                 except:
                     flag = True
-                    print("[ERROR] \"" + deviceType +"\" device module does not properly implement the Device interface", file=sys.stderr)
-                    print("[WARNING] \"" + sectionName + "\" device will not be monitored.")
+                    self.agentPrint("\"" + deviceType +"\" device module does not properly implement the Device interface", isError=True)
+                    self.agentPrint("[WARNING] \"" + sectionName + "\" device will not be monitored.")
                     continue
 
                 validSections[sectionName] = device
@@ -103,7 +109,7 @@ class Agent():
         if flag:
             print("For more information use --help.")
             if self.killSwitch:
-                print("Killswitch enabled. Exiting..")
+                self.agentPrint("Killswitch is enabled. Exiting..")
                 exit(6)
 
         return validSections
@@ -114,17 +120,17 @@ class Agent():
             device = self.validSections[sectionName]
             if device._connect():
                 self.devices.append(device)
-                print("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
+                self.agentPrint("[OK] " + deviceType + " at port " + connectionPort + " connected succesfully!")
             else:
-                sys.stderr.write("[ERROR] " + deviceType + " at port " + connectionPort + " cannot be connected.")
-                print("[WARNING] Device " + deviceType + " at " + connectionPort + " will not be monitored.")
+                self.agentPrint(deviceType + " at port " + connectionPort + " cannot be connected.", isError=True)
+                self.agentPrint("[WARNING] Device " + deviceType + " at " + connectionPort + " will not be monitored.")
 
     def __disconnectDevices(self):
         for device in self.devices:
             device._disconnect()
 
             if self.verbose:
-                print("Disconnected device " + device.id)
+                self.agentPrint("Disconnected device " + device.id)
 
     def __fetchFrom(self, device):
         while 1:
@@ -132,14 +138,14 @@ class Agent():
                 start = time.time()
                 device._fetch(fetchedBy = self.name)
                 elapsed = time.time() - start
-                print("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
+                self.agentPrint("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
             else:
                 device._fetch(fetchedBy = self.name)
 
             time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
-        print("Connecting to devices listed in agent.conf..")
+        self.agentPrint("Connecting to devices listed in agent.conf..")
         self.__connectDevices()
 
         if len(self.devices) == 0:
@@ -147,22 +153,22 @@ class Agent():
             print("Exiting..")
             sys.exit(11)
 
-        print("Starting prometheus server at port " + str(self.prometheusPort) + "..")
+        self.agentPrint("Starting prometheus server at port " + str(self.prometheusPort) + "..")
         start_http_server(self.prometheusPort)
 
         try:
             for device in self.devices:
                 Thread(target = self.__fetchFrom, args=(device,)).start()
                 if self.verbose:
-                    print("[" + self.name + "] Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
+                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
 
             if not self.verbose:
-                print("[" + self.name + "] Monitoring.. ")
+                self.agentPrint("Monitoring.. ")
 
             while 1:
                 pass
         except KeyboardInterrupt:
-            print("[" + self.name + "] Disconnecting devices..")
+            self.agentPrint("Disconnecting devices..")
             self.__disconnectDevices()
             exit(0)
 
