@@ -7,7 +7,7 @@ from prometheus_client import start_http_server
 from device_modules import *
 
 class Agent():
-    options = {"agentname":"Agent0","prometheusport":8000}
+    options = {"agentname":"Agent0","prometheusport":8000,"verbose":False}
 
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -27,6 +27,8 @@ class Agent():
         except ValueError:
             print("PrometheusPort must be a number from 0 to 65535")
             sys.exit(5)
+
+        self.verbose = self.config.getboolean("Agent", "verbose", fallback=Agent.options["verbose"])
 
     def __readConfig(self):
         try:
@@ -48,11 +50,10 @@ class Agent():
 
             try:
                 entityClass = globals()[entityType]
-
-                if entityClass.options is None:
+                if entityClass.options == Device.options or len(entityClass.options) == 0:
                     raise Exception()
             except Exception as e:
-                print("[ERROR] \"" + section + "\" cannot be recognised for validation. Make sure " + entityType + "'s module exists in device_modules and that it implements the static options dictionary (" + str(e) + ")")
+                print("[ERROR] \"" + section + "\" cannot be recognised for validation. Make sure " + entityType + "'s module exists in device_modules and that it implements the static options dictionary")
                 continue
 
             options = {}
@@ -123,10 +124,14 @@ class Agent():
 
     def __fetchFrom(self, device):
         while (1):
-            start = time.time()
-            device._fetch()
-            elapsed = time.time() - start
-            print("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
+            if self.verbose:
+                start = time.time()
+                device._fetch()
+                elapsed = time.time() - start
+                print("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
+            else:
+                device._fetch()
+
             time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
