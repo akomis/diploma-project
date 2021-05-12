@@ -1,8 +1,9 @@
+from abc import ABC, abstractmethod
 from prometheus_client import Info, Gauge, Enum
 import runtime.DobotDllTypeX as dTypeX
 import serial
 
-class Device():
+class Device(ABC):
     options = {"timeout":100} # Default device options/attributes
 
     def __init__(self, config, port):
@@ -13,17 +14,17 @@ class Device():
         if (self.timeout < 100):
             self.timeout = 100
 
-    #@abstractmethod
+    @abstractmethod
     def _connect(self):
-        return None
+        pass
 
-    #@abstractmethod
+    @abstractmethod
     def _fetch(self):
-        return None
+        pass
 
-    #@abstractmethod
+    @abstractmethod
     def _disconnect(self):
-        return None
+        pass
 
 
 class Dobot(Device):
