@@ -25,22 +25,15 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 <br><br>
 
 ## Configuration
-Change agent's settings and choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
-For changing the agent's settings you can change the values under the `[Agent]` section which must exist in the file.  
-In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN). You can connect multiple devices through various ports (serial port/IP address).  
+Choose which devices and which data/attributes of those will be monitored by changing the `agent.conf` file.  
+For monitoring a device the corresponding class in device_modules.py must exist. For the agent to discover the device and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section), a device entry must exist in the configuration file e.g. `class DeviceType` a `[DeviceType:<port>]`. One can connect multiple devices through various ports (serial port/IP address).  
+In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN).
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in the same format as the class name representing the device module.  
-For custom device modules/classes in the device_modules.py e.g. `DeviceType` a `[DeviceType:<port>]` entry must exist in the configuration for the monitoring agent to automatically discover it and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section).  
 Each device entry supports the `Timeout` attribute which sets the timeout period in milliseconds in between fetches and defaults to 100.  
-All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.
-For more details on the configuration settings for the Agent, Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
+All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.  
+For more details on the configuration settings for the Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
-### Agent
-|   Config Name   |                        Description                        | Type | Default |
-|:---------------:|:---------------------------------------------------------:|:----:|:-------:|
-|    AgentName    |                  Symbolic name for agent                  |  str |  Agent0 |
-|  PrometheusPort |                Port for Prometheus endpoint               |  int |   8000  |
-|     Verbose     |             Print actions with details in stdout          | bool |   off   |
 
 ### Dobot
 |         Config Name        |                                          Description                                          | Prometheus Type |     Default     |            API Call            |
@@ -140,9 +133,18 @@ For a more practical insight check the default `agent.conf` included.
 
 ## Usage
 Make sure that `agent.conf` is properly setup and in the same directory as the executable.  
-`$ python3 agent.py [-k|--killswitch|-h|--help]`  
-`-k / --killswitch : Exit agent if error(s) exist in agent.conf`  
-`-h / --help : Displays this (README.md)`  
+```
+$ agent.py [-h] [-c CONFIG] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
+
+Optional arguments:
+  -h, --help                        show this help message and exit
+  -c CONFIG, --config CONFIG        specify configuration file path (default: "agent.conf")
+  -n NAME, --name NAME              specify symbolic agent/station name used for seperation/grouping of stations (default: "Agent0")
+  -p PROMPORT, --promport PROMPORT  specify port number for Prometheus endpoint (default: 8000)
+  -k, --killswitch                  exit agent if at least 1 error exists in configuration file
+  -v, --verbose                     print actions with details in standard output
+  -m, --more                        open README.md with configuration and implementation details
+```
 <br><br>
 
 ## Scalability

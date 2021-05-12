@@ -1,5 +1,6 @@
 import sys
 import time
+import argparse
 import webbrowser
 import configparser
 from threading import Thread
@@ -7,72 +8,32 @@ from prometheus_client import start_http_server
 from device_modules import *
 
 class Agent():
-    options = {"agentname":"Agent0","prometheusport":8000,"verbose":False}
-
-    def __init__(self, ks):
-        self.killSwitch = ks
+    def __init__(self, configFileName, name, prometheusPort, killSwitch, verbose):
         self.config = configparser.ConfigParser()
-        self.__readConfig()
+        self.__readConfig(configFileName)
         self.validSections = self.__validateConfig()
 
-        self.devices = []
-        self.agentName = self.config.get("Agent", "agentname", fallback=Agent.options["agentname"])
-        if self.agentName == "":
-            self.agentName = "Agent0"
+        self.name = name
+        self.prometheusPort = prometheusPort
+        self.verbose = verbose
+        self.killSwitch = killSwitch
 
+    def __readConfig(self, filename):
         try:
-            self.prometheusPort = self.config.getint("Agent", "prometheusport", fallback=Agent.options["prometheusport"])
-            if self.prometheusPort > 65535 or self.prometheusPort < 0:
-                print(str(self.prometheusPort) + " is not a valid port")
-                raise ValueError
-        except ValueError:
-            print("PrometheusPort must be a number from 0 to 65535")
-            sys.exit(5)
-
-        self.verbose = self.config.getboolean("Agent", "verbose", fallback=Agent.options["verbose"])
-
-    def __readConfig(self):
-        try:
-            check = self.config.read("agent.conf")[0]
+            check = self.config.read(filename)[0]
             if check == "":
-                raise Exception("Couldn't find agent.conf")
+                raise Exception("Couldn't find \"" + filename + "\"")
 
-            print("Reading agent.conf..")
+            print("Reading configuration file..")
         except Exception as e:
-            print("Can't read configuration file. Make sure agent.conf is in the same directory as agent.py (error: " + str(e) + ")")
+            print("Can't read configuration file \"" + filename + "\" (error: " + str(e) + ")")
             exit(3)
 
     def __validateConfig(self):
         validBooleanValues = ["1","yes","true","on","0","no","false","off"]
         validSections = {}
 
-        # Check Agent section's validity first and seperately from device sections
-        try:
-            if "Agent" not in self.config.sections():
-                raise Exception("Missing mandatory \"Agent\" section in \"agent.conf\"")
-
-            for option in self.config["Agent"]:
-                if option not in Agent.options:
-                    raise Exception("Agent does not support the \"" + option + "\" option")
-
-                configValue = self.config["Agent"][option]
-                optionsValue = Agent.options[option]
-
-                if isinstance(optionsValue, bool) and configValue not in validBooleanValues:
-                    raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"Agent\" is not valid (must be one of the following: 1,yes,true,on,0,no,false,off)")
-
-                try:
-                    type(optionsValue)(configValue)
-                except:
-                    raise Exception("Value \"" + configValue + "\" for option \"" + option + "\" in section \"Agent\" is not valid (must be of type " + str(type(optionsValue).__name__) + ").")
-
-                type(optionsValue)(configValue)
-        except Exception as e:
-            print("[ERROR] " + str(e), file=sys.stderr)
-            print("Exiting..")
-            exit(4)
-
-        # Check configuration validity for the monitored devices
+        # Check configuration validity for the defined (for monitoring) devices
         flag = False
         deviceSections = self.config.sections()
         deviceSections.remove("Agent")
@@ -169,11 +130,11 @@ class Agent():
         while 1:
             if self.verbose:
                 start = time.time()
-                device._fetch(fetchedBy = self.agentName)
+                device._fetch(fetchedBy = self.name)
                 elapsed = time.time() - start
                 print("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms")
             else:
-                device._fetch(fetchedBy = self.agentName)
+                device._fetch(fetchedBy = self.name)
 
             time.sleep(device.timeout / 1000)
 
@@ -193,41 +154,43 @@ class Agent():
             for device in self.devices:
                 Thread(target = self.__fetchFrom, args=(device,)).start()
                 if self.verbose:
-                    print("[" + self.agentName + "] Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
+                    print("[" + self.name + "] Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes")
 
             if not self.verbose:
-                print("[" + self.agentName + "] Monitoring.. ")
+                print("[" + self.name + "] Monitoring.. ")
 
             while 1:
                 pass
         except KeyboardInterrupt:
-            print("Disconnecting devices..")
+            print("[" + self.name + "] Disconnecting devices..")
             self.__disconnectDevices()
             exit(0)
 
-
-def agentInit(args):
+def isPort(value):
+    port = 0
     try:
-        if len(args) > 2:
-            raise Exception("Too many arguments")
-        elif len(args) == 2:
-            if args[1] == "-h" or args[1] == "--help":
-                webbrowser.open("../README.md")
-                exit(1)
-            elif args[1] == "-k" or args[1] == "--killswitch":
-                return Agent(True)
-            else:
-                raise Exception("Unrecognised option \"" + sys.argv[1] + "\"")
+        port = int(value)
+        if port > 65535 or port < 0:
+            raise Exception()
     except Exception as e:
-        print(str(e))
-        print("For more information: $ agent.py --help")
-        exit(2)
+        raise argparse.ArgumentTypeError("\"%s\" is not a valid port number (must be an integer between 1 and 65535)" % value)
 
-    return Agent(False)
+    return port
 
 def main():
-    agent = agentInit(sys.argv)
-    agent.startRoutine()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", default="agent.conf", help="specify configuration file path (default: \".\\agent.conf\")")
+    parser.add_argument("-n", "--name", default="Agent0", help="specify symbolic agent/station name used for seperation/grouping of stations (default: \"Agent0\")")
+    parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for Prometheus endpoint (default: 8000)")
+    parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if at least 1 error exists in configuration file")
+    parser.add_argument("-v", "--verbose", action="store_true", help="print actions with details in standard output")
+    parser.add_argument("-m", "--more", action="store_true", help="open README.md with configuration and implementation details")
+    args = parser.parse_args()
+
+    if args.more:
+        webbrowser.open("../README.md")
+
+    Agent(args.config, args.name, args.promport, args.killswitch, args.verbose).startRoutine()
 
 if __name__ == "__main__":
     main()
