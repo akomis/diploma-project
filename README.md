@@ -129,7 +129,7 @@ For more details on the configuration settings for the Agent, Dobot Magician and
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
 
 ### Jevois
-|    Config Name   |          Description         |  Prometheus Type | Message Type | Default |
+|    Config Name   |          Description         |  Prometheus Type |   Serstyle   | Default |
 |:----------------:|:----------------------------:|:----------------:|:------------:|:-------:|
 | ObjectIdentified |   Identified object's name   |    enum (str)    |    Normal    |    on   |
 |  ObjectLocation  | Identified object's location | gauge(s) (float) |    Normal    |    on   |
