@@ -201,7 +201,7 @@ for a in dTypeX.GetAlarmsStateX(dobot0):
 ### Additions
 * `GetActiveDobots()` function that returns the amount of currently connected Dobot Magicians  
 * `DisconnectAll()` function to disconnect from all connected Dobot Magician devices and clean up any runtime files  
-Both additions were due to the addition of the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
+Both additions were due to the creation of the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
 <br><br>
 
 ## Resources
