@@ -11,16 +11,21 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 
 ## Dependencies
 - [Python 3.9+](https://www.python.org/downloads/windows/)
-- [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
 - [Prometheus](https://prometheus.io/download/#prometheus)
 - [prometheus-client](https://pypi.org/project/prometheus-client/)
+
+For using the `Dobot` device module
+- [Dobot Robot Driver](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=70#sub-download)
+
+For using the `Jevois` device module
+- [pyserial](https://pythonhosted.org/pyserial/)
 <br><br>
 
 ## Installation
 - Install Python 3.9+
 - Install Magician Studio (which includes the Dobot Robot Driver)
 - Install Prometheus
-- `pip3 install prometheus-client`
+- `pip3 install prometheus-client pyserial`
 - `git clone https://github.com/akomis/diploma-project.git`
 <br><br>
 
