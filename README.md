@@ -19,7 +19,7 @@ The goal of this system is to be a cost-effective, modular and extensible soluti
 ## Installation
 - Install Python 3.9+
 - Install Magician Studio (which includes the Dobot Robot Driver)
-- Install Prometheus Monitoring System
+- Install Prometheus
 - `pip3 install prometheus-client`
 - `git clone https://github.com/akomis/diploma-project.git`
 <br><br>
