@@ -148,7 +148,7 @@ Optional arguments:
 <br><br>
 
 ## Scalability
-The system can scale (monitoring station level) vertically as the agent can connect to and monitor a variable amount of devices, a number constrained by the monitoring station's available ports and resources. In addition for larger and more complex setups one can scale the system vertically by adding multiple monitoring stations. For the configuration of these stations one can tweak their respective prometheus and agent configurations. For their coordination one can change the grafana (visual layer) settings on the main monitoring station.
+The system can scale (monitoring station level) vertically as the agent can connect to and monitor a variable amount of devices, a number constrained by the monitoring station's available ports and resources. In addition for larger and more complex setups one can scale the system vertically by adding multiple monitoring stations. For the configuration of these stations one can tweak their respective prometheus and agent configurations. For their coordination one can use a [Prometheus Hierarchical Federation](https://prometheus.io/docs/prometheus/latest/federation/#hierarchical-federation).
 <br><br>
 
 ## Extensibility

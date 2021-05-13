@@ -17,7 +17,6 @@ class termcolors:
     ERROR = "\033[91m"
     END = "\033[0m"
 
-
 class Agent():
     def __init__(self, devicesFilename, name, prometheusPort, killSwitch, verbose):
         self.config = configparser.ConfigParser()
