@@ -143,7 +143,7 @@ $ agent.py [-h] [-c CONFIG] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
 
 Optional arguments:
   -h, --help                        show this help message and exit
-  -c CONFIG, --config CONFIG        specify configuration file path (default: "devices.conf")
+  -d DEVICES, --devices DEVICES     specify configuration file path (default: ".\devices.conf")
   -n NAME, --name NAME              specify symbolic agent/station name used for seperation/grouping of stations (default: "Agent0")
   -p PROMPORT, --promport PROMPORT  specify port number for the Prometheus endpoint (default: 8000)
   -k, --killswitch                  exit agent if at least 1 error exists in configuration file
