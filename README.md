@@ -139,7 +139,7 @@ For a more practical insight check the default `devices.conf` included.
 ## Usage
 When using the default configuration file location, make sure that `devices.conf` is properly setup and in the same directory as the executable.  
 ```
-$ agent.py [-h] [-c CONFIG] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
+$ agent.py [-h] [-d DEVICES] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
 
 Optional arguments:
   -h, --help                        show this help message and exit
