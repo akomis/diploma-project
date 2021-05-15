@@ -7,41 +7,42 @@ from threading import Thread
 from prometheus_client import start_http_server
 from device_modules import *
 
-class termcolors:
-    B = "\033[1m"
-    U = "\033[4m"
-    OK = "\033[92m"
-    INFO = "\033[94m"
-    HEADER = "\033[95m"
-    WARNING = "\033[93m"
-    ERROR = "\033[91m"
-    END = "\033[0m"
-
 class Agent():
-    def __init__(self, devicesFilename, name, prometheusPort, killSwitch, verbose):
+    termcolors = {
+    "B":"\033[1m","U":"\033[4m","H":"\033[95m",
+    "OK":"\033[92m","INFO":"\033[94m",
+    "WARNING":"\033[93m","ERROR":"\033[91m",
+    "END":"\033[0m"}
+
+    def __init__(self, devicesFilename:str, name:str, prometheusPort:int, killSwitch:bool, verbose:bool, color:bool):
         self.config = configparser.ConfigParser()
         self.name = name
         self.prometheusPort = prometheusPort
-        self.verbose = verbose
         self.killSwitch = killSwitch
+        self.verbose = verbose
+        if not color:
+            for attr in Agent.termcolors:
+                Agent.termcolors[attr] = ""
+
         self.__readConfig(devicesFilename)
         self.validSections = self.__validateConfig()
         self.devices = []
 
     def agentPrint(self, s, type=""):
+        termcolors = Agent.termcolors
         prefix = self.name + " (" + time.ctime() + "): "
-        body = s + termcolors.END
+        body = s + termcolors["END"]
 
         if type == "i":
-            print(prefix + termcolors.INFO +  "[INFO] " + body)
+            print(prefix + termcolors["INFO"] +  "[INFO] " + body)
         elif type == "o":
-            print(prefix + termcolors.OK + "[OK] " + body)
+            print(prefix + termcolors["OK"] + "[OK] " + body)
         elif type == "w":
-            print(prefix + termcolors.WARNING + "[WARNING] " + body)
+            print(prefix + termcolors["WARNING"] + "[WARNING] " + body)
         elif type == "e":
-            print(prefix + termcolors.ERROR + "[ERROR] " + body, file=sys.stderr)
+            print(prefix + termcolors["ERROR"] + "[ERROR] " + body, file=sys.stderr)
         elif type == "f":
-            print(prefix + termcolors.ERROR + "[" + termcolors.U + "FATAL" + termcolors.END + termcolors.ERROR + "] " + body, file=sys.stderr)
+            print(prefix + termcolors["ERROR"] + "[" + termcolors["U"] + "FATAL" + termcolors["END"] + termcolors["ERROR"] + "] " + body, file=sys.stderr)
         else:
             print(prefix + s)
 
@@ -222,13 +223,14 @@ def main():
     parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for the Prometheus endpoint (default: 8000)")
     parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if at least 1 error exists in configuration file")
     parser.add_argument("-v", "--verbose", action="store_true", help="print actions with details in standard output")
+    parser.add_argument("-c", "--color", action="store_true", help="print color rich messages to terminal (terminal needs to support ANSI escape colors)")
     parser.add_argument("-m", "--more", action="store_true", help="open README.md with configuration and implementation details")
     args = parser.parse_args()
 
     if args.more:
         webbrowser.open("..\README.md")
 
-    Agent(args.devices, args.name, args.promport, args.killswitch, args.verbose).startRoutine()
+    Agent(args.devices, args.name, args.promport, args.killswitch, args.verbose, args.color).startRoutine()
 
 if __name__ == "__main__":
     main()

@@ -148,6 +148,7 @@ Optional arguments:
   -p PROMPORT, --promport PROMPORT  specify port number for the Prometheus endpoint (default: 8000)
   -k, --killswitch                  exit agent if at least 1 error exists in configuration file
   -v, --verbose                     print actions with details in standard output
+  -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
   -m, --more                        open README.md with configuration and implementation details
 ```
 <br><br>
