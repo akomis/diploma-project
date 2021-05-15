@@ -6,22 +6,30 @@ import serial
 class Device(ABC):
     options = {"timeout":100} # Default device options/attributes
 
-    def __init__(self, config_section, port):
+    def __init__(self, config_section, port, host):
         self.section = config_section
         self.type = type(self).__name__
         self.port = port
+        self.host = host
         self.id = self.type + ":" + self.port
 
         self.timeout = self.section.getint("timeout", fallback=Device.options["timeout"])
         if (self.timeout < 100):
             self.timeout = 100
 
+        activeCounter = 0
+        for key in type(self).options:
+            if self.section.getboolean(key, fallback=type(self).options[key]):
+                activeCounter += 1
+
+        self.attrNumber = activeCounter
+
     @abstractmethod
     def _connect(self) -> bool:
         pass
 
     @abstractmethod
-    def _fetch(self, fetchedBy):
+    def _fetch(self):
         pass
 
     @abstractmethod
@@ -98,10 +106,10 @@ class Dobot(Device):
     ptpRearArmAcceleration = Gauge("ptp_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in point to point mode", ["device","station"])
     ptpForearmAcceleration = Gauge("ptp_forearm_acceleration","Acceleration (°/s^2) of forearm joint in point to point mode", ["device","station"])
     ptpEndEffectorAcceleration = Gauge("ptp_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in point to point mode", ["device","station"])
-    ptpXYZVelocity = Gauge("ptp_xyz_velocity","Velocity (mm/s) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpRVelocity = Gauge("ptp_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpXYZAcceleration = Gauge("ptp_x_y_z_acceleration","Acceleration (mm/s^2) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpRAcceleration = Gauge("ptp_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in point to point mode", ["device","station"])
+    ptpAxisXYZVelocity = Gauge("ptp_axis_xyz_velocity","Velocity (mm/s) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device","station"])
+    ptpAxisRVelocity = Gauge("ptp_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in point to point mode", ["device","station"])
+    ptpAxisXYZAcceleration = Gauge("ptp_axis_x_y_z_acceleration","Acceleration (mm/s^2) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device","station"])
+    ptpAxisRAcceleration = Gauge("ptp_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in point to point mode", ["device","station"])
     ptpVelocityRatio = Gauge("ptp_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device","station"])
     ptpAccelerationRatio = Gauge("ptp_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device","station"])
     liftingHeight = Gauge("lifting_height","Lifting height in jump mode", ["device","station"])
@@ -125,7 +133,7 @@ class Dobot(Device):
     wifiModuleStatus = Enum("wifi_module_status","Wifi module status (enabled/disabled)", ["device","station"], states=["enabled","disabled"])
     wifiConnectionStatus = Enum("wifi_connection_status","Wifi connection status (connected/not connected)", ["device","station"], states=["enabled","disabled"])
 
-    def _connect(self):
+    def _connect(self) -> bool:
         self.api, state = dTypeX.ConnectDobotX(self.port)
 
         if state[0] == dTypeX.DobotConnect.DobotConnect_NoError:
@@ -143,7 +151,7 @@ class Dobot(Device):
         if self.section.getboolean("deviceversion", fallback=Dobot.options["deviceversion"]):
             enabledDeviceInfo["version"] = ".".join(list(map(str, dTypeX.GetDeviceVersion(self.api))))
         if len(enabledDeviceInfo) > 0:
-            Dobot.deviceInfo.labels(device=self.id, station=fetchedBy).info(enabledDeviceInfo)
+            Dobot.deviceInfo.labels(device=self.id, station=self.host).info(enabledDeviceInfo)
 
         enabledWifiInfo = {}
         if self.section.getboolean("wifissid", fallback=Dobot.options["wifissid"]):
@@ -159,267 +167,266 @@ class Dobot(Device):
         if self.section.getboolean("wifidns", fallback=Dobot.options["wifidns"]):
             enabledWifiInfo["dns"] = ".".join(list(map(str, dTypeX.GetWIFIDNS(self.api))))
         if len(enabledWifiInfo) > 0:
-            Dobot.wifiInfo.labels(device=self.id, station=fetchedBy).info(enabledWifiInfo)
+            Dobot.wifiInfo.labels(device=self.id, station=self.host).info(enabledWifiInfo)
 
-    def _fetch(self, fetchedBy):
+    def _fetch(self):
         if self.section.getboolean("devicetime", fallback=Dobot.options["devicetime"]):
-            Dobot.deviceTime.labels(device=self.id, station=fetchedBy).set(dTypeX.GetDeviceTime(self.api)[0])
+            Dobot.deviceTime.labels(device=self.id, station=self.host).set(dTypeX.GetDeviceTime(self.api)[0])
 
         if self.section.getboolean("queueindex", fallback=Dobot.options["queueindex"]):
-            Dobot.queueIndex.labels(device=self.id, station=fetchedBy).set(dTypeX.GetQueuedCmdCurrentIndex(self.api)[0])
+            Dobot.queueIndex.labels(device=self.id, station=self.host).set(dTypeX.GetQueuedCmdCurrentIndex(self.api)[0])
 
         pose = dTypeX.GetPose(self.api)
         if self.section.getboolean("posex", fallback=Dobot.options["posex"]):
-            Dobot.poseX.labels(device=self.id, station=fetchedBy).set(pose[0])
+            Dobot.poseX.labels(device=self.id, station=self.host).set(pose[0])
 
         if self.section.getboolean("posey", fallback=Dobot.options["posey"]):
-            Dobot.poseY.labels(device=self.id, station=fetchedBy).set(pose[1])
+            Dobot.poseY.labels(device=self.id, station=self.host).set(pose[1])
 
         if self.section.getboolean("posez", fallback=Dobot.options["posez"]):
-            Dobot.poseZ.labels(device=self.id, station=fetchedBy).set(pose[2])
+            Dobot.poseZ.labels(device=self.id, station=self.host).set(pose[2])
 
         if self.section.getboolean("poser", fallback=Dobot.options["poser"]):
-            Dobot.poseR.labels(device=self.id, station=fetchedBy).set(pose[3])
+            Dobot.poseR.labels(device=self.id, station=self.host).set(pose[3])
 
         if self.section.getboolean("anglebase", fallback=Dobot.options["anglebase"]):
-            Dobot.angleBase.labels(device=self.id, station=fetchedBy).set(pose[4])
+            Dobot.angleBase.labels(device=self.id, station=self.host).set(pose[4])
 
         if self.section.getboolean("anglereararm", fallback=Dobot.options["anglereararm"]):
-            Dobot.angleRearArm.labels(device=self.id, station=fetchedBy).set(pose[5])
+            Dobot.angleRearArm.labels(device=self.id, station=self.host).set(pose[5])
 
         if self.section.getboolean("angleforearm", fallback=Dobot.options["angleforearm"]):
-            Dobot.angleForearm.labels(device=self.id, station=fetchedBy).set(pose[6])
+            Dobot.angleForearm.labels(device=self.id, station=self.host).set(pose[6])
 
         if self.section.getboolean("angleendeffector", fallback=Dobot.options["angleendeffector"]):
-            Dobot.angleEndEffector.labels(device=self.id, station=fetchedBy).set(pose[7])
+            Dobot.angleEndEffector.labels(device=self.id, station=self.host).set(pose[7])
 
         if self.section.getboolean("alarmsstate", fallback=Dobot.options["alarmsstate"]):
             for a in dTypeX.GetAlarmsStateX(self.api):
-                Dobot.alarmsState.labels(device=self.id, station=fetchedBy).state(a)
+                Dobot.alarmsState.labels(device=self.id, station=self.host).state(a)
 
         home = dTypeX.GetHOMEParams(self.api)
         if self.section.getboolean("homex", fallback=Dobot.options["homex"]):
-            Dobot.homeX.labels(device=self.id, station=fetchedBy).set(home[0])
+            Dobot.homeX.labels(device=self.id, station=self.host).set(home[0])
 
         if self.section.getboolean("homey", fallback=Dobot.options["homey"]):
-            Dobot.homeY.labels(device=self.id, station=fetchedBy).set(home[1])
+            Dobot.homeY.labels(device=self.id, station=self.host).set(home[1])
 
         if self.section.getboolean("homez", fallback=Dobot.options["homez"]):
-            Dobot.homeZ.labels(device=self.id, station=fetchedBy).set(home[2])
+            Dobot.homeZ.labels(device=self.id, station=self.host).set(home[2])
 
         if self.section.getboolean("homer", fallback=Dobot.options["homer"]):
-            Dobot.homeR.labels(device=self.id, station=fetchedBy).set(home[3])
+            Dobot.homeR.labels(device=self.id, station=self.host).set(home[3])
 
         endEffector = dTypeX.GetEndEffectorParams(self.api)
         if self.section.getboolean("endeffectorx", fallback=Dobot.options["endeffectorx"]):
-            Dobot.endEffectorX.labels(device=self.id, station=fetchedBy).set(endEffector[0])
+            Dobot.endEffectorX.labels(device=self.id, station=self.host).set(endEffector[0])
 
         if self.section.getboolean("endeffectory", fallback=Dobot.options["endeffectory"]):
-            Dobot.endEffectorY.labels(device=self.id, station=fetchedBy).set(endEffector[1])
+            Dobot.endEffectorY.labels(device=self.id, station=self.host).set(endEffector[1])
 
         if self.section.getboolean("endeffectorz", fallback=Dobot.options["endeffectorz"]):
-            Dobot.endEffectorZ.labels(device=self.id, station=fetchedBy).set(endEffector[2])
+            Dobot.endEffectorZ.labels(device=self.id, station=self.host).set(endEffector[2])
 
         if self.section.getboolean("laserstatus", fallback=Dobot.options["laserstatus"]):
             if bool(dTypeX.GetEndEffectorLaser(self.api)[0]):
-                Dobot.laserStatus.labels(device=self.id, station=fetchedBy).state("enabled")
+                Dobot.laserStatus.labels(device=self.id, station=self.host).state("enabled")
             else:
-                Dobot.laserStatus.labels(device=self.id, station=fetchedBy).state("disabled")
+                Dobot.laserStatus.labels(device=self.id, station=self.host).state("disabled")
 
         if self.section.getboolean("suctioncupstatus", fallback=Dobot.options["suctioncupstatus"]):
             if bool(dTypeX.GetEndEffectorSuctionCup(self.api)[0]):
-                Dobot.suctionCupStatus.labels(device=self.id, station=fetchedBy).state("enabled")
+                Dobot.suctionCupStatus.labels(device=self.id, station=self.host).state("enabled")
             else:
-                Dobot.suctionCupStatus.labels(device=self.id, station=fetchedBy).state("disabled")
+                Dobot.suctionCupStatus.labels(device=self.id, station=self.host).state("disabled")
 
         if self.section.getboolean("gripperstatus", fallback=Dobot.options["gripperstatus"]):
             if bool(dTypeX.GetEndEffectorGripper(self.api)[0]):
-                Dobot.gripperStatus.labels(device=self.id, station=fetchedBy).state("enabled")
+                Dobot.gripperStatus.labels(device=self.id, station=self.host).state("enabled")
             else:
-                Dobot.gripperStatus.labels(device=self.id, station=fetchedBy).state("disabled")
+                Dobot.gripperStatus.labels(device=self.id, station=self.host).state("disabled")
 
         jogJoints = dTypeX.GetJOGJointParams(self.api)
         if self.section.getboolean("jogbasevelocity", fallback=Dobot.options["jogbasevelocity"]):
-            Dobot.jogBaseVelocity.labels(device=self.id, station=fetchedBy).set(jogJoints[0])
+            Dobot.jogBaseVelocity.labels(device=self.id, station=self.host).set(jogJoints[0])
 
         if self.section.getboolean("jogreararmvelocity", fallback=Dobot.options["jogreararmvelocity"]):
-            Dobot.jogRearArmVelocity.labels(device=self.id, station=fetchedBy).set(jogJoints[1])
+            Dobot.jogRearArmVelocity.labels(device=self.id, station=self.host).set(jogJoints[1])
 
         if self.section.getboolean("jogforearmvelocity", fallback=Dobot.options["jogforearmvelocity"]):
-            Dobot.jogForearmVelocity.labels(device=self.id, station=fetchedBy).set(jogJoints[2])
+            Dobot.jogForearmVelocity.labels(device=self.id, station=self.host).set(jogJoints[2])
 
         if self.section.getboolean("jogendeffectorvelocity", fallback=Dobot.options["jogendeffectorvelocity"]):
-            Dobot.jogEndEffectorVelocity.labels(device=self.id, station=fetchedBy).set(jogJoints[3])
+            Dobot.jogEndEffectorVelocity.labels(device=self.id, station=self.host).set(jogJoints[3])
 
         if self.section.getboolean("jogbaseacceleration", fallback=Dobot.options["jogbaseacceleration"]):
-            Dobot.jogBaseAcceleration.labels(device=self.id, station=fetchedBy).set(jogJoints[4])
+            Dobot.jogBaseAcceleration.labels(device=self.id, station=self.host).set(jogJoints[4])
 
         if self.section.getboolean("jogreararmacceleration", fallback=Dobot.options["jogreararmacceleration"]):
-            Dobot.jogRearArmAcceleration.labels(device=self.id, station=fetchedBy).set(jogJoints[5])
+            Dobot.jogRearArmAcceleration.labels(device=self.id, station=self.host).set(jogJoints[5])
 
         if self.section.getboolean("jogforearmacceleration", fallback=Dobot.options["jogforearmacceleration"]):
-            Dobot.jogForearmAcceleration.labels(device=self.id, station=fetchedBy).set(jogJoints[6])
+            Dobot.jogForearmAcceleration.labels(device=self.id, station=self.host).set(jogJoints[6])
 
         if self.section.getboolean("jogendeffectoracceleration", fallback=Dobot.options["jogendeffectoracceleration"]):
-            Dobot.jogEndEffectorAcceleration.labels(device=self.id, station=fetchedBy).set(jogJoints[7])
+            Dobot.jogEndEffectorAcceleration.labels(device=self.id, station=self.host).set(jogJoints[7])
 
         jogCoords = dTypeX.GetJOGCoordinateParams(self.api)
         if self.section.getboolean("jogaxisxvelocity", fallback=Dobot.options["jogaxisxvelocity"]):
-            Dobot.jogAxisXVelocity.labels(device=self.id, station=fetchedBy).set(jogCoords[0])
+            Dobot.jogAxisXVelocity.labels(device=self.id, station=self.host).set(jogCoords[0])
 
         if self.section.getboolean("jogaxisyvelocity", fallback=Dobot.options["jogaxisyvelocity"]):
-            Dobot.jogAxisYVelocity.labels(device=self.id, station=fetchedBy).set(jogCoords[1])
+            Dobot.jogAxisYVelocity.labels(device=self.id, station=self.host).set(jogCoords[1])
 
         if self.section.getboolean("jogaxiszvelocity", fallback=Dobot.options["jogaxiszvelocity"]):
-            Dobot.jogAxisZVelocity.labels(device=self.id, station=fetchedBy).set(jogCoords[2])
+            Dobot.jogAxisZVelocity.labels(device=self.id, station=self.host).set(jogCoords[2])
 
         if self.section.getboolean("jogaxisrvelocity", fallback=Dobot.options["jogaxisrvelocity"]):
-            Dobot.jogAxisRVelocity.labels(device=self.id, station=fetchedBy).set(jogCoords[3])
+            Dobot.jogAxisRVelocity.labels(device=self.id, station=self.host).set(jogCoords[3])
 
         if self.section.getboolean("jogaxisxacceleration", fallback=Dobot.options["jogaxisxacceleration"]):
-            Dobot.jogAxisXAcceleration.labels(device=self.id, station=fetchedBy).set(jogCoords[4])
+            Dobot.jogAxisXAcceleration.labels(device=self.id, station=self.host).set(jogCoords[4])
 
         if self.section.getboolean("jogaxisyacceleration", fallback=Dobot.options["jogaxisyacceleration"]):
-            Dobot.jogAxisYAcceleration.labels(device=self.id, station=fetchedBy).set(jogCoords[5])
+            Dobot.jogAxisYAcceleration.labels(device=self.id, station=self.host).set(jogCoords[5])
 
         if self.section.getboolean("jogaxiszacceleration", fallback=Dobot.options["jogaxiszacceleration"]):
-            Dobot.jogAxisZAcceleration.labels(device=self.id, station=fetchedBy).set(jogCoords[6])
+            Dobot.jogAxisZAcceleration.labels(device=self.id, station=self.host).set(jogCoords[6])
 
         if self.section.getboolean("jogaxisracceleration", fallback=Dobot.options["jogaxisracceleration"]):
-            Dobot.jogAxisRAcceleration.labels(device=self.id, station=fetchedBy).set(jogCoords[7])
+            Dobot.jogAxisRAcceleration.labels(device=self.id, station=self.host).set(jogCoords[7])
 
         jogCommon = dTypeX.GetJOGCommonParams(self.api)
         if self.section.getboolean("jogvelocityratio", fallback=Dobot.options["jogvelocityratio"]):
-            Dobot.jogVelocityRatio.labels(device=self.id, station=fetchedBy).set(jogCommon[0])
+            Dobot.jogVelocityRatio.labels(device=self.id, station=self.host).set(jogCommon[0])
 
         if self.section.getboolean("jogaccelerationratio", fallback=Dobot.options["jogaccelerationratio"]):
-            Dobot.jogAccelerationRatio.labels(device=self.id, station=fetchedBy).set(jogCommon[1])
+            Dobot.jogAccelerationRatio.labels(device=self.id, station=self.host).set(jogCommon[1])
 
         ptpJoints = dTypeX.GetPTPJointParams(self.api)
         if self.section.getboolean("ptpbasevelocity", fallback=Dobot.options["ptpbasevelocity"]):
-            Dobot.ptpBaseVelocity.labels(device=self.id, station=fetchedBy).set(ptpJoints[0])
+            Dobot.ptpBaseVelocity.labels(device=self.id, station=self.host).set(ptpJoints[0])
 
         if self.section.getboolean("ptpreararmvelocity", fallback=Dobot.options["ptpreararmvelocity"]):
-            Dobot.ptpRearArmVelocity.labels(device=self.id, station=fetchedBy).set(ptpJoints[1])
+            Dobot.ptpRearArmVelocity.labels(device=self.id, station=self.host).set(ptpJoints[1])
 
         if self.section.getboolean("ptpforearmvelocity", fallback=Dobot.options["ptpforearmvelocity"]):
-            Dobot.ptpForearmVelocity.labels(device=self.id, station=fetchedBy).set(ptpJoints[2])
+            Dobot.ptpForearmVelocity.labels(device=self.id, station=self.host).set(ptpJoints[2])
 
         if self.section.getboolean("ptpendeffectorvelocity", fallback=Dobot.options["ptpendeffectorvelocity"]):
-            Dobot.ptpEndEffectorVelocity.labels(device=self.id, station=fetchedBy).set(ptpJoints[3])
+            Dobot.ptpEndEffectorVelocity.labels(device=self.id, station=self.host).set(ptpJoints[3])
 
         if self.section.getboolean("ptpbaseacceleration", fallback=Dobot.options["ptpbaseacceleration"]):
-            Dobot.ptpBaseAcceleration.labels(device=self.id, station=fetchedBy).set(ptpJoints[4])
+            Dobot.ptpBaseAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[4])
 
         if self.section.getboolean("ptpreararmacceleration", fallback=Dobot.options["ptpreararmacceleration"]):
-            Dobot.ptpRearArmAcceleration.labels(device=self.id, station=fetchedBy).set(ptpJoints[5])
+            Dobot.ptpRearArmAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[5])
 
         if self.section.getboolean("ptpforearmacceleration", fallback=Dobot.options["ptpforearmacceleration"]):
-            Dobot.ptpForearmAcceleration.labels(device=self.id, station=fetchedBy).set(ptpJoints[6])
+            Dobot.ptpForearmAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[6])
 
         if self.section.getboolean("ptpendeffectoracceleration", fallback=Dobot.options["ptpendeffectoracceleration"]):
-            Dobot.ptpEndEffectorAcceleration.labels(device=self.id, station=fetchedBy).set(ptpJoints[7])
+            Dobot.ptpEndEffectorAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[7])
 
         ptpCoords = dTypeX.GetPTPCoordinateParams(self.api)
-        if self.section.getboolean("ptpxyzvelocity", fallback=Dobot.options["ptpxyzvelocity"]):
-            Dobot.ptpXYZVelocity.labels(device=self.id, station=fetchedBy).set(ptpCoords[0])
+        if self.section.getboolean("ptpaxisxyzvelocity", fallback=Dobot.options["ptpaxisxyzvelocity"]):
+            Dobot.ptpAxisXYZVelocity.labels(device=self.id, station=self.host).set(ptpCoords[0])
 
-        if self.section.getboolean("ptprvelocity", fallback=Dobot.options["ptprvelocity"]):
-            Dobot.ptpRVelocity.labels(device=self.id, station=fetchedBy).set(ptpCoords[1])
+        if self.section.getboolean("ptpaxisrvelocity", fallback=Dobot.options["ptpaxisrvelocity"]):
+            Dobot.ptpAxisRVelocity.labels(device=self.id, station=self.host).set(ptpCoords[1])
 
-        if self.section.getboolean("ptpxyzacceleration", fallback=Dobot.options["ptpxyzacceleration"]):
-            Dobot.ptpXYZAcceleration.labels(device=self.id, station=fetchedBy).set(ptpCoords[2])
+        if self.section.getboolean("ptpaxisxyzacceleration", fallback=Dobot.options["ptpaxisxyzacceleration"]):
+            Dobot.ptpAxisXYZAcceleration.labels(device=self.id, station=self.host).set(ptpCoords[2])
 
-        if self.section.getboolean("ptpracceleration", fallback=Dobot.options["ptpracceleration"]):
-            Dobot.ptpRAcceleration.labels(device=self.id, station=fetchedBy).set(ptpCoords[3])
+        if self.section.getboolean("ptpaxisracceleration", fallback=Dobot.options["ptpaxisracceleration"]):
+            Dobot.ptpAxisRAcceleration.labels(device=self.id, station=self.host).set(ptpCoords[3])
 
         ptpCommon = dTypeX.GetPTPCommonParams(self.api)
         if self.section.getboolean("ptpvelocityratio", fallback=Dobot.options["ptpvelocityratio"]):
-            Dobot.ptpVelocityRatio.labels(device=self.id, station=fetchedBy).set(ptpCommon[0])
+            Dobot.ptpVelocityRatio.labels(device=self.id, station=self.host).set(ptpCommon[0])
 
         if self.section.getboolean("ptpaccelerationratio", fallback=Dobot.options["ptpaccelerationratio"]):
-            Dobot.ptpAccelerationRatio.labels(device=self.id, station=fetchedBy).set(ptpCommon[1])
+            Dobot.ptpAccelerationRatio.labels(device=self.id, station=self.host).set(ptpCommon[1])
 
         ptpJump = dTypeX.GetPTPJumpParams(self.api)
         if self.section.getboolean("liftingheight", fallback=Dobot.options["liftingheight"]):
-            Dobot.liftingHeight.labels(device=self.id, station=fetchedBy).set(ptpJump[0])
+            Dobot.liftingHeight.labels(device=self.id, station=self.host).set(ptpJump[0])
 
-        if self.section.getboolean("heighlimit", fallback=Dobot.options["heighlimit"]):
-            Dobot.heightLimit.labels(device=self.id, station=fetchedBy).set(ptpJump[1])
+        if self.section.getboolean("heightlimit", fallback=Dobot.options["heightlimit"]):
+            Dobot.heightLimit.labels(device=self.id, station=self.host).set(ptpJump[1])
 
         cp = dTypeX.GetCPParams(self.api)
         if self.section.getboolean("cpvelocity", fallback=Dobot.options["cpvelocity"]):
-            Dobot.cpVelocity.labels(device=self.id, station=fetchedBy).set(cp[0])
+            Dobot.cpVelocity.labels(device=self.id, station=self.host).set(cp[0])
 
         if self.section.getboolean("cpacceleration", fallback=Dobot.options["cpacceleration"]):
-            Dobot.cpAcceleration.labels(device=self.id, station=fetchedBy).set(cp[1])
+            Dobot.cpAcceleration.labels(device=self.id, station=self.host).set(cp[1])
 
         arc = dTypeX.GetARCParams(self.api)
         if self.section.getboolean("arcxyzvelocity", fallback=Dobot.options["arcxyzvelocity"]):
-            Dobot.arcXYZVelocity.labels(device=self.id, station=fetchedBy).set(arc[0])
+            Dobot.arcXYZVelocity.labels(device=self.id, station=self.host).set(arc[0])
 
         if self.section.getboolean("arcrvelocity", fallback=Dobot.options["arcrvelocity"]):
-            Dobot.arcRVelocity.labels(device=self.id, station=fetchedBy).set(arc[1])
+            Dobot.arcRVelocity.labels(device=self.id, station=self.host).set(arc[1])
 
         if self.section.getboolean("arcxyzacceleration", fallback=Dobot.options["arcxyzacceleration"]):
-            Dobot.arcXYZAcceleration.labels(device=self.id, station=fetchedBy).set(arc[2])
+            Dobot.arcXYZAcceleration.labels(device=self.id, station=self.host).set(arc[2])
 
         if self.section.getboolean("arcracceleration", fallback=Dobot.options["arcracceleration"]):
-            Dobot.arcRAcceleration.labels(device=self.id, station=fetchedBy).set(arc[3])
+            Dobot.arcRAcceleration.labels(device=self.id, station=self.host).set(arc[3])
 
         angleStaticErr = dTypeX.GetAngleSensorStaticError(self.api)
         if self.section.getboolean("anglestaticerrrear", fallback=Dobot.options["anglestaticerrrear"]):
-            Dobot.angleStaticErrRear.labels(device=self.id, station=fetchedBy).set(angleStaticErr[0])
+            Dobot.angleStaticErrRear.labels(device=self.id, station=self.host).set(angleStaticErr[0])
 
         if self.section.getboolean("anglestaticerrfront", fallback=Dobot.options["anglestaticerrfront"]):
-            Dobot.angleStaticErrFront.labels(device=self.id, station=fetchedBy).set(angleStaticErr[1])
+            Dobot.angleStaticErrFront.labels(device=self.id, station=self.host).set(angleStaticErr[1])
 
         angleCoef = dTypeX.GetAngleSensorCoef(self.api)
         if self.section.getboolean("anglecoefrear", fallback=Dobot.options["anglecoefrear"]):
-            Dobot.angleCoefRear.labels(device=self.id, station=fetchedBy).set(angleCoef[0])
+            Dobot.angleCoefRear.labels(device=self.id, station=self.host).set(angleCoef[0])
 
         if self.section.getboolean("anglecoeffront", fallback=Dobot.options["anglecoeffront"]):
-            Dobot.angleCoefFront.labels(device=self.id, station=fetchedBy).set(angleCoef[1])
+            Dobot.angleCoefFront.labels(device=self.id, station=self.host).set(angleCoef[1])
 
         if self.section.getboolean("slidingrailstatus", fallback=Dobot.options["slidingrailstatus"]):
             if bool(dTypeX.GetDeviceWithL(self.api)[0]):
-                Dobot.slidingRailStatus.labels(device=self.id, station=fetchedBy).state("enabled")
+                Dobot.slidingRailStatus.labels(device=self.id, station=self.host).state("enabled")
             else:
-                Dobot.slidingRailStatus.labels(device=self.id, station=fetchedBy).state("disabled")
+                Dobot.slidingRailStatus.labels(device=self.id, station=self.host).state("disabled")
 
         if self.section.getboolean("slidingrailpose", fallback=Dobot.options["slidingrailpose"]):
-            Dobot.slidingRailPose.labels(device=self.id, station=fetchedBy).set(dTypeX.GetPoseL(self.api)[0])
+            Dobot.slidingRailPose.labels(device=self.id, station=self.host).set(dTypeX.GetPoseL(self.api)[0])
 
         jogRail = dTypeX.GetJOGLParams(self.api)
         if self.section.getboolean("slidingrailjogvelocity", fallback=Dobot.options["slidingrailjogvelocity"]):
-            Dobot.slidingRailJogVelocity.labels(device=self.id, station=fetchedBy).set(jogRail[0])
+            Dobot.slidingRailJogVelocity.labels(device=self.id, station=self.host).set(jogRail[0])
 
         if self.section.getboolean("slidingrailjogacceleration", fallback=Dobot.options["slidingrailjogacceleration"]):
-            Dobot.slidingRailJogAcceleration.labels(device=self.id, station=fetchedBy).set(jogRail[1])
+            Dobot.slidingRailJogAcceleration.labels(device=self.id, station=self.host).set(jogRail[1])
 
         ptpRail = dTypeX.GetPTPLParams(self.api)
         if self.section.getboolean("slidingrailptpvelocity", fallback=Dobot.options["slidingrailptpvelocity"]):
-            Dobot.slidingRailPtpVelocity.labels(device=self.id, station=fetchedBy).set(ptpRail[0])
+            Dobot.slidingRailPtpVelocity.labels(device=self.id, station=self.host).set(ptpRail[0])
 
         if self.section.getboolean("slidingrailptpacceleration", fallback=Dobot.options["slidingrailptpacceleration"]):
-            Dobot.slidingRailPtpAcceleration.labels(device=self.id, station=fetchedBy).set(ptpRail[1])
+            Dobot.slidingRailPtpAcceleration.labels(device=self.id, station=self.host).set(ptpRail[1])
 
 
         if self.section.getboolean("wifimodulestatus", fallback=Dobot.options["wifimodulestatus"]):
             if bool(dTypeX.GetWIFIConfigMode(self.api)[0]):
-                Dobot.wifiModuleStatus.labels(device=self.id, station=fetchedBy).state("enabled")
+                Dobot.wifiModuleStatus.labels(device=self.id, station=self.host).state("enabled")
             else:
-                Dobot.wifiModuleStatus.labels(device=self.id, station=fetchedBy).state("disabled")
+                Dobot.wifiModuleStatus.labels(device=self.id, station=self.host).state("disabled")
 
         if self.section.getboolean("wificonnectionstatus", fallback=Dobot.options["wificonnectionstatus"]):
             if bool(dTypeX.GetWIFIConnectStatus(self.api)[0]):
-                Dobot.wifiConnectionStatus.labels(device=self.id, station=fetchedBy).state("enabled")
+                Dobot.wifiConnectionStatus.labels(device=self.id, station=self.host).state("enabled")
             else:
-                Dobot.wifiConnectionStatus.labels(device=self.id, station=fetchedBy).state("disabled")
+                Dobot.wifiConnectionStatus.labels(device=self.id, station=self.host).state("disabled")
 
     def _disconnect(self):
-        dTypeX.DisconnectAll()
-        #dTypeX.DisconnectDobotX(self.api)
+        dTypeX.DisconnectDobotX(self.api)
 
 class Jevois(Device):
     options = {"objects":"","objectidentified":True,"objectlocation":True,"objectsize":False}
@@ -429,7 +436,7 @@ class Jevois(Device):
     objectLocationZ = Gauge("object_location_z", "Identified object\"s Z position", ["device","station"])
     objectSize = Gauge("object_size","Identified object\"s size", ["device","station"])
 
-    def _connect(self):
+    def _connect(self) -> bool:
         try:
             self.serial = serial.Serial(self.port, 115200, timeout=0)
             self.__prominit()
@@ -447,7 +454,7 @@ class Jevois(Device):
                 print("The \"objects\" list is necessary for monitoring identified objects")
                 print("Skipping monitoring objects identified for Jevois:" + self.port)
 
-    def _fetch(self, fetchedBy):
+    def _fetch(self):
         line = self.serial.readline().rstrip().decode()
         tok = line.split()
 
@@ -469,26 +476,21 @@ class Jevois(Device):
                 self.objectIdentified.state(tok[1])
 
         if self.section.getboolean("objectlocation", fallback=Jevois.options["objectlocation"]):
-            Jevois.objectLocationX.labels(device=self.id, station=fetchedBy).set(float(tok[2]))
+            Jevois.objectLocationX.labels(device=self.id, station=self.host).set(float(tok[2]))
 
             if int(dimension) > 1:
-                Jevois.objectLocationY.labels(device=self.id, station=fetchedBy).set(float(tok[3]))
+                Jevois.objectLocationY.labels(device=self.id, station=self.host).set(float(tok[3]))
 
             if int(dimension) == 3:
-                Jevois.objectLOcationZ.labels(device=self.id, station=fetchedBy).set(float(tok[4]))
+                Jevois.objectLOcationZ.labels(device=self.id, station=self.host).set(float(tok[4]))
 
         if self.section.getboolean("objectsize", fallback=Jevois.options["objectsize"]):
             if dimension == "1":
-                Jevois.objectSize.labels(device=self.id, station=fetchedBy).set(float(tok[3]))
+                Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[3]))
             elif dimension == "2":
-                Jevois.objectSize.labels(device=self.id, station=fetchedBy).set(float(tok[4])*float(tok[5]))
+                Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[4])*float(tok[5]))
             elif dimension == "3":
-                Jevois.objectSize.labels(device=self.id, station=fetchedBy).set(float(tok[5])*float(tok[6])*float(tok[7]))
+                Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[5])*float(tok[6])*float(tok[7]))
 
     def _disconnect(self):
         self.serial.close()
-
-class Tester(Device):
-    def _connect(self):
-        pass
-    pass

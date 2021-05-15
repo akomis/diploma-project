@@ -586,6 +586,8 @@ isUsingLinearRail = False
 QuitDobotApiFlag = True
 
 connections = []
+kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
 
 def load():
     if platform.system() == "Windows":
@@ -689,7 +691,7 @@ def ConnectDobotX(portName, baudrate=115200):
         if api is None:
             raise Exception
     except:
-        return None, [0]
+        return None, [1]
 
     state = ConnectDobot(api, portName, baudrate)
 
@@ -698,26 +700,24 @@ def ConnectDobotX(portName, baudrate=115200):
 def DisconnectDobot(api):
     api.DisconnectDobot(c_int(masterId))
 
-def free_library(api):
-    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
-    kernel32.FreeLibrary.argtypes = [ctypes.wintypes.HMODULE]
-    kernel32.FreeLibrary(api._handle)
-
 def DisconnectDobotX(api):
     #api.DisconnectDobot(c_int(masterId))
     id = connections.index(api)
+
     if connections[id] is not None:
-        free_library(api)
+        kernel32.FreeLibrary(api._handle)
         os.remove('.\\runtime\dobot' + str(id) + '.dll')
+        print("Removed dobot"+str(id)+".dll OK")
         connections[id] = None
         #print('Removed dobot with id: ' + str(id))
 
 def DisconnectAll():
     for api in connections:
-        id = connections.index(api)
-        free_library(api)
-        os.remove('.\\runtime\dobot' + str(id) + '.dll')
-        #print('Removed dobot with id: ' + str(id))
+        if api is not None:
+            id = connections.index(api)
+            kernel32.FreeLibrary(api._handle)
+            os.remove('.\\runtime\dobot' + str(id) + '.dll')
+            #print('Removed dobot with id: ' + str(id))
 
     connections.clear()
 

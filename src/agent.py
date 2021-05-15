@@ -120,10 +120,16 @@ class Agent():
                 self.agentPrint(str(errorCount) + " error(s) in \"" + sectionName + "\" section. The device will not be monitored. Please resolve the errors in order for this device to be monitored.", type="w")
             else:
                 try:
-                    device = entityClass(section, connectionPort)
+                    device = entityClass(section, connectionPort, self.name)
                 except:
                     flag = True
                     self.agentPrint("\"" + deviceType +"\" device module does not properly implement the Device interface", type="e")
+                    self.agentPrint("\"" + sectionName + "\" device will not be monitored.", type="w")
+                    continue
+
+                if device.attrNumber == 0:
+                    flag = True
+                    self.agentPrint("Device \"" + sectionName + "\" has 0 enabled attributes to be monitored", type="e")
                     self.agentPrint("\"" + sectionName + "\" device will not be monitored.", type="w")
                     continue
 
@@ -170,11 +176,15 @@ class Agent():
         while 1:
             if self.verbose:
                 start = time.time()
-                device._fetch(fetchedBy = self.name)
+                device._fetch()
                 elapsed = time.time() - start
                 self.agentPrint("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms", type="o")
             else:
-                device._fetch(fetchedBy = self.name)
+                try:
+                    device._fetch(fetchedBy = self.name)
+                except Exception as e:
+                    print(device.id + ": " + str(e))
+                    continue
 
             time.sleep(device.timeout / 1000)
 
@@ -193,7 +203,7 @@ class Agent():
             for device in self.devices:
                 Thread(target = self.__fetchFrom, args=(device,)).start()
                 if self.verbose:
-                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(len(device.section)) + " active attributes", type="o")
+                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(device.attrNumber) + " active attributes (fetching timeout: " + str(device.timeout) + "ms)", type="o")
 
             if not self.verbose:
                 self.agentPrint("Monitoring.. ", type="i")
