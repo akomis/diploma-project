@@ -701,23 +701,21 @@ def DisconnectDobot(api):
     api.DisconnectDobot(c_int(masterId))
 
 def DisconnectDobotX(api):
-    #api.DisconnectDobot(c_int(masterId))
+    DisconnectDobot(api)
     id = connections.index(api)
 
     if connections[id] is not None:
         kernel32.FreeLibrary(api._handle)
         os.remove('.\\runtime\dobot' + str(id) + '.dll')
-        print("Removed dobot"+str(id)+".dll OK")
         connections[id] = None
-        #print('Removed dobot with id: ' + str(id))
 
 def DisconnectAll():
     for api in connections:
         if api is not None:
+            DisconnectDobot(api)
             id = connections.index(api)
             kernel32.FreeLibrary(api._handle)
             os.remove('.\\runtime\dobot' + str(id) + '.dll')
-            #print('Removed dobot with id: ' + str(id))
 
     connections.clear()
 

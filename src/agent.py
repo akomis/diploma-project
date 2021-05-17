@@ -8,6 +8,7 @@ from prometheus_client import start_http_server
 from device_modules import *
 
 class Agent():
+    stopped = False
     termcolors = {
     "B":"\033[1m","U":"\033[4m","H":"\033[95m",
     "OK":"\033[92m","INFO":"\033[94m",
@@ -16,6 +17,7 @@ class Agent():
 
     def __init__(self, devicesFilename:str, name:str, prometheusPort:int, killSwitch:bool, verbose:bool, color:bool):
         self.config = configparser.ConfigParser()
+        self.devicesFilename = devicesFilename
         self.name = name
         self.prometheusPort = prometheusPort
         self.killSwitch = killSwitch
@@ -24,7 +26,7 @@ class Agent():
             for attr in Agent.termcolors:
                 Agent.termcolors[attr] = ""
 
-        self.__readConfig(devicesFilename)
+        self.__readConfig(self.devicesFilename)
         self.validSections = self.__validateConfig()
         self.devices = []
 
@@ -121,13 +123,13 @@ class Agent():
             else:
                 try:
                     device = entityClass(section, connectionPort, self.name)
-                except:
+                except Exception as e:
                     flag = True
-                    self.agentPrint("\"" + deviceType +"\" device module does not properly implement the Device interface", type="e")
+                    self.agentPrint("\"" + deviceType + "\" device module does not properly implement the Device interface", type="e")
                     self.agentPrint("\"" + sectionName + "\" device will not be monitored.", type="w")
                     continue
 
-                if device.attrNumber == 0:
+                if device.activeAttr == 0:
                     flag = True
                     self.agentPrint("Device \"" + sectionName + "\" has 0 enabled attributes to be monitored", type="e")
                     self.agentPrint("\"" + sectionName + "\" device will not be monitored.", type="w")
@@ -146,14 +148,14 @@ class Agent():
     def __connectDevices(self):
         # Discover through the validated config which devices should be monitored
         for sectionName in self.validSections:
-            start = None
+            start = time.time()
             device = self.validSections[sectionName]
 
             if self.verbose:
-                start = time.time()
                 self.agentPrint("Connecting to " + device.id + "..", type="i")
 
-            if device._connect():
+            try:
+                device.connect()
                 elapsed = time.time() - start
 
                 self.devices.append(device)
@@ -161,35 +163,36 @@ class Agent():
                     self.agentPrint("Device " + device.type + " at " + device.port + " connected succesfully! (" + str(round(elapsed*1000)) + "ms)", type="o")
                 else:
                     self.agentPrint("Device " + device.type + " at " + device.port + " connected succesfully!", type="o")
-            else:
-                self.agentPrint(device.type + " at " + device.port + " cannot be connected.", type="e")
+            except Exception as e:
+                self.agentPrint(device.type + " at " + device.port + " cannot be connected. (" + str(e) + ")", type="e")
                 self.agentPrint("Device " + device.type + " at " + device.port + " will not be monitored.", type="w")
+                if self.killSwitch:
+                    self.agentPrint("Killswitch is enabled. Exiting..", type="f")
+                    exit(7)
 
     def __disconnectDevices(self):
         for device in self.devices:
-            device._disconnect()
+            device.disconnect()
 
             if self.verbose:
                 self.agentPrint("Disconnected device " + device.id, type="o")
 
     def __fetchFrom(self, device):
-        while 1:
-            if self.verbose:
-                start = time.time()
-                device._fetch()
+        while not Agent.stopped:
+            start = time.time()
+            try:
+                device.fetch()
                 elapsed = time.time() - start
-                self.agentPrint("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms", type="o")
-            else:
-                try:
-                    device._fetch(fetchedBy = self.name)
-                except Exception as e:
-                    print(device.id + ": " + str(e))
-                    continue
+                if self.verbose:
+                    self.agentPrint("Fetched from " + device.id + " in " + str(round(elapsed*1000)) + " ms", type="o")
 
-            time.sleep(device.timeout / 1000)
+                time.sleep(device.timeout / 1000)
+            except Exception as e:
+                self.agentPrint("Couldn't fetch from " + device.id + " (" + str(e) + ")", type="e")
+                time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
-        self.agentPrint("Connecting to devices listed in devices.conf..", type="i")
+        self.agentPrint("Connecting to devices listed in" + self.devicesFilename + "..", type="i")
         self.__connectDevices()
 
         if len(self.devices) == 0:
@@ -200,17 +203,26 @@ class Agent():
         start_http_server(self.prometheusPort)
 
         try:
+            threads = {}
             for device in self.devices:
-                Thread(target = self.__fetchFrom, args=(device,)).start()
+                threads[device] = Thread(target = self.__fetchFrom, args=(device,))
+
+            for device in threads:
+                threads[device].start()
                 if self.verbose:
-                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(device.attrNumber) + " active attributes (fetching timeout: " + str(device.timeout) + "ms)", type="o")
+                    self.agentPrint("Started monitoring for device " + device.id + " with " + str(device.activeAttr) + " active attributes (fetching timeout: " + str(device.timeout) + "ms)", type="o")
 
             if not self.verbose:
-                self.agentPrint("Monitoring.. ", type="i")
+                self.agentPrint("Monitoring..", type="i")
 
             while 1:
                 pass
         except KeyboardInterrupt:
+            Agent.stopped = True
+            self.agentPrint("Waiting for active fetching to complete..", type="i")
+            for device in threads:
+                threads[device].join()
+
             self.agentPrint("Disconnecting devices..", type="i")
             self.__disconnectDevices()
             exit(0)
@@ -231,7 +243,7 @@ def main():
     parser.add_argument("-d", "--devices", default="devices.conf", help="specify discovery/configuration file absolute path (default: \".\\devices.conf\")")
     parser.add_argument("-n", "--name", default="Agent0", help="specify symbolic agent/station name used for seperation/grouping of stations (default: \"Agent0\")")
     parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for the Prometheus endpoint (default: 8000)")
-    parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if at least 1 error exists in configuration file")
+    parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if error occurs in validation/connection phase")
     parser.add_argument("-v", "--verbose", action="store_true", help="print actions with details in standard output")
     parser.add_argument("-c", "--color", action="store_true", help="print color rich messages to terminal (terminal needs to support ANSI escape colors)")
     parser.add_argument("-m", "--more", action="store_true", help="open README.md with configuration and implementation details")

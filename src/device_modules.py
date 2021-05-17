@@ -19,21 +19,21 @@ class Device(ABC):
 
         activeCounter = 0
         for key in type(self).options:
-            if self.section.getboolean(key, fallback=type(self).options[key]):
+            if isinstance(type(self).options[key], bool) and self.section.getboolean(key, fallback=type(self).options[key]):
                 activeCounter += 1
 
-        self.attrNumber = activeCounter
+        self.activeAttr = activeCounter
 
     @abstractmethod
-    def _connect(self) -> bool:
+    def connect(self):
         pass
 
     @abstractmethod
-    def _fetch(self):
+    def fetch(self):
         pass
 
     @abstractmethod
-    def _disconnect(self):
+    def disconnect(self):
         pass
 
 class Dobot(Device):
@@ -131,16 +131,19 @@ class Dobot(Device):
     slidingRailPtpVelocity = Gauge("sliding_rail_ptp_velocity","Velocity (mm/s) of sliding rail in point to point mode", ["device","station"])
     slidingRailPtpAcceleration = Gauge("sliding_rail_ptp_acceleration","Acceleration (mm/s^2) of sliding rail in point to point mode", ["device","station"])
     wifiModuleStatus = Enum("wifi_module_status","Wifi module status (enabled/disabled)", ["device","station"], states=["enabled","disabled"])
-    wifiConnectionStatus = Enum("wifi_connection_status","Wifi connection status (connected/not connected)", ["device","station"], states=["enabled","disabled"])
+    wifiConnectionStatus = Enum("wificonnection_status","Wifi connection status (connected/not connected)", ["device","station"], states=["enabled","disabled"])
 
-    def _connect(self) -> bool:
-        self.api, state = dTypeX.ConnectDobotX(self.port)
+    def connect(self):
+        stateInfo = {1:"Not Found", 2:"Occupied"}
 
-        if state[0] == dTypeX.DobotConnect.DobotConnect_NoError:
-            self.__prominit()
-            return True
-        else:
-            return False
+        try:
+            self.api, state = dTypeX.ConnectDobotX(self.port)
+            if state[0] == dTypeX.DobotConnect.DobotConnect_NoError:
+                self.__prominit()
+            else:
+                raise Exception(stateInfo[state[0]])
+        except Exception as e:
+            raise Exception(str(e))
 
     def __prominit(self):
         enabledDeviceInfo = {}
@@ -169,7 +172,7 @@ class Dobot(Device):
         if len(enabledWifiInfo) > 0:
             Dobot.wifiInfo.labels(device=self.id, station=self.host).info(enabledWifiInfo)
 
-    def _fetch(self):
+    def fetch(self):
         if self.section.getboolean("devicetime", fallback=Dobot.options["devicetime"]):
             Dobot.deviceTime.labels(device=self.id, station=self.host).set(dTypeX.GetDeviceTime(self.api)[0])
 
@@ -425,7 +428,7 @@ class Dobot(Device):
             else:
                 Dobot.wifiConnectionStatus.labels(device=self.id, station=self.host).state("disabled")
 
-    def _disconnect(self):
+    def disconnect(self):
         dTypeX.DisconnectDobotX(self.api)
 
 class Jevois(Device):
@@ -436,40 +439,37 @@ class Jevois(Device):
     objectLocationZ = Gauge("object_location_z", "Identified object\"s Z position", ["device","station"])
     objectSize = Gauge("object_size","Identified object\"s size", ["device","station"])
 
-    def _connect(self) -> bool:
+    def connect(self):
         try:
             self.serial = serial.Serial(self.port, 115200, timeout=0)
             self.__prominit()
-            return True
         except Exception as e:
-            print("Couldn't connect with Jevois Camera device at port " + self.port + " (" + str(e) + ")")
-            return False
+            raise Exception(str(e))
 
     def __prominit(self):
-        if self.section.getboolean("objectidentified", fallback=Dobot.options["objectidentified"]):
-            if self.section.get("objects") is not None:
+        if self.section.getboolean("objectidentified", fallback=Jevois.options["objectidentified"]):
+            if self.section["objects"] is not None:
                 self.objects = self.section["objects"].split()
                 self.objectIdentified = Enum("object_identified_by_"+self.port, "Object Identified", states=self.objects)
             else:
-                print("The \"objects\" list is necessary for monitoring identified objects")
-                print("Skipping monitoring objects identified for Jevois:" + self.port)
+                raise Exception("The \"objects\" list is necessary for monitoring identified objects")
 
-    def _fetch(self):
+    def fetch(self):
         line = self.serial.readline().rstrip().decode()
         tok = line.split()
 
-        # Abort fetching if timeout or malformed line
+        # in case of no identified object (empty message)
         if len(tok) < 1: return
 
         serstyle = tok[0][0]
         dimension = tok[0][1]
 
         # If the serstyle is not Normal (thus it is unsupported by the module)
-        if (serstyle != "N"): return
+        if (serstyle != "N"): raise Exception("Unsupported serstyle (" + serstyle + ")")
 
-        if dimension == "1" and len(tok) != 4: return
-        if dimension == "2" and len(tok) != 6: return
-        if dimension == "3" and len(tok) != 8: return
+        if dimension == "1" and len(tok) != 4: raise Exception("Malformed line (expected 4 fields but received " + str(len(tok)) + ")")
+        if dimension == "2" and len(tok) != 6: raise Exception("Malformed line (expected 6 fields but received " + str(len(tok)) + ")")
+        if dimension == "3" and len(tok) != 8: raise Exception("Malformed line (expected 8 fields but received " + str(len(tok)) + ")")
 
         if self.section.getboolean("objectidentified", fallback=Jevois.options["objectidentified"]):
             if self.objects is not None and tok[1] in self.objects:
@@ -482,15 +482,15 @@ class Jevois(Device):
                 Jevois.objectLocationY.labels(device=self.id, station=self.host).set(float(tok[3]))
 
             if int(dimension) == 3:
-                Jevois.objectLOcationZ.labels(device=self.id, station=self.host).set(float(tok[4]))
+                Jevois.objectLocationZ.labels(device=self.id, station=self.host).set(float(tok[4]))
 
         if self.section.getboolean("objectsize", fallback=Jevois.options["objectsize"]):
             if dimension == "1":
                 Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[3]))
             elif dimension == "2":
-                Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[4])*float(tok[5]))
+                Jevois.objectSize.labels(device=self.id, station=self.host).set(abs(float(tok[4])*float(tok[5])))
             elif dimension == "3":
-                Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[5])*float(tok[6])*float(tok[7]))
+                Jevois.objectSize.labels(device=self.id, station=self.host).set(abs(float(tok[5])*float(tok[6])*float(tok[7])))
 
-    def _disconnect(self):
+    def disconnect(self):
         self.serial.close()

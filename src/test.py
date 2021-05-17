@@ -193,15 +193,13 @@ Parameters:
 '''
 def f_Jevois_Connectivity(port):
     try:
-        ser = serial.Serial(port, 115200, timeout=1)
-        line = ser.readline().rstrip()
-        tok = line.split()
+        ser = serial.Serial(port, 115200, timeout=0.25)
         print("Jevois Camera at port " + port + " connected succesfully!")
     except Exception as e:
         print("Couldn't connect with Jevois Camera device at port " + port + " (" + str(e) + ")")
         return False
 
-    stop = time.time() + 5
+    stop = time.time() + 30
     while (time.time() < stop):
         line = ser.readline().rstrip().decode()
         tok = line.split()
@@ -271,6 +269,6 @@ def f_Dobot_ParallelConnection(portList):
 #p_Dobot_FetchingOverhead("192.168.43.4", 30)
 #p_Jevois_FetchingRate("COM4", 50)
 #p_Dobot_SwitchOverhead("192.168.43.4","192.168.43.5")
-#f_Jevois_Connectivity("COM4")
+f_Jevois_Connectivity("COM4")
 #f_Dobot_Alarms("192.168.43.4")
 #f_Dobot_ParallelConnection(["192.168.43.4","192.168.43.5"])
