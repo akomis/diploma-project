@@ -8,9 +8,9 @@ class Device(ABC):
 
     def __init__(self, config_section, port, host):
         self.section = config_section
-        self.type = type(self).__name__
         self.port = port
         self.host = host
+        self.type = type(self).__name__
         self.id = self.type + ":" + self.port
 
         self.timeout = self.section.getint("timeout", fallback=Device.options["timeout"])

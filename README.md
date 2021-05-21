@@ -125,6 +125,7 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 |         WifiNetmask        |                                          Subnet mask                                          |    info (str)   |       off       |       GetWIFINetmask(api)      |
 |         WifiGateway        |                                        Default Gateway                                        |    info (str)   |       off       |       GetWIFIGateway(api)      |
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
+
 Note: Only enable the WiFi attributes if the Dobot is currently not executing and movement commands.   
 
 ### Jevois
@@ -159,8 +160,8 @@ The system can scale (monitoring station level) vertically as the agent can conn
 <br><br>
 
 ## Extensibility
-The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to implement the `Device` abstract base class (virtual interface) i.e. implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch its attributes (and update prometheus endpoint) and disconnect from the device.  
-The attributes that need to be implemented is the options{} dictionary and the methods are the connect(), fetch() and disconnect() methods. More specifically
+The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to implement the `Device` abstract base class (virtual interface). The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch its attributes (and update prometheus endpoint) and disconnect from the device.  
+The member that needs to be implemented is the options{} dictionary and the methods are the connect(), fetch() and disconnect() methods. More specifically
 ### `options{}`
 A dictionary that includes all the valid fields/options a device can have in the configuration file (monitored attribute fields) as keys and their default value (also used to validate the type of the value in the configuration file) as values.
 ### `connect()`
@@ -188,7 +189,7 @@ Throughout the usage of the Dobot API, some minor issues arose with fetching cer
 * Fixed `GetPoseL(api)` function, which returns the position of the sliding rail (if there is one connected to the robot), by importing the math library which is required for the needs of the function, however not imported by default.
 ### Improvements
 * `loadX()` function to replace `load()` that implements loading individual dll (DobotDll.dll instances) for each connected device in order to enable parallel connection with multiple dobots. In addition to that a "connections" list is maintained by the API to include all connected devices (their dll). This function is not meant to be called explicitly.
-* `ConnectDobotX(port)` function to replace `api = dType.load(); state = dType.ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()` improvement, it allows parallel connections to Dobot Magicians and removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
+* `ConnectDobotX(port)` function to replace `api = dType.load(); state = dType.ConnectDobot(api, port, baudrate)` for connecting to a Dobot Magician device. The main improvement this change provides is that through its implementation, by utilizing the `loadX()`, it allows parallel connections to Dobot Magicians and also removes the need to issue it separately. When using the default API this model is not feasible and multiple Dobot Magicians can be connected concurrently with a switching overhead of approximately 0.3 seconds per switch. Apart from the performance benefits this function provides, it is also a more readable and convenient option for connecting a Dobot Magician device as all the standardized procedures are included either in the function or through default arguments. Example of use:  
 ```python
 dobot0, state0 = dTypeX.ConnectDobotX("192.168.43.4")
 dobot1, state1 = dTypeX.ConnectDobotX("192.168.43.5")
