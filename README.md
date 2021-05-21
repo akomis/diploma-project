@@ -125,7 +125,7 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 |         WifiNetmask        |                                          Subnet mask                                          |    info (str)   |       off       |       GetWIFINetmask(api)      |
 |         WifiGateway        |                                        Default Gateway                                        |    info (str)   |       off       |       GetWIFIGateway(api)      |
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
-Note: Only enable the WiFi attributes if the Dobot is currently not working.   
+Note: Only enable the WiFi attributes if the Dobot is currently not executing and movement commands.   
 
 ### Jevois
 |    Config Name   |          Description         |  Prometheus Type |Supported Serstyle| Default |
