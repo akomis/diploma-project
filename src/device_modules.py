@@ -6,7 +6,7 @@ import serial
 class Device(ABC):
     options = {"timeout":100} # Default device options/attributes
 
-    def __initialize__(self, config_section, port, host):
+    def __init__(self, config_section, port, host):
         self.section = config_section
         self.type = type(self).__name__
         self.port = port

@@ -26,7 +26,7 @@ class Agent():
             for attr in Agent.termcolors:
                 Agent.termcolors[attr] = ""
 
-        self.__readConfig(self.devicesFilename)
+        self.__readConfig()
         self.validSections = self.__validateConfig()
         self.devices = []
 
@@ -48,17 +48,17 @@ class Agent():
         else:
             print(prefix + s)
 
-    def __readConfig(self, filename):
+    def __readConfig(self):
         try:
-            check = self.config.read(filename)
+            check = self.config.read(self.devicesFilename)
 
             if len(check) == 0:
-                raise Exception("Couldn't find \"" + filename + "\"")
-
-            self.agentPrint("Reading configuration file..", type="i")
+                raise Exception("Couldn't find file")
         except Exception as e:
-            self.agentPrint("Can't read configuration file \"" + filename + "\" (" + str(e) + ")", type="e")
+            self.agentPrint("Can't read configuration file \"" + self.devicesFilename + "\" (" + str(e) + ")", type="e")
             exit(3)
+
+        self.agentPrint("Succesfully opened configuration file \"" + self.devicesFilename + "\"", type="o")
 
     def __validateConfig(self):
         self.agentPrint("Validating configuration file..", type="i")
@@ -142,6 +142,9 @@ class Agent():
             if self.killSwitch:
                 self.agentPrint("Killswitch is enabled. Exiting..", type="f")
                 exit(6)
+        else:
+            if self.verbose:
+                self.agentPrint("No errors in \"" + self.devicesFilename + "\"", type="o")
 
         return validSections
 
@@ -192,7 +195,7 @@ class Agent():
                 time.sleep(device.timeout / 1000)
 
     def startRoutine(self):
-        self.agentPrint("Connecting to devices listed in" + self.devicesFilename + "..", type="i")
+        self.agentPrint("Connecting to devices listed in \"" + self.devicesFilename + "\"..", type="i")
         self.__connectDevices()
 
         if len(self.devices) == 0:
