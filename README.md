@@ -23,8 +23,8 @@ For using the `Jevois` device module
 
 ## Installation
 - Install Python 3.9+
-- Install Magician Studio (which includes the Dobot Robot Driver)
 - Install Prometheus
+- Install Magician Studio (which includes the Dobot Robot Driver)
 - `pip3 install prometheus-client pyserial`
 - `git clone https://github.com/akomis/diploma-project.git`
 <br><br>
@@ -34,7 +34,7 @@ Choose which devices and which data/attributes of those will be monitored by cha
 For monitoring a device the corresponding class in device_modules.py must exist. For the agent to discover the device and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section), a device entry must exist in the configuration file e.g. `class DeviceType` a `[DeviceType:<port>]`. One can connect multiple devices through various ports (serial port/IP address).  
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN).
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
-For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be in the same format as the class name representing the device module.  
+For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be exactly the same as the class name representing the device module.  
 Each device entry supports by default the `Timeout` attribute which sets the timeout period in milliseconds in between fetches and defaults to 100.  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.  
 For more details on the configuration settings for the Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
@@ -125,6 +125,7 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 |         WifiNetmask        |                                          Subnet mask                                          |    info (str)   |       off       |       GetWIFINetmask(api)      |
 |         WifiGateway        |                                        Default Gateway                                        |    info (str)   |       off       |       GetWIFIGateway(api)      |
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
+Note: Only enable the WiFi attributes if the Dobot is currently not working.   
 
 ### Jevois
 |    Config Name   |          Description         |  Prometheus Type |Supported Serstyle| Default |
@@ -154,18 +155,18 @@ Optional arguments:
 <br><br>
 
 ## Scalability
-The system can scale (monitoring station level) vertically as the agent can connect to and monitor a variable amount of devices, a number constrained by the monitoring station's available ports and resources. In addition for larger and more complex setups one can scale the system vertically by adding multiple monitoring stations. For the configuration of these stations one can tweak their respective prometheus and agent configurations. For their coordination one can use a [Prometheus Hierarchical Federation](https://prometheus.io/docs/prometheus/latest/federation/#hierarchical-federation).
+The system can scale (monitoring station level) vertically as the agent can connect to and monitor a variable amount of devices, a number constrained by the monitoring station's available ports and resources. In addition for larger and more complex setups one can scale the system vertically by adding multiple monitoring stations. For load balancing a section of the monitoring one can use multiple monitoring stations with the same name and query metrics based on that. For the configuration of these stations one can tweak their respective prometheus and agent configurations. For their coordination one can use a [Prometheus Hierarchical Federation](https://prometheus.io/docs/prometheus/latest/federation/#hierarchical-federation).
 <br><br>
 
 ## Extensibility
-The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to be a child of the Device class (found in the same file) and implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch (and inform prometheus) its attributes and finally disconnect from the device.  
+The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to implement the `Device` abstract base class (virtual interface) i.e. implement all its attributes and methods. The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch its attributes (and update prometheus endpoint) and disconnect from the device.  
 The attributes that need to be implemented is the options{} dictionary and the methods are the connect(), fetch() and disconnect() methods. More specifically
 ### `options{}`
 A dictionary that includes all the valid fields/options a device can have in the configuration file (monitored attribute fields) as keys and their default value (also used to validate the type of the value in the configuration file) as values.
 ### `connect()`
-Responsible for connecting to the device, initialize the prometheus metrics and other necessary device information that is vital for the use of the other methods. If the connection attempt is unsuccessful this method should return False, otherwise it should return True.
+Responsible for connecting to the device, initialize the prometheus metrics and other necessary device information that is vital for the use of the other methods. If the connection attempt is unsuccessful it should raise an exception.
 ### `fetch()`
-Used to extract all enabled monitoring attributes for said device and update the Prometheus metrics accordingly.
+Used to extract all enabled monitoring attributes for said device and update the Prometheus metrics accordingly. If the fetch attempt is unsuccessful it should raise an exception.
 ### `disconnect()`
 Responsible for disconnecting the device, close any open ports/streams and remove any runtime temporary files regarding the device.  
 
