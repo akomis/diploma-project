@@ -215,8 +215,8 @@ Both additions were due to the creation of the `ConnectDobotX(port)` function an
 <br><br>
 
 ## Resources
+- [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
 - [Dobot API & Dobot Communication Protocol](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot ALARM](http://www.dobot.it/wp-content/uploads/2018/03/dobot-magician-alarm-en.pdf)
 - [JeVois: Standardized serial messages formatting](http://jevois.org/doc/UserSerialStyle.html)
-- [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
 <br><br>
