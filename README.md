@@ -32,6 +32,23 @@ For using the `Jevois` device module
 - `git clone https://github.com/akomis/diploma-project.git`
 <br><br>
 
+## Usage
+When using the default configuration file location, make sure that `devices.conf` is properly setup and in the same directory as the executable.  
+```
+$ agent.py [-h] [-d DEVICES] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
+
+Optional arguments:
+  -h, --help                        show this help message and exit
+  -d DEVICES, --devices DEVICES     specify configuration file path (default: ".\devices.conf")
+  -n NAME, --name NAME              specify symbolic agent/station name used for seperation/grouping of stations (default: "Agent0")
+  -p PROMPORT, --promport PROMPORT  specify port number for the Prometheus endpoint (default: 8000)
+  -k, --killswitch                  exit agent if error occurs in validation/connection phase
+  -v, --verbose                     print actions with details in standard output
+  -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
+  -m, --more                        open README.md with configuration and implementation details
+```
+<br><br>
+
 ## Configuration
 Choose which devices and which data/attributes of those will be monitored by changing the `devices.conf` file.  
 For monitoring a device the corresponding class in device_modules.py must exist. For the agent to discover the device and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section), a device entry must exist in the configuration file e.g. `class DeviceType` a `[DeviceType:<port>]`. One can connect multiple devices through various ports (serial port/IP address).  
@@ -41,7 +58,6 @@ For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in 
 Each device entry supports by default the `Timeout` attribute which sets the timeout period in milliseconds in between fetches and defaults to 100.  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.  
 For more details on the configuration settings for the Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
-
 
 ### Dobot
 |         Config Name        |                                          Description                                          | Prometheus Type |     Default     |            API Call            |
@@ -129,7 +145,7 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 |         WifiGateway        |                                        Default Gateway                                        |    info (str)   |       off       |       GetWIFIGateway(api)      |
 |           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
 
-Note: Only enable the WiFi attributes if the Dobot is currently not executing and movement commands.   
+Note: Only enable the WiFi attributes if the Dobot is currently not executing any movement commands.   
 
 ### Jevois
 |    Config Name   |          Description         |  Prometheus Type |Supported Serstyle| Default |
@@ -139,23 +155,6 @@ Note: Only enable the WiFi attributes if the Dobot is currently not executing an
 |    ObjectSize    |   Identified object's size   |   gauge (float)  |      Normal      |   off   |
 
 For a more practical insight check the default `devices.conf` included.
-<br><br>
-
-## Usage
-When using the default configuration file location, make sure that `devices.conf` is properly setup and in the same directory as the executable.  
-```
-$ agent.py [-h] [-d DEVICES] [-n NAME] [-p PROMPORT] [-k] [-v] [-m]
-
-Optional arguments:
-  -h, --help                        show this help message and exit
-  -d DEVICES, --devices DEVICES     specify configuration file path (default: ".\devices.conf")
-  -n NAME, --name NAME              specify symbolic agent/station name used for seperation/grouping of stations (default: "Agent0")
-  -p PROMPORT, --promport PROMPORT  specify port number for the Prometheus endpoint (default: 8000)
-  -k, --killswitch                  exit agent if error occurs in validation/connection phase
-  -v, --verbose                     print actions with details in standard output
-  -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
-  -m, --more                        open README.md with configuration and implementation details
-```
 <br><br>
 
 ## Scalability
