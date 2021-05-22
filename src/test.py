@@ -135,16 +135,20 @@ def p_Jevois_FetchingRate(port, n):
     max = 0
     min = sys.maxsize
     sum = 0
-    for i in range(iterations):
+    i = 0
+    while i < iterations:
         start = time.time()
         line = ser.readline().rstrip().decode()
         stop = time.time()
-        ms = (stop - start) * 1000
-        sum += ms
-        if ms > max:
-            max = ms
-        if ms < min:
-            min = ms
+        if len(line) > 0:
+            print(line)
+            ms = (stop - start) * 1000
+            sum += ms
+            if ms > max:
+                max = ms
+            if ms < min:
+                min = ms
+            i += 1
 
     print("\nResults for " + str(iterations) + " iterations (attribute_name, avg, min, max (in milliseconds))")
     print(str(round(sum/iterations)) + "," + str(round(min)) + "," + str(round(max)))
@@ -267,8 +271,8 @@ def f_Dobot_ParallelConnection(portList):
 
 ### Enable/Disable Tests ###
 #p_Dobot_FetchingOverhead("192.168.43.4", 30)
-#p_Jevois_FetchingRate("COM4", 50)
+p_Jevois_FetchingRate("COM4", 30)
 #p_Dobot_SwitchOverhead("192.168.43.4","192.168.43.5")
-f_Jevois_Connectivity("COM4")
+#f_Jevois_Connectivity("COM4")
 #f_Dobot_Alarms("192.168.43.4")
 #f_Dobot_ParallelConnection(["192.168.43.4","192.168.43.5"])
