@@ -252,6 +252,7 @@ The supported device modules currently implement the device_id, device_type and 
 | ObjectIdentified | object_identified_by_{device_id}_{station} |
 |  ObjectLocation  |          object_location_{x\|y\|z}         |
 |    ObjectSize    |                 object_size                |
+
 <br><br>
 
 ## Fetch Times
