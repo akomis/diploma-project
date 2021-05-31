@@ -10,7 +10,7 @@ The goal of this system is to be an effective, modular and extensible solution a
 <div align="center">
 <img alt="overview" src="/pics/overview.jpg">
 </div>
-<br>
+<br><br>
 
 ## Dependencies
 - [Python 3.9+](https://www.python.org/downloads/windows/)
@@ -22,7 +22,7 @@ For using the `Dobot` device module
 
 For using the `Jevois` device module
 - [pyserial](https://pythonhosted.org/pyserial/)
-<br>
+<br><br>
 
 ## Installation
 - Install Python 3.9+
@@ -30,7 +30,7 @@ For using the `Jevois` device module
 - Install Magician Studio (which includes the Dobot Robot Driver)
 - `pip3 install prometheus-client pyserial`
 - `git clone https://github.com/akomis/diploma-project.git`
-<br>
+<br><br>
 
 ## Usage
 When using the default configuration file location, make sure that `devices.conf` is properly setup and in the same directory as the executable.  
@@ -47,7 +47,7 @@ Optional arguments:
   -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
   -m, --more                        open README.md with configuration and implementation details and exit
 ```
-<br>
+<br><br>
 
 ## Device Discovery/Configuration
 Choose which devices and which data/attributes of those will be monitored by changing the `devices.conf` file.  
@@ -60,90 +60,90 @@ All configuration is parsed and validated based on the above information, before
 For more details on the configuration settings for the Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
 ### Dobot
-|         Config Name        |                                          Description                                          | Prometheus Type |     Default     |            API Call            |
-|:--------------------------:|:---------------------------------------------------------------------------------------------:|:---------------:|:---------------:|:------------------------------:|
-|          DeviceSN          |                                     Device's serial number                                    |    info (str)   |        on       |        GetDeviceSN(api)        |
-|         DeviceName         |                                      Device's name/alias                                      |    info (str)   |        on       |       GetDeviceName(api)       |
-|        DeviceVersion       |                            Device's verion (major.minor.0.revision)                           |    info (str)   |        on       |      GetDeviceVersion(api)     |
-|         DeviceTime         |                                      Device's clock/time                                      |    info (str)   |       off       |       GetDeviceTime(api)       |
-|         QueueIndex         |                                 Current index in command queue                                |   gauge (int)   |       off       |  GetQueuedCmdCurrentIndex(api) |
-|            PoseX           |                       Real-time cartesian coordinate of device's X axis                       |  gauge (float)  |        on       |          GetPose(api)          |
-|            PoseY           |                       Real-time cartesian coordinate of device's Y axis                       |  gauge (float)  |        on       |          GetPose(api)          |
-|            PoseZ           |                       Real-time cartesian coordinate of device's Z axis                       |  gauge (float)  |        on       |          GetPose(api)          |
-|            PoseR           |                       Real-time cartesian coordinate of device's R axis                       |  gauge (float)  |        on       |          GetPose(api)          |
-|          AngleBase         |                                        Base joint angle                                       |  gauge (float)  |        on       |          GetPose(api)          |
-|        AngleRearArm        |                                      Rear arm joint angle                                     |  gauge (float)  |        on       |          GetPose(api)          |
-|        AngleForearm        |                                      Forearm joint angle                                      |  gauge (float)  |        on       |          GetPose(api)          |
-|      AngleEndEffector      |                                    End effector joint angle                                   |  gauge (float)  |        on       |          GetPose(api)          |
-|         AlarmsState        |                                     Device's active alarms                                    |  enum (alarms)  |        on       |       GetAlarmsStateX(api)     |
-|            HomeX           |                                    Home position for X axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |
-|            HomeY           |                                    Home position for Y axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |
-|            HomeZ           |                                    Home position for Z axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |
-|            HomeR           |                                    Home position for R axis                                   |  gauge (float)  |       off       |       GetHOMEParams(api)       |
-|        EndEffectorX        |                                 X-axis offset of end effector                                 |  gauge (float)  |       off       |    GetEndEffectorParams(api)   |
-|        EndEffectorY        |                                 Y-axis offset of end effector                                 |  gauge (float)  |       off       |    GetEndEffectorParams(api)   |
-|        EndEffectorZ        |                                 Z-axis offset of end effector                                 |  gauge (float)  |       off       |    GetEndEffectorParams(api)   |
-|         LaserStatus        |                               Status (enabled/disabled) of laser                              |   enum (bool)   |       off       |    GetEndEffectorLaser(api)    |
-|      SuctionCupStatus      |                            Status (enabled/disabled) of suction cup                           |   enum (bool)   |       off       |  GetEndEffectorSuctionCup(api) |
-|        GripperStatus       |                              Status (enabled/disabled) of gripper                             |   enum (bool)   |       off       |   GetEndEffectorGripper(api)   |
-|       JogBaseVelocity      |                          Velocity (°/s) of base joint in jogging mode                         |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|     JogRearArmVelocity     |                        Velocity (°/s) of rear arm joint in jogging mode                       |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|     JogForearmVelocity     |                        Velocity (°/s) of forearm joint in jogging mode                        |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|   JogEndEffectorVelocity   |                      Velocity (°/s) of end effector joint in jogging mode                     |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|     JogBaseAcceleration    |                       Acceleration (°/s^2) of base joint in jogging mode                      |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|   JogRearArmAcceleration   |                     Acceleration (°/s^2) of rear arm joint in jogging mode                    |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|   JogForearmAcceleration   |                     Acceleration (°/s^2) of forearm joint in jogging mode                     |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-| JogEndEffectorAcceleration |                   Acceleration (°/s^2) of end effector joint in jogging mode                  |  gauge (float)  |       off       |     GetJOGJointParams(api)     |
-|      JogAxisXVelocity      |           Velocity (mm/s) of device's X axis (cartesian coordinate) in jogging mode           |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|      JogAxisYVelocity      |           Velocity (mm/s) of device's Y axis (cartesian coordinate) in jogging mode           |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|      JogAxisZVelocity      |           Velocity (mm/s) of device's Z axis (cartesian coordinate) in jogging mode           |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|      JogAxisRVelocity      |           Velocity (mm/s) of device's R axis (cartesian coordinate) in jogging mode           |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|    JogAxisXAcceleration    |        Acceleration (mm/s^2) of device's X axis (cartesian coordinate) in jogging mode        |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|    JogAxisYAcceleration    |        Acceleration (mm/s^2) of device's Y axis (cartesian coordinate) in jogging mode        |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|    JogAxisZAcceleration    |        Acceleration (mm/s^2) of device's Z axis (cartesian coordinate) in jogging mode        |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|    JogAxisRAcceleration    |        Acceleration (mm/s^2) of device's R axis (cartesian coordinate) in jogging mode        |  gauge (float)  |       off       |   GetJOGCoordinateParams(api)  |
-|      JogVelocityRatio      |       Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode      |  gauge (float)  |       off       |     GetJOGCommonParams(api)    |
-|    JogAccelerationRatio    |     Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode    |  gauge (float)  |       off       |     GetJOGCommonParams(api)    |
-|       PtpBaseVelocity      |                      Velocity (°/s) of base joint in point to point mode                      |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|     PtpRearArmVelocity     |                    Velocity (°/s) of rear arm joint in point to point mode                    |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|     PtpForearmVelocity     |                     Velocity (°/s) of forearm joint in point to point mode                    |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|   PtpEndEffectorVelocity   |                  Velocity (°/s) of end effector joint in point to point mode                  |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|     PtpBaseAcceleration    |                   Acceleration (°/s^2) of base joint in point to point mode                   |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|   PtpRearArmAcceleration   |                 Acceleration (°/s^2) of rear arm joint in point to point mode                 |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|   PtpForearmAcceleration   |                  Acceleration (°/s^2) of forearm joint in point to point mode                 |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-| PtpEndEffectorAcceleration |               Acceleration (°/s^2) of end effector joint in point to point mode               |  gauge (float)  |       off       |     GetPTPJointParams(api)     |
-|     PtpAxisXYZVelocity     |     Velocity (mm/s) of device's X, Y, Z axis (cartesian coordinate) in point to point mode    |  gauge (float)  |       off       |   GetPTPCoordinateParams(api)  |
-|      PtpAxisRVelocity      |        Velocity (mm/s) of device's R axis (cartesian coordinate) in point to point mode       |  gauge (float)  |       off       |   GetPTPCoordinateParams(api)  |
-|   PtpAxisXYZAcceleration   |  Acceleration (mm/s^2) of device's X, Y, Z axis (cartesian coordinate) in point to point mode |  gauge (float)  |       off       |   GetPTPCoordinateParams(api)  |
-|    PtpAxisRAcceleration    |     Acceleration (mm/s^2) of device's R axis (cartesian coordinate) in point to point mode    |  gauge (float)  |       off       |   GetPTPCoordinateParams(api)  |
-|      PtpVelocityRatio      |   Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode   |  gauge (float)  |       off       |     GetPTPCommonParams(api)    |
-|    PtpAccelerationRatio    | Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode |  gauge (float)  |       off       |     GetPTPCommonParams(api)    |
-|        LiftingHeight       |                                  Lifting height in jump mode                                  |  gauge (float)  |       off       |      GetPTPJumpParams(api)     |
-|         HeighLimit         |                                Max lifting height in jump mode                                |  gauge (float)  |       off       |      GetPTPJumpParams(api)     |
-|         CpVelocity         |                                   Velocity (mm/s) in cp mode                                  |  gauge (float)  |       off       |        GetCPParams(api)        |
-|       CpAcceleration       |                                Acceleration (mm/s^2) in cp mode                               |  gauge (float)  |       off       |        GetCPParams(api)        |
-|       ArcXYZVelocity       |                          Velocity (mm/s) of X, Y, Z axis in arc mode                          |  gauge (float)  |       off       |        GetARCParams(api)       |
-|        ArcRVelocity        |                             Velocity (mm/s) of R axis in arc mode                             |  gauge (float)  |       off       |        GetARCParams(api)       |
-|     ArcXYZAcceleration     |                       Acceleration (mm/s^2) of X, Y, Z axis in arc mode                       |  gauge (float)  |       off       |        GetARCParams(api)       |
-|      ArcRAcceleration      |                          Acceleration (mm/s^2) of R axis in arc mode                          |  gauge (float)  |       off       |        GetARCParams(api)       |
-|     AngleStaticErrRear     |                               Rear arm angle sensor static error                              |  gauge (float)  |       off       | GetAngleSensorStaticError(api) |
-|     AngleStaticErrFront    |                               Forearm angle sensor static error                               |  gauge (float)  |       off       | GetAngleSensorStaticError(api) |
-|        AngleCoefRear       |                         Rear arm angle sensor linearization parameter                         |  gauge (float)  |       off       |     GetAngleSensorCoef(api)    |
-|       AngleCoefFront       |                          Forearm angle sensor linearization parameter                         |  gauge (float)  |       off       |     GetAngleSensorCoef(api)    |
-|      SlidingRailStatus     |                            Sliding rail's status (enabled/disabled)                           |   enum (bool)   |       off       |       GetDeviceWithL(api)      |
-|       SlidingRailPose      |                              Sliding rail's real-time pose in mm                              |  gauge (float)  |       off       |          GetPoseL(api)         |
-|   SlidingRailJogVelocity   |                        Velocity (mm/s) of sliding rail in jogging mode                        |  gauge (float)  |       off       |       GetJOGLParams(api)       |
-| SlidingRailJogAcceleration |                     Acceleration (mm/s^2) of sliding rail in jogging mode                     |  gauge (float)  |       off       |       GetJOGLParams(api)       |
-|   SlidingRailPtpVelocity   |                     Velocity (mm/s) of sliding rail in point to point mode                    |  gauge (float)  |       off       |       GetPTPLParams(api)       |
-| SlidingRailPtpAcceleration |                  Acceleration (mm/s^2) of sliding rail in point to point mode                 |  gauge (float)  |       off       |       GetPTPLParams(api)       |
-|      WifiModuleStatus      |                             Wifi module status (enabled/disabled)                             |   enum (bool)   |       off       |     GetWIFIConfigMode(api)     |
-|    WifiConnectionStatus    |                        Wifi connection status (connected/not connected)                       |   enum (bool)   |       off       |    GetWIFIConnectStatus(api)   |
-|          WifiSSID          |                                      Configured Wifi SSID                                     |    info (str)   |       off       |        GetWIFISSID(api)        |
-|        WifiPassword        |                                    Configured Wifi Password                                   |    info (str)   |       off       |      GetWIFIPassword(api)      |
-|        WifiIPAddress       |                                      Device's IP address                                      |    info (str)   |       off       |      GetWIFIIPAddress(api)     |
-|         WifiNetmask        |                                          Subnet mask                                          |    info (str)   |       off       |       GetWIFINetmask(api)      |
-|         WifiGateway        |                                        Default Gateway                                        |    info (str)   |       off       |       GetWIFIGateway(api)      |
-|           WifiDNS          |                                              DNS                                              |    info (str)   |       off       |         GetWIFIDNS(api)        |
+|         Config Name        |                                          Description                                          | Prometheus Type | Default |          API Call         |
+|:--------------------------:|:---------------------------------------------------------------------------------------------:|:---------------:|:-------:|:-------------------------:|
+|          DeviceSN          |                                     Device's serial number                                    |    info (str)   |    on   |        GetDeviceSN        |
+|         DeviceName         |                                      Device's name/alias                                      |    info (str)   |    on   |       GetDeviceName       |
+|        DeviceVersion       |                            Device's verion (major.minor.0.revision)                           |    info (str)   |    on   |      GetDeviceVersion     |
+|         DeviceTime         |                                      Device's clock/time                                      |    info (str)   |   off   |       GetDeviceTime       |
+|         QueueIndex         |                                 Current index in command queue                                |   gauge (int)   |   off   |  GetQueuedCmdCurrentIndex |
+|            PoseX           |                       Real-time cartesian coordinate of device's X axis                       |  gauge (float)  |    on   |          GetPose          |
+|            PoseY           |                       Real-time cartesian coordinate of device's Y axis                       |  gauge (float)  |    on   |          GetPose          |
+|            PoseZ           |                       Real-time cartesian coordinate of device's Z axis                       |  gauge (float)  |    on   |          GetPose          |
+|            PoseR           |                       Real-time cartesian coordinate of device's R axis                       |  gauge (float)  |    on   |          GetPose          |
+|          AngleBase         |                                        Base joint angle                                       |  gauge (float)  |    on   |          GetPose          |
+|        AngleRearArm        |                                      Rear arm joint angle                                     |  gauge (float)  |    on   |          GetPose          |
+|        AngleForearm        |                                      Forearm joint angle                                      |  gauge (float)  |    on   |          GetPose          |
+|      AngleEndEffector      |                                    End effector joint angle                                   |  gauge (float)  |    on   |          GetPose          |
+|         AlarmsState        |                                     Device's active alarms                                    |  enum (alarms)  |    on   |      GetAlarmsStateX      |
+|            HomeX           |                                    Home position for X axis                                   |  gauge (float)  |   off   |       GetHOMEParams       |
+|            HomeY           |                                    Home position for Y axis                                   |  gauge (float)  |   off   |       GetHOMEParams       |
+|            HomeZ           |                                    Home position for Z axis                                   |  gauge (float)  |   off   |       GetHOMEParams       |
+|            HomeR           |                                    Home position for R axis                                   |  gauge (float)  |   off   |       GetHOMEParams       |
+|        EndEffectorX        |                                 X-axis offset of end effector                                 |  gauge (float)  |   off   |    GetEndEffectorParams   |
+|        EndEffectorY        |                                 Y-axis offset of end effector                                 |  gauge (float)  |   off   |    GetEndEffectorParams   |
+|        EndEffectorZ        |                                 Z-axis offset of end effector                                 |  gauge (float)  |   off   |    GetEndEffectorParams   |
+|         LaserStatus        |                               Status (enabled/disabled) of laser                              |   enum (bool)   |   off   |    GetEndEffectorLaser    |
+|      SuctionCupStatus      |                            Status (enabled/disabled) of suction cup                           |   enum (bool)   |   off   |  GetEndEffectorSuctionCup |
+|        GripperStatus       |                              Status (enabled/disabled) of gripper                             |   enum (bool)   |   off   |   GetEndEffectorGripper   |
+|       JogBaseVelocity      |                          Velocity (°/s) of base joint in jogging mode                         |  gauge (float)  |   off   |     GetJOGJointParams     |
+|     JogRearArmVelocity     |                        Velocity (°/s) of rear arm joint in jogging mode                       |  gauge (float)  |   off   |     GetJOGJointParams     |
+|     JogForearmVelocity     |                        Velocity (°/s) of forearm joint in jogging mode                        |  gauge (float)  |   off   |     GetJOGJointParams     |
+|   JogEndEffectorVelocity   |                      Velocity (°/s) of end effector joint in jogging mode                     |  gauge (float)  |   off   |     GetJOGJointParams     |
+|     JogBaseAcceleration    |                       Acceleration (°/s^2) of base joint in jogging mode                      |  gauge (float)  |   off   |     GetJOGJointParams     |
+|   JogRearArmAcceleration   |                     Acceleration (°/s^2) of rear arm joint in jogging mode                    |  gauge (float)  |   off   |     GetJOGJointParams     |
+|   JogForearmAcceleration   |                     Acceleration (°/s^2) of forearm joint in jogging mode                     |  gauge (float)  |   off   |     GetJOGJointParams     |
+| JogEndEffectorAcceleration |                   Acceleration (°/s^2) of end effector joint in jogging mode                  |  gauge (float)  |   off   |     GetJOGJointParams     |
+|      JogAxisXVelocity      |           Velocity (mm/s) of device's X axis (cartesian coordinate) in jogging mode           |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|      JogAxisYVelocity      |           Velocity (mm/s) of device's Y axis (cartesian coordinate) in jogging mode           |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|      JogAxisZVelocity      |           Velocity (mm/s) of device's Z axis (cartesian coordinate) in jogging mode           |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|      JogAxisRVelocity      |           Velocity (mm/s) of device's R axis (cartesian coordinate) in jogging mode           |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|    JogAxisXAcceleration    |        Acceleration (mm/s^2) of device's X axis (cartesian coordinate) in jogging mode        |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|    JogAxisYAcceleration    |        Acceleration (mm/s^2) of device's Y axis (cartesian coordinate) in jogging mode        |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|    JogAxisZAcceleration    |        Acceleration (mm/s^2) of device's Z axis (cartesian coordinate) in jogging mode        |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|    JogAxisRAcceleration    |        Acceleration (mm/s^2) of device's R axis (cartesian coordinate) in jogging mode        |  gauge (float)  |   off   |   GetJOGCoordinateParams  |
+|      JogVelocityRatio      |       Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode      |  gauge (float)  |   off   |     GetJOGCommonParams    |
+|    JogAccelerationRatio    |     Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode    |  gauge (float)  |   off   |     GetJOGCommonParams    |
+|       PtpBaseVelocity      |                      Velocity (°/s) of base joint in point to point mode                      |  gauge (float)  |   off   |     GetPTPJointParams     |
+|     PtpRearArmVelocity     |                    Velocity (°/s) of rear arm joint in point to point mode                    |  gauge (float)  |   off   |     GetPTPJointParams     |
+|     PtpForearmVelocity     |                     Velocity (°/s) of forearm joint in point to point mode                    |  gauge (float)  |   off   |     GetPTPJointParams     |
+|   PtpEndEffectorVelocity   |                  Velocity (°/s) of end effector joint in point to point mode                  |  gauge (float)  |   off   |     GetPTPJointParams     |
+|     PtpBaseAcceleration    |                   Acceleration (°/s^2) of base joint in point to point mode                   |  gauge (float)  |   off   |     GetPTPJointParams     |
+|   PtpRearArmAcceleration   |                 Acceleration (°/s^2) of rear arm joint in point to point mode                 |  gauge (float)  |   off   |     GetPTPJointParams     |
+|   PtpForearmAcceleration   |                  Acceleration (°/s^2) of forearm joint in point to point mode                 |  gauge (float)  |   off   |     GetPTPJointParams     |
+| PtpEndEffectorAcceleration |               Acceleration (°/s^2) of end effector joint in point to point mode               |  gauge (float)  |   off   |     GetPTPJointParams     |
+|     PtpAxisXYZVelocity     |     Velocity (mm/s) of device's X, Y, Z axis (cartesian coordinate) in point to point mode    |  gauge (float)  |   off   |   GetPTPCoordinateParams  |
+|      PtpAxisRVelocity      |        Velocity (mm/s) of device's R axis (cartesian coordinate) in point to point mode       |  gauge (float)  |   off   |   GetPTPCoordinateParams  |
+|   PtpAxisXYZAcceleration   |  Acceleration (mm/s^2) of device's X, Y, Z axis (cartesian coordinate) in point to point mode |  gauge (float)  |   off   |   GetPTPCoordinateParams  |
+|    PtpAxisRAcceleration    |     Acceleration (mm/s^2) of device's R axis (cartesian coordinate) in point to point mode    |  gauge (float)  |   off   |   GetPTPCoordinateParams  |
+|      PtpVelocityRatio      |   Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode   |  gauge (float)  |   off   |     GetPTPCommonParams    |
+|    PtpAccelerationRatio    | Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode |  gauge (float)  |   off   |     GetPTPCommonParams    |
+|        LiftingHeight       |                                  Lifting height in jump mode                                  |  gauge (float)  |   off   |      GetPTPJumpParams     |
+|         HeighLimit         |                                Max lifting height in jump mode                                |  gauge (float)  |   off   |      GetPTPJumpParams     |
+|         CpVelocity         |                                   Velocity (mm/s) in cp mode                                  |  gauge (float)  |   off   |        GetCPParams        |
+|       CpAcceleration       |                                Acceleration (mm/s^2) in cp mode                               |  gauge (float)  |   off   |        GetCPParams        |
+|       ArcXYZVelocity       |                          Velocity (mm/s) of X, Y, Z axis in arc mode                          |  gauge (float)  |   off   |        GetARCParams       |
+|        ArcRVelocity        |                             Velocity (mm/s) of R axis in arc mode                             |  gauge (float)  |   off   |        GetARCParams       |
+|     ArcXYZAcceleration     |                       Acceleration (mm/s^2) of X, Y, Z axis in arc mode                       |  gauge (float)  |   off   |        GetARCParams       |
+|      ArcRAcceleration      |                          Acceleration (mm/s^2) of R axis in arc mode                          |  gauge (float)  |   off   |        GetARCParams       |
+|     AngleStaticErrRear     |                               Rear arm angle sensor static error                              |  gauge (float)  |   off   | GetAngleSensorStaticError |
+|     AngleStaticErrFront    |                               Forearm angle sensor static error                               |  gauge (float)  |   off   | GetAngleSensorStaticError |
+|        AngleCoefRear       |                         Rear arm angle sensor linearization parameter                         |  gauge (float)  |   off   |     GetAngleSensorCoef    |
+|       AngleCoefFront       |                          Forearm angle sensor linearization parameter                         |  gauge (float)  |   off   |     GetAngleSensorCoef    |
+|      SlidingRailStatus     |                            Sliding rail's status (enabled/disabled)                           |   enum (bool)   |   off   |       GetDeviceWithL      |
+|       SlidingRailPose      |                              Sliding rail's real-time pose in mm                              |  gauge (float)  |   off   |          GetPoseL         |
+|   SlidingRailJogVelocity   |                        Velocity (mm/s) of sliding rail in jogging mode                        |  gauge (float)  |   off   |       GetJOGLParams       |
+| SlidingRailJogAcceleration |                     Acceleration (mm/s^2) of sliding rail in jogging mode                     |  gauge (float)  |   off   |       GetJOGLParams       |
+|   SlidingRailPtpVelocity   |                     Velocity (mm/s) of sliding rail in point to point mode                    |  gauge (float)  |   off   |       GetPTPLParams       |
+| SlidingRailPtpAcceleration |                  Acceleration (mm/s^2) of sliding rail in point to point mode                 |  gauge (float)  |   off   |       GetPTPLParams       |
+|      WifiModuleStatus      |                             Wifi module status (enabled/disabled)                             |   enum (bool)   |   off   |     GetWIFIConfigMode     |
+|    WifiConnectionStatus    |                        Wifi connection status (connected/not connected)                       |   enum (bool)   |   off   |    GetWIFIConnectStatus   |
+|          WifiSSID          |                                      Configured Wifi SSID                                     |    info (str)   |   off   |        GetWIFISSID        |
+|        WifiPassword        |                                    Configured Wifi Password                                   |    info (str)   |   off   |      GetWIFIPassword      |
+|        WifiIPAddress       |                                      Device's IP address                                      |    info (str)   |   off   |      GetWIFIIPAddress     |
+|         WifiNetmask        |                                          Subnet mask                                          |    info (str)   |   off   |       GetWIFINetmask      |
+|         WifiGateway        |                                        Default Gateway                                        |    info (str)   |   off   |       GetWIFIGateway      |
+|           WifiDNS          |                                              DNS                                              |    info (str)   |   off   |         GetWIFIDNS        |
 
 Note: Only enable the WiFi attributes if the Dobot is currently not executing any movement commands.   
 
@@ -155,7 +155,7 @@ Note: Only enable the WiFi attributes if the Dobot is currently not executing an
 |    ObjectSize    |   Identified object's size   |   gauge (float)  |      Normal      |   off   |
 
 For a more practical insight check the default `devices.conf` included.
-<br>
+<br><br>
 
 ## Quering
 The supported device modules currently implement the device_id, device_type and station labels for querying based on specific device id (e.g. Dobot: 192.168.43.4), device type (e.g. Dobot, Jevois) and agent/station name, respectively. You can find the monitoring options and their respective prometheus metric names for quering below.
@@ -252,7 +252,7 @@ The supported device modules currently implement the device_id, device_type and 
 | ObjectIdentified | object_identified_by_{device_id}_{station} |
 |  ObjectLocation  |          object_location_{x\|y\|z}         |
 |    ObjectSize    |                 object_size                |
-<br>
+<br><br>
 
 ## Fetch Times
 ### Dobot
@@ -604,11 +604,11 @@ For the fetch times regarding the regarding the Dobot Magician device and the Do
 
 ### Jevois
 Since the Jevois is directly connected to the host machine through a serial port, considering that timeout to the serial reading is set to 0 the consecutive fetch times, including reading, stripping and decoding the standardized message are on average around 1ms with a max fetch time of 4ms. The testing was done with Normal style 2D standardized messages. Fetch times on empty messages were not counted.
-<br>
+<br><br>
 
 ## Scalability
 The system can scale (monitoring station level) vertically as the agent can connect to and monitor a variable amount of devices, a number constrained by the monitoring station's available ports and resources. In addition for larger and more complex setups one can scale the system vertically by adding multiple monitoring stations. For load balancing a section of the monitoring one can use multiple monitoring stations with the same name and query metrics based on that. For the configuration of these stations one can tweak their respective Prometheus and agent configurations. For their coordination one can use a [Prometheus Hierarchical Federation](https://prometheus.io/docs/prometheus/latest/federation/#hierarchical-federation).
-<br>
+<br><br>
 
 ## Extensibility
 The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to implement the `Device` abstract base class (virtual interface). The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch its attributes (and update prometheus endpoint) and disconnect from the device.  
@@ -624,11 +624,11 @@ Responsible for disconnecting the device, close any open ports/streams and remov
 
 All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot` device module) and any runtime files should be included in the `runtime` directory.  
 For a practical example one can review the source code in `device_modules.py` and more specifically the `Dobot` and `Jevois` classes (device modules).
-<br>
+<br><br>
 
 ## Load Balancing
 Monitoring stations can be used to group a set of devices (probably in the same section in the workflow) where the agent/station name option becomes relevant. Monitoring/grouping many devices through a single monitoring station (host computer) can bottleneck it and affect monitoring rates. In this case, another use of the agent’s name attribute is naming two or more stations with the same name thus creating a single virtual station. Since each metric supports the station label one can query based on the station name and get metrics from multiple stations while looking like it is one. For setups where the use of multiple monitoring stations is doable, one can use more than one monitoring station for monitoring a section and thus if distributed properly load balance the monitoring stations while still looking like a unified station.
-<br>
+<br><br>
 
 ## Testing
 A small manageable testing utility is the `test.py` script which includes a number of functions respective to different functional (f) and performance (p) tests for different device modules. Each functional test represents a function of a device module. Each test returns true in successful completion and false otherwise. Performance tests produce results/statistics to standard output that can be further analyzed.  
@@ -636,7 +636,7 @@ The naming convention for better organization and use of the test functions
 is as follows: `typeOfTest_moduleName_description`  
 e.g.    For a performance test regarding the Jevois module => `p_Jevois_DescriptionOfTest()`  
         For a functional test regarding the Dobot module => `f_Dobot_DescriptionOfTest()`
-<br>
+<br><br>
 
 ## DobotDllType.py Fork (DobotDllTypeX.py)
 Throughout the usage of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos or bugs in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functions are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the [Dobot Demo](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download). For importing and utilizing the fork place `DobotDllTypeX` inside project's directory and add `import DobotDllTypeX as dTypeX` to the script. (for this reading `dType` refers to the original `DobotDllType.py` and `dTypeX` to the fork)
@@ -665,7 +665,7 @@ for a in dTypeX.GetAlarmsStateX(dobot0):
 * `GetActiveDobots()` function that returns the amount of currently connected Dobot Magicians  
 * `DisconnectAll()` function to disconnect from all connected Dobot Magician devices and clean up any runtime files  
 Both additions were due to the creation of the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
-<br>
+<br><br>
 
 ## Resources
 - [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
