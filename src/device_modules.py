@@ -4,7 +4,7 @@ import runtime.DobotDllTypeX as dTypeX
 import serial
 
 class Device(ABC):
-    options = {"timeout":100} # Default device options/attributes
+    options = {"timeout":0} # Default device options/attributes
 
     def __init__(self, config_section, port, host):
         self.section = config_section
@@ -14,8 +14,7 @@ class Device(ABC):
         self.id = self.type + ":" + self.port
 
         self.timeout = self.section.getint("timeout", fallback=Device.options["timeout"])
-        if (self.timeout < 100):
-            self.timeout = 100
+        if self.timeout < Device.options["timeout"]: self.timeout = Device.options["timeout"]
 
         activeCounter = 0
         for key in type(self).options:
@@ -81,7 +80,7 @@ class Dobot(Device):
     angleRearArm = Gauge("angle_rear_arm","Rear arm joint angle", ["device_id","device_type","station"])
     angleForearm = Gauge("angle_forearm","Forearm joint angle", ["device_id","device_type","station"])
     angleEndEffector = Gauge("angle_end_effector","End effector joint angle", ["device_id","device_type","station"])
-    alarmsState = Enum("alarms", "Device alarms", ["device_id","device_type","station"], states=list(dTypeX.alarms.values()))
+    alarmsState = Enum("alarms_state", "Device alarms state", ["device_id","device_type","station"], states=dTypeX.alarmStates)
     homeX = Gauge("home_x","Home position for X axis", ["device_id","device_type","station"])
     homeY = Gauge("home_y","Home position for Y axis", ["device_id","device_type","station"])
     homeZ = Gauge("home_z","Home position for Z axis", ["device_id","device_type","station"])
@@ -160,9 +159,9 @@ class Dobot(Device):
     def __initialize(self):
         enabledDeviceInfo = {}
         if self.isEnabled("devicesn"):
-            enabledDeviceInfo["serial_number"] = dTypeX.GetDeviceSN(self.api)[0]
+            enabledDeviceInfo["serial"] = dTypeX.GetDeviceSN(self.api)[0]
         if self.isEnabled("devicename"):
-            enabledDeviceInfo["device_name"] = dTypeX.GetDeviceName(self.api)[0]
+            enabledDeviceInfo["name"] = dTypeX.GetDeviceName(self.api)[0]
         if self.isEnabled("deviceversion"):
             enabledDeviceInfo["version"] = ".".join(list(map(str, dTypeX.GetDeviceVersion(self.api))))
         if len(enabledDeviceInfo) > 0:
@@ -238,8 +237,12 @@ class Dobot(Device):
                 Dobot.angleEndEffector.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[7])
 
         if self.isEnabled("alarmsstate"):
-            for a in dTypeX.GetAlarmsStateX(self.api):
-                Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state(a)
+            alarmsList = dTypeX.GetAlarmsStateX(self.api)
+            if len(alarmsList) == 0:
+                Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state("clear")
+            else:
+                for a in alarmsList:
+                    Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state(a)
 
         if self.GetHomeParams:
             home = dTypeX.GetHOMEParams(self.api)

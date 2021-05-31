@@ -261,9 +261,9 @@ def f_Dobot_ParallelConnection(portList):
 
     print("\nConnected Dobots:")
     for dobot in dobotList:
-        print("Device Name: " + str(attributes["GetDeviceName"].append(_execute(dTypeX.GetDeviceName, dobot))[0]))
-        print("Device Serial No: " + str(attributes["GetDeviceSN"].append(_execute(dTypeX.GetDeviceSN, dobot))[0]))
-        print("Device Version: " + '.'.join(list(map(str, attributes["GetDeviceVersion"].append(_execute(dTypeX.GetDeviceVersion, dobot))))))
+        print("Device Name: " + str(dTypeX.GetDeviceName(dobot)[0]))
+        print("Device Serial No: " + str(dTypeX.GetDeviceSN(dobot)[0]))
+        print("Device Version: " + ".".join(list(map(str, dTypeX.GetDeviceVersion(dobot)))))
         print()
 
     dTypeX.DisconnectAll()

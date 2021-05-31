@@ -47,7 +47,7 @@ Optional arguments:
   -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
   -m, --more                        open README.md with configuration and implementation details and exit
 ```
-<br><br>
+<br>
 
 ## Device Discovery/Configuration
 Choose which devices and which data/attributes of those will be monitored by changing the `devices.conf` file.  
@@ -55,7 +55,7 @@ For monitoring a device the corresponding class in device_modules.py must exist.
 In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN).
 Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names in the "objects" entry (e.g. objects = cube pen paper).  
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be exactly the same as the class name representing the device module.  
-Each device entry supports by default the `Timeout` attribute which sets the timeout period in milliseconds in between fetches and defaults to 100.  
+Each device entry supports by default the `Timeout` attribute which sets the timeout period in milliseconds in between fetches and defaults to 0.  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.  
 For more details on the configuration settings for the Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
@@ -157,15 +157,15 @@ Note: Only enable the WiFi attributes if the Dobot is currently not executing an
 For a more practical insight check the default `devices.conf` included.
 <br><br>
 
-## Quering
-The supported device modules currently implement the device_id, device_type and station labels for querying based on specific device id (e.g. Dobot: 192.168.43.4), device type (e.g. Dobot, Jevois) and agent/station name, respectively. You can find the monitoring options and their respective prometheus metric names for quering below.
+## Querying
+The supported device modules currently implement the device_id, device_type and station labels for querying based on specific device id (e.g. Dobot: 192.168.43.4), device type (e.g. Dobot, Jevois) and agent/station name, respectively. You can find the monitoring options and their respective prometheus metric names for querying below.
 
 ### Dobot
 |         Config Name        |     Prometheus Metric Name    |
 |:--------------------------:|:-----------------------------:|
-|          DeviceSN          |      dobot_magician_info      |
-|         DeviceName         |      dobot_magician_info      |
-|        DeviceVersion       |      dobot_magician_info      |
+|          DeviceSN          |  dobot_magician_info{serial}  |
+|         DeviceName         |   dobot_magician_info{name}   |
+|        DeviceVersion       |  dobot_magician_info{version} |
 |         DeviceTime         |          device_time          |
 |         QueueIndex         |          queue_index          |
 |            PoseX           |             pose_x            |
@@ -239,12 +239,12 @@ The supported device modules currently implement the device_id, device_type and 
 | SlidingRailPtpAcceleration | sliding_rail_ptp_acceleration |
 |      WifiModuleStatus      |       wifi_module_status      |
 |    WifiConnectionStatus    |     wifi_connection_status    |
-|          WifiSSID          |           wifi_info           |
-|        WifiPassword        |           wifi_info           |
-|        WifiIPAddress       |           wifi_info           |
-|         WifiNetmask        |           wifi_info           |
-|         WifiGateway        |           wifi_info           |
-|           WifiDNS          |           wifi_info           |
+|          WifiSSID          |        wifi_info{ssid}        |
+|        WifiPassword        |      wifi_info{password}      |
+|        WifiIPAddress       |     wifi_info{ip_address}     |
+|         WifiNetmask        |       wifi_info{netmask}      |
+|         WifiGateway        |       wifi_info{gateway}      |
+|           WifiDNS          |         wifi_info{dns}        |
 
 ### Jevois
 |    Config Name   |           Prometheus Metric Name           |
@@ -253,7 +253,7 @@ The supported device modules currently implement the device_id, device_type and 
 |  ObjectLocation  |          object_location_{x\|y\|z}         |
 |    ObjectSize    |                 object_size                |
 
-<br><br>
+<br>
 
 ## Fetch Times
 ### Dobot
