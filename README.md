@@ -54,15 +54,14 @@ Optional arguments:
 
 ## Device Discovery/Configuration
 Choose which devices and which data/attributes of those will be monitored by changing the `devices.conf` file.  
-For monitoring a device the corresponding class in device_modules.py must exist. For the agent to discover the device and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section), a device entry must exist in the configuration file e.g. `class DeviceType` a `[DeviceType:<port>]`. One can connect multiple devices through various ports (serial port/IP address).  
-In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN).
-Similarly in order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names (representing the pictures (file names) the camera uses for training) in the "objects" entry (e.g. objects = cube.png pen.png paper.png).  
+For monitoring a device the corresponding class in device_modules.py must exist. For the agent to discover the device and use the appropriate module for connecting, fetching and disconnecting (see more in "Extensibility" section), a device entry must exist in the configuration file e.g. `class DeviceType` a `[DeviceType:<port>]`. One can connect multiple devices through various ports (serial port/IP address).    
 For enabling data to be monitored you can use `on`, `1`, `yes` or `true` and in order to not monitor certain data use `off`, `0`, `no`, `false` depending on your preference. By removing an entry completely the value for the entry will be resolved to the default. All keys are case-insensitive but all section names must be exactly the same as the class name representing the device module.  
 Each device entry supports by default the `Timeout` attribute which sets the timeout period in milliseconds in between fetches and defaults to 0.  
 All configuration is parsed and validated based on the above information, before the start of the routine, and warns the user for any invalid entries, fields and values.  
 For more details on the configuration settings for the Dobot Magician and JeVois camera devices check their respective tables below with all options and their details.  
 
 ### Dobot
+In order for the agent to find a Dobot Magician and connect to it, a section of the device, `[Dobot:PORT]` must exist in the configuration file e.g. `[Dobot:COM7]` for serial or `[Dobot:192.168.0.3]` for connecting through WiFi (WLAN).
 |         Config Name        |                                          Description                                          | Prometheus Type | Default |          API Call         |
 |:--------------------------:|:---------------------------------------------------------------------------------------------:|:---------------:|:-------:|:-------------------------:|
 |          DeviceSN          |                                     Device's serial number                                    |    info (str)   |    on   |        GetDeviceSN        |
@@ -151,6 +150,7 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 Note: Only enable the WiFi attributes if the Dobot is currently not executing any movement commands.   
 
 ### Jevois
+In order for the agent to find a JeVois camera and connect to it, a section of the device `[Jevois:PORT]` must exist in the configuration file (e.g. `[Jevois:COM3]`) with the only difference that the port can only be serial as the camera does not support wireless connection with the host. For monitoring the object's identity one must provide a space-separated list with object names (representing the pictures (file names) the camera uses for training) in the "objects" entry (e.g. objects = cube.png pen.png paper.png).
 |    Config Name   |          Description         |  Prometheus Type | Default |   Message Type   |
 |:----------------:|:----------------------------:|:----------------:|:-------:|:----------------:|
 | ObjectIdentified |   Identified object's name   |    enum (str)    |    on   |  1D/2D/3D Normal |
