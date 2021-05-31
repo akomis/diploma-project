@@ -148,11 +148,11 @@ For more details on the configuration settings for the Dobot Magician and JeVois
 Note: Only enable the WiFi attributes if the Dobot is currently not executing any movement commands.   
 
 ### Jevois
-|    Config Name   |          Description         |  Prometheus Type | Default |Supported Serstyle|
+|    Config Name   |          Description         |  Prometheus Type | Default |   Message Type   |
 |:----------------:|:----------------------------:|:----------------:|:-------:|:----------------:|
-| ObjectIdentified |   Identified object's name   |    enum (str)    |    on   |      Normal      |
-|  ObjectLocation  | Identified object's location | gauge(s) (float) |    on   |      Normal      |
-|    ObjectSize    |   Identified object's size   |   gauge (float)  |   off   |      Normal      |
+| ObjectIdentified |   Identified object's name   |    enum (str)    |    on   |  1D/2D/3D Normal |
+|  ObjectLocation  | Identified object's location | gauge(s) (float) |    on   |  1D/2D/3D Normal |
+|    ObjectSize    |   Identified object's size   |   gauge (float)  |   off   |  1D/2D/3D Normal |
 
 For a more practical insight check the default `devices.conf` included.
 <br><br>
