@@ -10,7 +10,7 @@ The goal of this system is to be an effective, modular and extensible solution a
 <div align="center">
 <img alt="overview" src="/pics/overview.jpg">
 </div>
-<br><br>
+<br>
 
 ## Dependencies
 - [Python 3.9+](https://www.python.org/downloads/windows/)
@@ -22,7 +22,7 @@ For using the `Dobot` device module
 
 For using the `Jevois` device module
 - [pyserial](https://pythonhosted.org/pyserial/)
-<br><br>
+<br>
 
 ## Installation
 - Install Python 3.9+
@@ -30,7 +30,7 @@ For using the `Jevois` device module
 - Install Magician Studio (which includes the Dobot Robot Driver)
 - `pip3 install prometheus-client pyserial`
 - `git clone https://github.com/akomis/diploma-project.git`
-<br><br>
+<br>
 
 ## Usage
 When using the default configuration file location, make sure that `devices.conf` is properly setup and in the same directory as the executable.  
@@ -47,7 +47,7 @@ Optional arguments:
   -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
   -m, --more                        open README.md with configuration and implementation details and exit
 ```
-<br><br>
+<br>
 
 ## Device Discovery/Configuration
 Choose which devices and which data/attributes of those will be monitored by changing the `devices.conf` file.  
@@ -155,7 +155,7 @@ Note: Only enable the WiFi attributes if the Dobot is currently not executing an
 |    ObjectSize    |   Identified object's size   |   gauge (float)  |      Normal      |   off   |
 
 For a more practical insight check the default `devices.conf` included.
-<br><br>
+<br>
 
 ## Quering
 The supported device modules currently implement the device_id, device_type and station labels for querying based on specific device id (e.g. Dobot: 192.168.43.4), device type (e.g. Dobot, Jevois) and agent/station name, respectively. You can find the monitoring options and their respective prometheus metric names for quering below.
@@ -252,6 +252,7 @@ The supported device modules currently implement the device_id, device_type and 
 | ObjectIdentified | object_identified_by_{device_id}_{station} |
 |  ObjectLocation  |          object_location_{x\|y\|z}         |
 |    ObjectSize    |                 object_size                |
+<br>
 
 ## Performance Analysis
 A series of performance tests to benchmark the agent and device modules were done. Memory footprint and fetch times were the two most important metrics that were taken into consideration. The performance tests were run on a x64 Windows (OS build 19041.985) machine. Both Dobot and Jevois related software (dobot driver, dobot api, jevois image) were the latest based on the date of the creation of this paper. The memory footprint of the agent prior to connecting to any devices (and thus creating any device objects) was 25MB and after connecting 2 Dobot Magicians and 1 Jevois camera with all attributes enabled it increased to 30MB. The performance/responsiveness for connecting, fetching and disconnecting from a device is determined by the respective device module implementation and the device architecture.
@@ -259,370 +260,357 @@ A series of performance tests to benchmark the agent and device modules were don
 ### Dobot
 For the fetch times regarding the regarding the Dobot Magician device and the Dobot device module for all attributes the average fetch time while connected through usb was ~15ms and when connected through WiFi ~24ms, which leads to the conclusion that the general wireless overhead is around 9ms. However, for some of the WiFi related (see Tabel 3.4 and Image 3.1) and the GetDeviceTime api calls, the fetch times were lower (better) when connected wirelessly. These attributes are also the only attributes that their fetch times always exceed 500ms in both cases. Since these WiFi attributes are info attributes, which means they are only fetched once at the start of the monitoring phase this is not a bottleneck to the fetching routine. It has been observed that if the Dobot is under any kind of movement starting the monitoring with the WiFi attributes enabled will affect the normal operations of the robot (supposedly due to the high fetch times interfering with the normal command execution) so only enable these attributes if the monitoring will start prior to the normal operations. Since DeviceTime is the only non-info attribute that exceeds the average low fetch times (by a great amount), it is advised that enabling the DeviceTime attribute is avoided. A detailed look of the results for both wired and wireless connections can be seen in the table below.
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-pb0m{border-color:inherit;text-align:center;vertical-align:bottom}
-.tg .tg-9wq8{border-color:inherit;text-align:center;vertical-align:middle}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-nrix{text-align:center;vertical-align:middle}
-.tg .tg-8d8j{text-align:center;vertical-align:bottom}
-</style>
-<table class="tg">
+<table>
 <thead>
   <tr>
-    <th class="tg-9wq8" rowspan="2">&nbsp;&nbsp;&nbsp;<br>API Call&nbsp;&nbsp;&nbsp;</th>
-    <th class="tg-9wq8" colspan="3">&nbsp;&nbsp;&nbsp;<br>Wired&nbsp;&nbsp;&nbsp;</th>
-    <th class="tg-nrix" colspan="3">&nbsp;&nbsp;&nbsp;<br>Wireless&nbsp;&nbsp;&nbsp;</th>
+    <th rowspan="2">API Call</th>
+    <th colspan="3">Wired</th>
+    <th colspan="3">Wireless</th>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>Average&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-nrix">&nbsp;&nbsp;&nbsp;<br>Min&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-nrix">&nbsp;&nbsp;&nbsp;<br>Max&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-nrix">&nbsp;&nbsp;&nbsp;<br>Average&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-nrix">&nbsp;&nbsp;&nbsp;<br>Min&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-nrix">&nbsp;&nbsp;&nbsp;<br>Max&nbsp;&nbsp;&nbsp;</td>
+    <td>Average</td>
+    <td>Min</td>
+    <td>Max</td>
+    <td>Average</td>
+    <td>Min</td>
+    <td>Max</td>
   </tr>
 </thead>
 <tbody>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetDeviceTime&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>719&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>505&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1014&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>608&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>205&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>655&nbsp;&nbsp;&nbsp;</td>
+    <td>GetDeviceTime</td>
+    <td>719</td>
+    <td>505</td>
+    <td>1014</td>
+    <td>608</td>
+    <td>205</td>
+    <td>655</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetQueuedCmdCurrentIndex&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>15&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>27&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>147&nbsp;&nbsp;&nbsp;</td>
+    <td>GetQueuedCmdCurrentIndex</td>
+    <td>15</td>
+    <td>10</td>
+    <td>20</td>
+    <td>27</td>
+    <td>18</td>
+    <td>147</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPose&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>12&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>33&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPose</td>
+    <td>16</td>
+    <td>12</td>
+    <td>23</td>
+    <td>24</td>
+    <td>20</td>
+    <td>33</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetAlarmsStateX&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>25&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>19&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>32&nbsp;&nbsp;&nbsp;</td>
+    <td>GetAlarmsStateX</td>
+    <td>17</td>
+    <td>10</td>
+    <td>20</td>
+    <td>25</td>
+    <td>19</td>
+    <td>32</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetHOMEParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>29&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>34&nbsp;&nbsp;&nbsp;</td>
+    <td>GetHOMEParams</td>
+    <td>20</td>
+    <td>13</td>
+    <td>24</td>
+    <td>29</td>
+    <td>22</td>
+    <td>34</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetAutoLevelingResult&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>15&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>21&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>31&nbsp;&nbsp;&nbsp;</td>
+    <td>GetAutoLevelingResult</td>
+    <td>15</td>
+    <td>10</td>
+    <td>21</td>
+    <td>24</td>
+    <td>18</td>
+    <td>31</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetEndEffectorParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>15&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>34&nbsp;&nbsp;&nbsp;</td>
+    <td>GetEndEffectorParams</td>
+    <td>15</td>
+    <td>10</td>
+    <td>22</td>
+    <td>23</td>
+    <td>18</td>
+    <td>34</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetEndEffectorLaser&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>7&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>30&nbsp;&nbsp;&nbsp;</td>
+    <td>GetEndEffectorLaser</td>
+    <td>13</td>
+    <td>7</td>
+    <td>20</td>
+    <td>23</td>
+    <td>17</td>
+    <td>30</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetEndEffectorSuctionCup&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>7&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>34&nbsp;&nbsp;&nbsp;</td>
+    <td>GetEndEffectorSuctionCup</td>
+    <td>13</td>
+    <td>7</td>
+    <td>20</td>
+    <td>23</td>
+    <td>18</td>
+    <td>34</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetEndEffectorGripper&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>14&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>8&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>29&nbsp;&nbsp;&nbsp;</td>
+    <td>GetEndEffectorGripper</td>
+    <td>14</td>
+    <td>8</td>
+    <td>22</td>
+    <td>22</td>
+    <td>18</td>
+    <td>29</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetJOGJointParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>12&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>31&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>26&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>21&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>33&nbsp;&nbsp;&nbsp;</td>
+    <td>GetJOGJointParams</td>
+    <td>17</td>
+    <td>12</td>
+    <td>31</td>
+    <td>26</td>
+    <td>21</td>
+    <td>33</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetJOGCoordinateParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>28&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>33&nbsp;&nbsp;&nbsp;</td>
+    <td>GetJOGCoordinateParams</td>
+    <td>17</td>
+    <td>9</td>
+    <td>22</td>
+    <td>28</td>
+    <td>20</td>
+    <td>33</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetJOGCommonParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>15&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>25&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>30&nbsp;&nbsp;&nbsp;</td>
+    <td>GetJOGCommonParams</td>
+    <td>15</td>
+    <td>9</td>
+    <td>20</td>
+    <td>25</td>
+    <td>16</td>
+    <td>30</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPTPJointParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>12&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>26&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>33&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPTPJointParams</td>
+    <td>16</td>
+    <td>12</td>
+    <td>23</td>
+    <td>26</td>
+    <td>20</td>
+    <td>33</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPTPCoordinateParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>25&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>31&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPTPCoordinateParams</td>
+    <td>17</td>
+    <td>10</td>
+    <td>24</td>
+    <td>25</td>
+    <td>20</td>
+    <td>31</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPTPCommonParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>14&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>29&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPTPCommonParams</td>
+    <td>14</td>
+    <td>9</td>
+    <td>24</td>
+    <td>24</td>
+    <td>17</td>
+    <td>29</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPTPJumpParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>15&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>25&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>31&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPTPJumpParams</td>
+    <td>15</td>
+    <td>9</td>
+    <td>25</td>
+    <td>24</td>
+    <td>17</td>
+    <td>31</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetCPParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>14&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>21&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>19&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>30&nbsp;&nbsp;&nbsp;</td>
+    <td>GetCPParams</td>
+    <td>14</td>
+    <td>9</td>
+    <td>21</td>
+    <td>24</td>
+    <td>19</td>
+    <td>30</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetARCParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>21&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>32&nbsp;&nbsp;&nbsp;</td>
+    <td>GetARCParams</td>
+    <td>16</td>
+    <td>9</td>
+    <td>21</td>
+    <td>24</td>
+    <td>18</td>
+    <td>32</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetAngleSensorStaticError&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>15&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>25&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>30&nbsp;&nbsp;&nbsp;</td>
+    <td>GetAngleSensorStaticError</td>
+    <td>15</td>
+    <td>9</td>
+    <td>22</td>
+    <td>25</td>
+    <td>20</td>
+    <td>30</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetAngleSensorCoef&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>8&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>25&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>39&nbsp;&nbsp;&nbsp;</td>
+    <td>GetAngleSensorCoef</td>
+    <td>16</td>
+    <td>8</td>
+    <td>22</td>
+    <td>25</td>
+    <td>18</td>
+    <td>39</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetDeviceWithL&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>14&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>8&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>19&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>29&nbsp;&nbsp;&nbsp;</td>
+    <td>GetDeviceWithL</td>
+    <td>14</td>
+    <td>8</td>
+    <td>19</td>
+    <td>23</td>
+    <td>17</td>
+    <td>29</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPoseL&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>8&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>31&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPoseL</td>
+    <td>13</td>
+    <td>8</td>
+    <td>20</td>
+    <td>22</td>
+    <td>18</td>
+    <td>31</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetJOGLParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>21&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>17&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>28&nbsp;&nbsp;&nbsp;</td>
+    <td>GetJOGLParams</td>
+    <td>13</td>
+    <td>10</td>
+    <td>20</td>
+    <td>21</td>
+    <td>17</td>
+    <td>28</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetPTPLParams&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>23&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>30&nbsp;&nbsp;&nbsp;</td>
+    <td>GetPTPLParams</td>
+    <td>13</td>
+    <td>9</td>
+    <td>20</td>
+    <td>23</td>
+    <td>18</td>
+    <td>30</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFIConfigMode&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>14&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>8&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>30&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFIConfigMode</td>
+    <td>14</td>
+    <td>8</td>
+    <td>20</td>
+    <td>24</td>
+    <td>18</td>
+    <td>30</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFIConnectStatus&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>10&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>21&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>28&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFIConnectStatus</td>
+    <td>13</td>
+    <td>10</td>
+    <td>21</td>
+    <td>22</td>
+    <td>18</td>
+    <td>28</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetDeviceSN&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>13&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>19&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>24&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>19&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>40&nbsp;&nbsp;&nbsp;</td>
+    <td>GetDeviceSN</td>
+    <td>13</td>
+    <td>9</td>
+    <td>19</td>
+    <td>24</td>
+    <td>19</td>
+    <td>40</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetDeviceName&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>11&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>22&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>26&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>18&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>34&nbsp;&nbsp;&nbsp;</td>
+    <td>GetDeviceName</td>
+    <td>16</td>
+    <td>11</td>
+    <td>22</td>
+    <td>26</td>
+    <td>18</td>
+    <td>34</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetDeviceVersion&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>16&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>9&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>26&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>20&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>32&nbsp;&nbsp;&nbsp;</td>
+    <td>GetDeviceVersion</td>
+    <td>16</td>
+    <td>9</td>
+    <td>20</td>
+    <td>26</td>
+    <td>20</td>
+    <td>32</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFISSID&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>521&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>516&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>528&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>536&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>531&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>541&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFISSID</td>
+    <td>521</td>
+    <td>516</td>
+    <td>528</td>
+    <td>536</td>
+    <td>531</td>
+    <td>541</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFIPassword&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>1676&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1011&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>2541&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1153&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1046&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1647&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFIPassword</td>
+    <td>1676</td>
+    <td>1011</td>
+    <td>2541</td>
+    <td>1153</td>
+    <td>1046</td>
+    <td>1647</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFIIPAddress&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>1499&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1012&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>2016&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1368&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1122&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1739&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFIIPAddress</td>
+    <td>1499</td>
+    <td>1012</td>
+    <td>2016</td>
+    <td>1368</td>
+    <td>1122</td>
+    <td>1739</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFINetmask&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>1550&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1012&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>2031&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1200&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>625&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1727&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFINetmask</td>
+    <td>1550</td>
+    <td>1012</td>
+    <td>2031</td>
+    <td>1200</td>
+    <td>625</td>
+    <td>1727</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFIGateway&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>1635&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1013&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>2537&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1141&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1066&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1630&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFIGateway</td>
+    <td>1635</td>
+    <td>1013</td>
+    <td>2537</td>
+    <td>1141</td>
+    <td>1066</td>
+    <td>1630</td>
   </tr>
   <tr>
-    <td class="tg-9wq8">&nbsp;&nbsp;&nbsp;<br>GetWIFIDNS&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-pb0m">&nbsp;&nbsp;&nbsp;<br>1483&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1013&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>2029&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1145&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1075&nbsp;&nbsp;&nbsp;</td>
-    <td class="tg-8d8j">&nbsp;&nbsp;&nbsp;<br>1736&nbsp;&nbsp;&nbsp;</td>
+    <td>GetWIFIDNS</td>
+    <td>1483</td>
+    <td>1013</td>
+    <td>2029</td>
+    <td>1145</td>
+    <td>1075</td>
+    <td>1736</td>
   </tr>
 </tbody>
 </table>
 
 ### Jevois
 Since the Jevois is directly connected to the host machine through a serial port, considering that timeout to the serial reading is set to 0 the consecutive fetch times, including reading, stripping and decoding the standardized message are on average around 1ms with a max fetch time of 4ms. The testing was done with Normal style 2D standardized messages. Fetch times on empty messages were not counted.
-
+<br>
 
 ## Scalability
 The system can scale (monitoring station level) vertically as the agent can connect to and monitor a variable amount of devices, a number constrained by the monitoring station's available ports and resources. In addition for larger and more complex setups one can scale the system vertically by adding multiple monitoring stations. For load balancing a section of the monitoring one can use multiple monitoring stations with the same name and query metrics based on that. For the configuration of these stations one can tweak their respective Prometheus and agent configurations. For their coordination one can use a [Prometheus Hierarchical Federation](https://prometheus.io/docs/prometheus/latest/federation/#hierarchical-federation).
-<br><br>
+<br>
 
 ## Extensibility
 The agent currently supports Dobot Magician and JeVois Camera devices. For extending the agent's capabilities to support a different type of device one can create a device class (device module) and place it in the `device_modules.py`. This class needs to implement the `Device` abstract base class (virtual interface). The name of the class is determining the name that the agent will use to discover a device through `devices.conf`, connect to it, fetch its attributes (and update prometheus endpoint) and disconnect from the device.  
@@ -638,10 +626,11 @@ Responsible for disconnecting the device, close any open ports/streams and remov
 
 All other necessary modules needed for implementing the above functions (e.g. `DobotDllTypeX.py` for the `Dobot` device module) and any runtime files should be included in the `runtime` directory.  
 For a practical example one can review the source code in `device_modules.py` and more specifically the `Dobot` and `Jevois` classes (device modules).
-<br><br>
+<br>
 
 ## Load Balancing
 Monitoring stations can be used to group a set of devices (probably in the same section in the workflow) where the agent/station name option becomes relevant. Monitoring/grouping many devices through a single monitoring station (host computer) can bottleneck it and affect monitoring rates. In this case, another use of the agent’s name attribute is naming two or more stations with the same name thus creating a single virtual station. Since each metric supports the station label one can query based on the station name and get metrics from multiple stations while looking like it is one. For setups where the use of multiple monitoring stations is doable, one can use more than one monitoring station for monitoring a section and thus if distributed properly load balance the monitoring stations while still looking like a unified station.
+<br>
 
 ## Testing
 A small manageable testing utility is the `test.py` script which includes a number of functions respective to different functional (f) and performance (p) tests for different device modules. Each functional test represents a function of a device module. Each test returns true in successful completion and false otherwise. Performance tests produce results/statistics to standard output that can be further analyzed.  
@@ -649,7 +638,7 @@ The naming convention for better organization and use of the test functions
 is as follows: `typeOfTest_moduleName_description`  
 e.g.    For a performance test regarding the Jevois module => `p_Jevois_DescriptionOfTest()`  
         For a functional test regarding the Dobot module => `f_Dobot_DescriptionOfTest()`
-<br><br>
+<br>
 
 ## DobotDllType.py Fork (DobotDllTypeX.py)
 Throughout the usage of the Dobot API, some minor issues arose with fetching certain useful attributes, either due to typos or bugs in the API. Fixing those bugs to not sacrifice any wanted data led to a greater understanding of how the Dobot API works and resulted to more changes that make the Dobot API more flexible and more convenient to use. No functions are changed as to not break any existing implementations utilizing the official API as all changes to functions are done through wrappers. For using the improved functions provided by the fork one should create a `runtime` directory in the directory of the agent with all the files provided in the [Dobot Demo](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download). For importing and utilizing the fork place `DobotDllTypeX` inside project's directory and add `import DobotDllTypeX as dTypeX` to the script. (for this reading `dType` refers to the original `DobotDllType.py` and `dTypeX` to the fork)
@@ -678,11 +667,10 @@ for a in dTypeX.GetAlarmsStateX(dobot0):
 * `GetActiveDobots()` function that returns the amount of currently connected Dobot Magicians  
 * `DisconnectAll()` function to disconnect from all connected Dobot Magician devices and clean up any runtime files  
 Both additions were due to the creation of the `ConnectDobotX(port)` function and their purpose is to accommodate it and enrich the flexibility it provides.
-<br><br>
+<br>
 
 ## Resources
 - [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
 - [Dobot API & Dobot Communication Protocol](https://www.dobot.cc/downloadcenter/dobot-magician.html?sub_cat=72#sub-download)
 - [Dobot ALARM](http://www.dobot.it/wp-content/uploads/2018/03/dobot-magician-alarm-en.pdf)
 - [JeVois: Standardized serial messages formatting](http://jevois.org/doc/UserSerialStyle.html)
-<br><br>
