@@ -47,6 +47,9 @@ Optional arguments:
   -c, --color                       print color rich messages to terminal (terminal needs to support ANSI escape colors)
   -m, --more                        open README.md with configuration and implementation details and exit
 ```
+<div align="center">
+<img alt="overview" src="/pics/agentruntime.png">
+</div>
 <br>
 
 ## Device Discovery/Configuration

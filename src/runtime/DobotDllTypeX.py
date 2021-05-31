@@ -1211,7 +1211,7 @@ alarms = {"0x00": "Public Alarm: Reset Alarm", "0x01": "Public Alarm: Undefined 
           "0x21": "Kinematic Alarm: Inverse Resolve Alarm", "0x22": "Kinematic Alarm: Inverse Resolve Limit",
           "0x40": "Limit Alarm: Joint 1 Positive Limit Alarm", "0x41": "Limit Alarm: Joint 1 Negative Limit Alarm", "0x42": "Limit Alarm: Joint 2 Positive Limit Alarm", "0x43": "Limit Alarm: Joint 2 Negative Limit Alarm", "0x44": "Limit Alarm: Joint 3 Positive Limit Alarm", "0x45": "Limit Alarm: Joint 3 Negative Limit Alarm", "0x46": "Limit Alarm: Joint 4 Positive Limit Alarm", "0x47": "Limit Alarm: Joint 4 Negative Limit Alarm", "0x48": "Limit Alarm: Parallegram Positive Limit Alarm", "0x49": "Limit Alarm: Parallegram Negative Limit Alarm"}
 alarmStates = list(alarms.values())
-alarmStates.append("clear")
+alarmStates.append(" ")
 
 def GetAlarmsStateX(api):
     alarmBytes = GetAlarmsState(api, 10)[0]

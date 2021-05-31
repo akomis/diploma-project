@@ -173,13 +173,6 @@ class Agent():
                     self.agentPrint("Killswitch is enabled. Exiting..", type="f")
                     exit(7)
 
-    def __disconnectDevices(self):
-        for device in self.devices:
-            device.disconnect()
-
-            if self.verbose:
-                self.agentPrint("Disconnected device " + device.id, type="o")
-
     def __fetchFrom(self, device):
         while not self.stopped:
             try:
@@ -227,7 +220,12 @@ class Agent():
                 threads[device].join()
 
             self.agentPrint("Disconnecting devices..", type="i")
-            self.__disconnectDevices()
+            for device in self.devices:
+                device.disconnect()
+
+            if self.verbose:
+                self.agentPrint("Disconnected devices", type="o")
+
             exit(0)
 
 def isPort(value):

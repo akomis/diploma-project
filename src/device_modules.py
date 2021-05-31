@@ -239,7 +239,7 @@ class Dobot(Device):
         if self.isEnabled("alarmsstate"):
             alarmsList = dTypeX.GetAlarmsStateX(self.api)
             if len(alarmsList) == 0:
-                Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state("clear")
+                Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state(" ")
             else:
                 for a in alarmsList:
                     Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state(a)
@@ -499,8 +499,12 @@ class Jevois(Device):
     def __initialize(self):
         if self.isEnabled("objectidentified"):
             if self.section["objects"] is not None:
-                self.objects = self.section["objects"].split()
-                self.objectIdentified = Enum("object_identified_by_"+self.id+"_"+self.host, "Object Identified", states=self.objects)
+                self.objects = [" "]
+                # remove extension part and add to the objects list
+                for obj in self.section["objects"].split():
+                    self.objects.append(obj.split(".")[0])
+
+                self.objectIdentified = Enum("object_id", "Object Identified", ["device_id","device_type","station"], states=self.objects)
             else:
                 raise Exception("The \"objects\" list is necessary for monitoring identified objects")
 
@@ -508,8 +512,16 @@ class Jevois(Device):
         line = self.serial.readline().rstrip().decode()
         tok = line.split()
 
-        # in case of no identified object (empty message) skip fetching
-        if len(tok) < 1: return
+        # in case of no identified object (empty message) or malformed line (as a message with Normal serstyle has 6 fields) skip fetching
+        if len(tok) < 6:
+            if self.isEnabled("objectidentified"):
+                self.objectIdentified.labels(device_id=self.id, device_type=self.type, station=self.host).state(" ")
+            Jevois.objectLocationX.labels(device_id=self.id, device_type=self.type, station=self.host).set(0)
+            Jevois.objectLocationY.labels(device_id=self.id, device_type=self.type, station=self.host).set(0)
+            Jevois.objectLocationZ.labels(device_id=self.id, device_type=self.type, station=self.host).set(0)
+            Jevois.objectSize.labels(device_id=self.id, device_type=self.type, station=self.host).set(0)
+            self.serial.flushInput()
+            return
 
         serstyle = tok[0][0]
         dimension = tok[0][1]
@@ -522,8 +534,14 @@ class Jevois(Device):
         if dimension == "3" and len(tok) != 8: raise Exception("Malformed line (expected 8 fields but received " + str(len(tok)) + ")")
 
         if self.isEnabled("objectidentified"):
-            if self.objects is not None and tok[1] in self.objects:
-                self.objectIdentified.state(tok[1])
+            if len(self.objects) > 1:
+                obj = tok[1].split(".")[0]
+                if obj in self.objects:
+                    self.objectIdentified.labels(device_id=self.id, device_type=self.type, station=self.host).state(obj)
+                else:
+                    self.objectIdentified.labels(device_id=self.id, device_type=self.type, station=self.host).state(" ")
+            else:
+                raise Exception("The \"objects\" list exists but is empty")
 
         if self.isEnabled("objectlocation"):
             Jevois.objectLocationX.labels(device_id=self.id, device_type=self.type, station=self.host).set(float(tok[2]))
@@ -541,6 +559,9 @@ class Jevois(Device):
                 Jevois.objectSize.labels(device_id=self.id, device_type=self.type, station=self.host).set(abs(float(tok[4])*float(tok[5])))
             elif dimension == "3":
                 Jevois.objectSize.labels(device_id=self.id, device_type=self.type, station=self.host).set(abs(float(tok[5])*float(tok[6])*float(tok[7])))
+
+        self.serial.flushInput()
+
 
     def disconnect(self):
         self.serial.close()

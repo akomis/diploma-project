@@ -273,6 +273,6 @@ def f_Dobot_ParallelConnection(portList):
 #p_Dobot_FetchingOverhead("192.168.43.4", 30)
 #p_Jevois_FetchingRate("COM4", 30)
 #p_Dobot_SwitchOverhead("192.168.43.4","192.168.43.5")
-#f_Jevois_Connectivity("COM4")
+f_Jevois_Connectivity("COM3")
 #f_Dobot_Alarms("192.168.43.4")
 #f_Dobot_ParallelConnection(["192.168.43.4","192.168.43.5"])
