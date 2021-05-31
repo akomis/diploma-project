@@ -252,7 +252,7 @@ The supported device modules currently implement the device_id, device_type and 
 ### Jevois
 |    Config Name   |           Prometheus Metric Name           |
 |:----------------:|:------------------------------------------:|
-| ObjectIdentified | object_identified_by_{device_id}_{station} |
+| ObjectIdentified |                  object_id                 |
 |  ObjectLocation  |          object_location_{x\|y\|z}         |
 |    ObjectSize    |                 object_size                |
 

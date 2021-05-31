@@ -526,7 +526,7 @@ class Jevois(Device):
         serstyle = tok[0][0]
         dimension = tok[0][1]
 
-        # If the serstyle is not Normal (thus it is unsupported by the module)
+        # If the serstyle is not Normal (thus it is not supported by the module)
         if (serstyle != "N"): raise Exception("Unsupported serstyle (" + serstyle + ")")
 
         if dimension == "1" and len(tok) != 4: raise Exception("Malformed line (expected 4 fields but received " + str(len(tok)) + ")")
