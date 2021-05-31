@@ -69,81 +69,81 @@ class Dobot(Device):
     "wificonnectionstatus":False,"wifissid":False,"wifipassword":False,"wifiipaddress":False,
     "wifinetmask":False,"wifigateway":False,"wifidns":False}
 
-    deviceInfo = Info("dobot_magician", "General information about monitored Dobot Magician device", ["device","station"])
-    wifiInfo = Info("wifi_info", "Information regarding the device\"s wifi connection", ["device","station"])
-    deviceTime = Gauge("device_time","Device\"s clock/time", ["device","station"])
-    queueIndex = Gauge("queue_index","Current index in command queue", ["device","station"])
-    poseX = Gauge("pose_x","Real-time cartesian coordinate of device\"s X axis", ["device","station"])
-    poseY = Gauge("pose_y","Real-time cartesian coordinate of device\"s Y axis", ["device","station"])
-    poseZ = Gauge("pose_z","Real-time cartesian coordinate of device\"s Z axis", ["device","station"])
-    poseR = Gauge("pose_r","Real-time cartesian coordinate of device\"s R axis", ["device","station"])
-    angleBase = Gauge("angle_base","Base joint angle", ["device","station"])
-    angleRearArm = Gauge("angle_rear_arm","Rear arm joint angle", ["device","station"])
-    angleForearm = Gauge("angle_forearm","Forearm joint angle", ["device","station"])
-    angleEndEffector = Gauge("angle_end_effector","End effector joint angle", ["device","station"])
-    alarmsState = Enum("alarms", "Device alarms", ["device","station"], states=list(dTypeX.alarms.values()))
-    homeX = Gauge("home_x","Home position for X axis", ["device","station"])
-    homeY = Gauge("home_y","Home position for Y axis", ["device","station"])
-    homeZ = Gauge("home_z","Home position for Z axis", ["device","station"])
-    homeR = Gauge("home_r","Home position for R axis", ["device","station"])
-    endEffectorX = Gauge("end_effector_x","X-axis offset of end effector", ["device","station"])
-    endEffectorY = Gauge("end_effector_y","Y-axis offset of end effector", ["device","station"])
-    endEffectorZ = Gauge("end_effector_z","Z-axis offset of end effector", ["device","station"])
-    laserStatus = Enum("laser_status","Status (enabled/disabled) of laser", ["device","station"], states=["enabled","disabled"])
-    suctionCupStatus = Enum("suction_cup_status","Status (enabled/disabled) of suction cup", ["device","station"], states=["enabled","disabled"])
-    gripperStatus = Enum("gripper_status","Status (enabled/disabled) of gripper", ["device","station"], states=["enabled","disabled"])
-    jogBaseVelocity = Gauge("jog_base_velocity","Velocity (°/s) of base joint in jogging mode", ["device","station"])
-    jogRearArmVelocity = Gauge("jog_rear_arm_velocity","Velocity (°/s) of rear arm joint in jogging mode", ["device","station"])
-    jogForearmVelocity = Gauge("jog_forearm_velocity","Velocity (°/s) of forearm joint in jogging mode", ["device","station"])
-    jogEndEffectorVelocity = Gauge("jog_end_effector_velocity","Velocity (°/s) of end effector joint in jogging mode", ["device","station"])
-    jogBaseAcceleration = Gauge("jog_base_acceleration","Acceleration (°/s^2) of base joint in jogging mode", ["device","station"])
-    jogRearArmAcceleration = Gauge("jog_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in jogging mode", ["device","station"])
-    jogForearmAcceleration = Gauge("jog_forearm_acceleration","Acceleration (°/s^2) of forearm joint in jogging mode", ["device","station"])
-    jogEndEffectorAcceleration = Gauge("jog_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in jogging mode", ["device","station"])
-    jogAxisXVelocity = Gauge("jog_axis_x_velocity","Velocity (mm/s) of device\"s X axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisYVelocity = Gauge("jog_axis_y_velocity","Velocity (mm/s) of device\"s Y axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisZVelocity = Gauge("jog_axis_z_velocity","Velocity (mm/s) of device\"s Z axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisRVelocity = Gauge("jog_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisXAcceleration = Gauge("jog_axis_x_acceleration","Acceleration (mm/s^2) of device\"s X axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisYAcceleration = Gauge("jog_axis_y_acceleration","Acceleration (mm/s^2) of device\"s Y axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisZAcceleration = Gauge("jog_axis_z_acceleration","Acceleration (mm/s^2) of device\"s Z axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogAxisRAcceleration = Gauge("jog_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in jogging mode", ["device","station"])
-    jogVelocityRatio = Gauge("jog_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode", ["device","station"])
-    jogAccelerationRatio = Gauge("jog_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode", ["device","station"])
-    ptpBaseVelocity = Gauge("ptp_base_velocity","Velocity (°/s) of base joint in point to point mode", ["device","station"])
-    ptpRearArmVelocity = Gauge("ptp_rear_arm_velocity","Velocity (°/s) of rear arm joint in point to point mode", ["device","station"])
-    ptpForearmVelocity = Gauge("ptp_forearm_velocity","Velocity (°/s) of forearm joint in point to point mode", ["device","station"])
-    ptpEndEffectorVelocity = Gauge("ptp_end_effector_velocity","Velocity (°/s) of end effector joint in point to point mode", ["device","station"])
-    ptpBaseAcceleration = Gauge("ptp_base_acceleration","Acceleration (°/s^2) of base joint in point to point mode", ["device","station"])
-    ptpRearArmAcceleration = Gauge("ptp_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in point to point mode", ["device","station"])
-    ptpForearmAcceleration = Gauge("ptp_forearm_acceleration","Acceleration (°/s^2) of forearm joint in point to point mode", ["device","station"])
-    ptpEndEffectorAcceleration = Gauge("ptp_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in point to point mode", ["device","station"])
-    ptpAxisXYZVelocity = Gauge("ptp_axis_xyz_velocity","Velocity (mm/s) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpAxisRVelocity = Gauge("ptp_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpAxisXYZAcceleration = Gauge("ptp_axis_x_y_z_acceleration","Acceleration (mm/s^2) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpAxisRAcceleration = Gauge("ptp_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in point to point mode", ["device","station"])
-    ptpVelocityRatio = Gauge("ptp_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device","station"])
-    ptpAccelerationRatio = Gauge("ptp_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device","station"])
-    liftingHeight = Gauge("lifting_height","Lifting height in jump mode", ["device","station"])
-    heightLimit = Gauge("height_limit","Max lifting height in jump mode", ["device","station"])
-    cpVelocity = Gauge("cp_velocity","Velocity (mm/s) in cp mode", ["device","station"])
-    cpAcceleration = Gauge("cp_acceleration","Acceleration (mm/s^2) in cp mode", ["device","station"])
-    arcXYZVelocity = Gauge("arc_x_y_z_velocity","Velocity (mm/s) of X, Y, Z axis in arc mode", ["device","station"])
-    arcRVelocity = Gauge("arc_r_velocity","Velocity (mm/s) of R axis in arc mode", ["device","station"])
-    arcXYZAcceleration = Gauge("arc_x_y_z_acceleration","Acceleration (mm/s^2) of X, Y, Z axis in arc mode", ["device","station"])
-    arcRAcceleration = Gauge("arc_r_acceleration","Acceleration (mm/s^2) of R axis in arc mode", ["device","station"])
-    angleStaticErrRear = Gauge("angle_static_err_rear","Rear arm angle sensor static error", ["device","station"])
-    angleStaticErrFront = Gauge("arc_static_err_front","Forearm angle sensor static error", ["device","station"])
-    angleCoefRear = Gauge("angle_coef_rear","Rear arm angle sensor linearization parameter", ["device","station"])
-    angleCoefFront = Gauge("angle_coef_front","Forearm angle sensor linearization parameter", ["device","station"])
-    slidingRailStatus = Enum("sliding_rail_status","Sliding rail\"s status (enabled/disabled)", ["device","station"], states=["enabled","disabled"])
-    slidingRailPose = Gauge("sliding_rail_pose","Sliding rail\"s real-time pose in mm", ["device","station"])
-    slidingRailJogVelocity = Gauge("sliding_rail_jog_velocity","Velocity (mm/s) of sliding rail in jogging mode", ["device","station"])
-    slidingRailJogAcceleration = Gauge("sliding_rail_jog_acceleration","Acceleration (mm/s^2) of sliding rail in jogging mode", ["device","station"])
-    slidingRailPtpVelocity = Gauge("sliding_rail_ptp_velocity","Velocity (mm/s) of sliding rail in point to point mode", ["device","station"])
-    slidingRailPtpAcceleration = Gauge("sliding_rail_ptp_acceleration","Acceleration (mm/s^2) of sliding rail in point to point mode", ["device","station"])
-    wifiModuleStatus = Enum("wifi_module_status","Wifi module status (enabled/disabled)", ["device","station"], states=["enabled","disabled"])
-    wifiConnectionStatus = Enum("wifi_connection_status","Wifi connection status (connected/not connected)", ["device","station"], states=["enabled","disabled"])
+    deviceInfo = Info("dobot_magician", "General information about monitored Dobot Magician device", ["device_id","device_type","station"])
+    wifiInfo = Info("wifi_info", "Information regarding the device\"s wifi connection", ["device_id","device_type","station"])
+    deviceTime = Gauge("device_time","Device\"s clock/time", ["device_id","device_type","station"])
+    queueIndex = Gauge("queue_index","Current index in command queue", ["device_id","device_type","station"])
+    poseX = Gauge("pose_x","Real-time cartesian coordinate of device\"s X axis", ["device_id","device_type","station"])
+    poseY = Gauge("pose_y","Real-time cartesian coordinate of device\"s Y axis", ["device_id","device_type","station"])
+    poseZ = Gauge("pose_z","Real-time cartesian coordinate of device\"s Z axis", ["device_id","device_type","station"])
+    poseR = Gauge("pose_r","Real-time cartesian coordinate of device\"s R axis", ["device_id","device_type","station"])
+    angleBase = Gauge("angle_base","Base joint angle", ["device_id","device_type","station"])
+    angleRearArm = Gauge("angle_rear_arm","Rear arm joint angle", ["device_id","device_type","station"])
+    angleForearm = Gauge("angle_forearm","Forearm joint angle", ["device_id","device_type","station"])
+    angleEndEffector = Gauge("angle_end_effector","End effector joint angle", ["device_id","device_type","station"])
+    alarmsState = Enum("alarms", "Device alarms", ["device_id","device_type","station"], states=list(dTypeX.alarms.values()))
+    homeX = Gauge("home_x","Home position for X axis", ["device_id","device_type","station"])
+    homeY = Gauge("home_y","Home position for Y axis", ["device_id","device_type","station"])
+    homeZ = Gauge("home_z","Home position for Z axis", ["device_id","device_type","station"])
+    homeR = Gauge("home_r","Home position for R axis", ["device_id","device_type","station"])
+    endEffectorX = Gauge("end_effector_x","X-axis offset of end effector", ["device_id","device_type","station"])
+    endEffectorY = Gauge("end_effector_y","Y-axis offset of end effector", ["device_id","device_type","station"])
+    endEffectorZ = Gauge("end_effector_z","Z-axis offset of end effector", ["device_id","device_type","station"])
+    laserStatus = Enum("laser_status","Status (enabled/disabled) of laser", ["device_id","device_type","station"], states=["enabled","disabled"])
+    suctionCupStatus = Enum("suction_cup_status","Status (enabled/disabled) of suction cup", ["device_id","device_type","station"], states=["enabled","disabled"])
+    gripperStatus = Enum("gripper_status","Status (enabled/disabled) of gripper", ["device_id","device_type","station"], states=["enabled","disabled"])
+    jogBaseVelocity = Gauge("jog_base_velocity","Velocity (°/s) of base joint in jogging mode", ["device_id","device_type","station"])
+    jogRearArmVelocity = Gauge("jog_rear_arm_velocity","Velocity (°/s) of rear arm joint in jogging mode", ["device_id","device_type","station"])
+    jogForearmVelocity = Gauge("jog_forearm_velocity","Velocity (°/s) of forearm joint in jogging mode", ["device_id","device_type","station"])
+    jogEndEffectorVelocity = Gauge("jog_end_effector_velocity","Velocity (°/s) of end effector joint in jogging mode", ["device_id","device_type","station"])
+    jogBaseAcceleration = Gauge("jog_base_acceleration","Acceleration (°/s^2) of base joint in jogging mode", ["device_id","device_type","station"])
+    jogRearArmAcceleration = Gauge("jog_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in jogging mode", ["device_id","device_type","station"])
+    jogForearmAcceleration = Gauge("jog_forearm_acceleration","Acceleration (°/s^2) of forearm joint in jogging mode", ["device_id","device_type","station"])
+    jogEndEffectorAcceleration = Gauge("jog_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in jogging mode", ["device_id","device_type","station"])
+    jogAxisXVelocity = Gauge("jog_axis_x_velocity","Velocity (mm/s) of device\"s X axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisYVelocity = Gauge("jog_axis_y_velocity","Velocity (mm/s) of device\"s Y axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisZVelocity = Gauge("jog_axis_z_velocity","Velocity (mm/s) of device\"s Z axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisRVelocity = Gauge("jog_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisXAcceleration = Gauge("jog_axis_x_acceleration","Acceleration (mm/s^2) of device\"s X axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisYAcceleration = Gauge("jog_axis_y_acceleration","Acceleration (mm/s^2) of device\"s Y axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisZAcceleration = Gauge("jog_axis_z_acceleration","Acceleration (mm/s^2) of device\"s Z axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisRAcceleration = Gauge("jog_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogVelocityRatio = Gauge("jog_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode", ["device_id","device_type","station"])
+    jogAccelerationRatio = Gauge("jog_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode", ["device_id","device_type","station"])
+    ptpBaseVelocity = Gauge("ptp_base_velocity","Velocity (°/s) of base joint in point to point mode", ["device_id","device_type","station"])
+    ptpRearArmVelocity = Gauge("ptp_rear_arm_velocity","Velocity (°/s) of rear arm joint in point to point mode", ["device_id","device_type","station"])
+    ptpForearmVelocity = Gauge("ptp_forearm_velocity","Velocity (°/s) of forearm joint in point to point mode", ["device_id","device_type","station"])
+    ptpEndEffectorVelocity = Gauge("ptp_end_effector_velocity","Velocity (°/s) of end effector joint in point to point mode", ["device_id","device_type","station"])
+    ptpBaseAcceleration = Gauge("ptp_base_acceleration","Acceleration (°/s^2) of base joint in point to point mode", ["device_id","device_type","station"])
+    ptpRearArmAcceleration = Gauge("ptp_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in point to point mode", ["device_id","device_type","station"])
+    ptpForearmAcceleration = Gauge("ptp_forearm_acceleration","Acceleration (°/s^2) of forearm joint in point to point mode", ["device_id","device_type","station"])
+    ptpEndEffectorAcceleration = Gauge("ptp_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in point to point mode", ["device_id","device_type","station"])
+    ptpAxisXYZVelocity = Gauge("ptp_axis_xyz_velocity","Velocity (mm/s) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisRVelocity = Gauge("ptp_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisXYZAcceleration = Gauge("ptp_axis_x_y_z_acceleration","Acceleration (mm/s^2) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisRAcceleration = Gauge("ptp_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpVelocityRatio = Gauge("ptp_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device_id","device_type","station"])
+    ptpAccelerationRatio = Gauge("ptp_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device_id","device_type","station"])
+    liftingHeight = Gauge("lifting_height","Lifting height in jump mode", ["device_id","device_type","station"])
+    heightLimit = Gauge("height_limit","Max lifting height in jump mode", ["device_id","device_type","station"])
+    cpVelocity = Gauge("cp_velocity","Velocity (mm/s) in cp mode", ["device_id","device_type","station"])
+    cpAcceleration = Gauge("cp_acceleration","Acceleration (mm/s^2) in cp mode", ["device_id","device_type","station"])
+    arcXYZVelocity = Gauge("arc_x_y_z_velocity","Velocity (mm/s) of X, Y, Z axis in arc mode", ["device_id","device_type","station"])
+    arcRVelocity = Gauge("arc_r_velocity","Velocity (mm/s) of R axis in arc mode", ["device_id","device_type","station"])
+    arcXYZAcceleration = Gauge("arc_x_y_z_acceleration","Acceleration (mm/s^2) of X, Y, Z axis in arc mode", ["device_id","device_type","station"])
+    arcRAcceleration = Gauge("arc_r_acceleration","Acceleration (mm/s^2) of R axis in arc mode", ["device_id","device_type","station"])
+    angleStaticErrRear = Gauge("angle_static_err_rear","Rear arm angle sensor static error", ["device_id","device_type","station"])
+    angleStaticErrFront = Gauge("arc_static_err_front","Forearm angle sensor static error", ["device_id","device_type","station"])
+    angleCoefRear = Gauge("angle_coef_rear","Rear arm angle sensor linearization parameter", ["device_id","device_type","station"])
+    angleCoefFront = Gauge("angle_coef_front","Forearm angle sensor linearization parameter", ["device_id","device_type","station"])
+    slidingRailStatus = Enum("sliding_rail_status","Sliding rail\"s status (enabled/disabled)", ["device_id","device_type","station"], states=["enabled","disabled"])
+    slidingRailPose = Gauge("sliding_rail_pose","Sliding rail\"s real-time pose in mm", ["device_id","device_type","station"])
+    slidingRailJogVelocity = Gauge("sliding_rail_jog_velocity","Velocity (mm/s) of sliding rail in jogging mode", ["device_id","device_type","station"])
+    slidingRailJogAcceleration = Gauge("sliding_rail_jog_acceleration","Acceleration (mm/s^2) of sliding rail in jogging mode", ["device_id","device_type","station"])
+    slidingRailPtpVelocity = Gauge("sliding_rail_ptp_velocity","Velocity (mm/s) of sliding rail in point to point mode", ["device_id","device_type","station"])
+    slidingRailPtpAcceleration = Gauge("sliding_rail_ptp_acceleration","Acceleration (mm/s^2) of sliding rail in point to point mode", ["device_id","device_type","station"])
+    wifiModuleStatus = Enum("wifi_module_status","Wifi module status (enabled/disabled)", ["device_id","device_type","station"], states=["enabled","disabled"])
+    wifiConnectionStatus = Enum("wifi_connection_status","Wifi connection status (connected/not connected)", ["device_id","device_type","station"], states=["enabled","disabled"])
 
     def connect(self):
         stateInfo = {1:"Not Found", 2:"Occupied"}
@@ -166,7 +166,7 @@ class Dobot(Device):
         if self.isEnabled("deviceversion"):
             enabledDeviceInfo["version"] = ".".join(list(map(str, dTypeX.GetDeviceVersion(self.api))))
         if len(enabledDeviceInfo) > 0:
-            Dobot.deviceInfo.labels(device=self.id, station=self.host).info(enabledDeviceInfo)
+            Dobot.deviceInfo.labels(device_id=self.id, device_type=self.type, station=self.host).info(enabledDeviceInfo)
 
         enabledWifiInfo = {}
         if self.isEnabled("wifissid"):
@@ -182,7 +182,7 @@ class Dobot(Device):
         if self.isEnabled("wifidns"):
             enabledWifiInfo["dns"] = ".".join(list(map(str, dTypeX.GetWIFIDNS(self.api))))
         if len(enabledWifiInfo) > 0:
-            Dobot.wifiInfo.labels(device=self.id, station=self.host).info(enabledWifiInfo)
+            Dobot.wifiInfo.labels(device_id=self.id, device_type=self.type, station=self.host).info(enabledWifiInfo)
 
         self.GetPose = self.isCallEnabled(["posex","posey","posez","poser","anglebase","anglereararm","angleforearm","angleendeffector"])
         self.GetHomeParams = self.isCallEnabled(["homex","homey","homez","homer"])
@@ -206,274 +206,274 @@ class Dobot(Device):
 
     def fetch(self):
         if self.isEnabled("devicetime"):
-            Dobot.deviceTime.labels(device=self.id, station=self.host).set(dTypeX.GetDeviceTime(self.api)[0])
+            Dobot.deviceTime.labels(device_id=self.id, device_type=self.type, station=self.host).set(dTypeX.GetDeviceTime(self.api)[0])
 
         if self.isEnabled("queueindex"):
-            Dobot.queueIndex.labels(device=self.id, station=self.host).set(dTypeX.GetQueuedCmdCurrentIndex(self.api)[0])
+            Dobot.queueIndex.labels(device_id=self.id, device_type=self.type, station=self.host).set(dTypeX.GetQueuedCmdCurrentIndex(self.api)[0])
 
         if self.GetPose:
             pose = dTypeX.GetPose(self.api)
             if self.isEnabled("posex"):
-                Dobot.poseX.labels(device=self.id, station=self.host).set(pose[0])
+                Dobot.poseX.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[0])
 
             if self.isEnabled("posey"):
-                Dobot.poseY.labels(device=self.id, station=self.host).set(pose[1])
+                Dobot.poseY.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[1])
 
             if self.isEnabled("posez"):
-                Dobot.poseZ.labels(device=self.id, station=self.host).set(pose[2])
+                Dobot.poseZ.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[2])
 
             if self.isEnabled("poser"):
-                Dobot.poseR.labels(device=self.id, station=self.host).set(pose[3])
+                Dobot.poseR.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[3])
 
             if self.isEnabled("anglebase"):
-                Dobot.angleBase.labels(device=self.id, station=self.host).set(pose[4])
+                Dobot.angleBase.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[4])
 
             if self.isEnabled("anglereararm"):
-                Dobot.angleRearArm.labels(device=self.id, station=self.host).set(pose[5])
+                Dobot.angleRearArm.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[5])
 
             if self.isEnabled("angleforearm"):
-                Dobot.angleForearm.labels(device=self.id, station=self.host).set(pose[6])
+                Dobot.angleForearm.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[6])
 
             if self.isEnabled("angleendeffector"):
-                Dobot.angleEndEffector.labels(device=self.id, station=self.host).set(pose[7])
+                Dobot.angleEndEffector.labels(device_id=self.id, device_type=self.type, station=self.host).set(pose[7])
 
         if self.isEnabled("alarmsstate"):
             for a in dTypeX.GetAlarmsStateX(self.api):
-                Dobot.alarmsState.labels(device=self.id, station=self.host).state(a)
+                Dobot.alarmsState.labels(device_id=self.id, device_type=self.type, station=self.host).state(a)
 
         if self.GetHomeParams:
             home = dTypeX.GetHOMEParams(self.api)
             if self.isEnabled("homex"):
-                Dobot.homeX.labels(device=self.id, station=self.host).set(home[0])
+                Dobot.homeX.labels(device_id=self.id, device_type=self.type, station=self.host).set(home[0])
 
             if self.isEnabled("homey"):
-                Dobot.homeY.labels(device=self.id, station=self.host).set(home[1])
+                Dobot.homeY.labels(device_id=self.id, device_type=self.type, station=self.host).set(home[1])
 
             if self.isEnabled("homez"):
-                Dobot.homeZ.labels(device=self.id, station=self.host).set(home[2])
+                Dobot.homeZ.labels(device_id=self.id, device_type=self.type, station=self.host).set(home[2])
 
             if self.isEnabled("homer"):
-                Dobot.homeR.labels(device=self.id, station=self.host).set(home[3])
+                Dobot.homeR.labels(device_id=self.id, device_type=self.type, station=self.host).set(home[3])
 
-        if self.GetEndEffectorPrams:
+        if self.GetEndEffectorParams:
             endEffector = dTypeX.GetEndEffectorParams(self.api)
             if self.isEnabled("endeffectorx"):
-                Dobot.endEffectorX.labels(device=self.id, station=self.host).set(endEffector[0])
+                Dobot.endEffectorX.labels(device_id=self.id, device_type=self.type, station=self.host).set(endEffector[0])
 
             if self.isEnabled("endeffectory"):
-                Dobot.endEffectorY.labels(device=self.id, station=self.host).set(endEffector[1])
+                Dobot.endEffectorY.labels(device_id=self.id, device_type=self.type, station=self.host).set(endEffector[1])
 
             if self.isEnabled("endeffectorz"):
-                Dobot.endEffectorZ.labels(device=self.id, station=self.host).set(endEffector[2])
+                Dobot.endEffectorZ.labels(device_id=self.id, device_type=self.type, station=self.host).set(endEffector[2])
 
         if self.isEnabled("laserstatus"):
             if bool(dTypeX.GetEndEffectorLaser(self.api)[0]):
-                Dobot.laserStatus.labels(device=self.id, station=self.host).state("enabled")
+                Dobot.laserStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("enabled")
             else:
-                Dobot.laserStatus.labels(device=self.id, station=self.host).state("disabled")
+                Dobot.laserStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("disabled")
 
         if self.isEnabled("suctioncupstatus"):
             if bool(dTypeX.GetEndEffectorSuctionCup(self.api)[0]):
-                Dobot.suctionCupStatus.labels(device=self.id, station=self.host).state("enabled")
+                Dobot.suctionCupStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("enabled")
             else:
-                Dobot.suctionCupStatus.labels(device=self.id, station=self.host).state("disabled")
+                Dobot.suctionCupStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("disabled")
 
         if self.isEnabled("gripperstatus"):
             if bool(dTypeX.GetEndEffectorGripper(self.api)[0]):
-                Dobot.gripperStatus.labels(device=self.id, station=self.host).state("enabled")
+                Dobot.gripperStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("enabled")
             else:
-                Dobot.gripperStatus.labels(device=self.id, station=self.host).state("disabled")
+                Dobot.gripperStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("disabled")
 
         if self.GetJOGGointParams:
             jogJoints = dTypeX.GetJOGJointParams(self.api)
             if self.isEnabled("jogbasevelocity"):
-                Dobot.jogBaseVelocity.labels(device=self.id, station=self.host).set(jogJoints[0])
+                Dobot.jogBaseVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[0])
 
             if self.isEnabled("jogreararmvelocity"):
-                Dobot.jogRearArmVelocity.labels(device=self.id, station=self.host).set(jogJoints[1])
+                Dobot.jogRearArmVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[1])
 
             if self.isEnabled("jogforearmvelocity"):
-                Dobot.jogForearmVelocity.labels(device=self.id, station=self.host).set(jogJoints[2])
+                Dobot.jogForearmVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[2])
 
             if self.isEnabled("jogendeffectorvelocity"):
-                Dobot.jogEndEffectorVelocity.labels(device=self.id, station=self.host).set(jogJoints[3])
+                Dobot.jogEndEffectorVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[3])
 
             if self.isEnabled("jogbaseacceleration"):
-                Dobot.jogBaseAcceleration.labels(device=self.id, station=self.host).set(jogJoints[4])
+                Dobot.jogBaseAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[4])
 
             if self.isEnabled("jogreararmacceleration"):
-                Dobot.jogRearArmAcceleration.labels(device=self.id, station=self.host).set(jogJoints[5])
+                Dobot.jogRearArmAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[5])
 
             if self.isEnabled("jogforearmacceleration"):
-                Dobot.jogForearmAcceleration.labels(device=self.id, station=self.host).set(jogJoints[6])
+                Dobot.jogForearmAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[6])
 
             if self.isEnabled("jogendeffectoracceleration"):
-                Dobot.jogEndEffectorAcceleration.labels(device=self.id, station=self.host).set(jogJoints[7])
+                Dobot.jogEndEffectorAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogJoints[7])
 
         if self.GetJOGCoordinateParams:
             jogCoords = dTypeX.GetJOGCoordinateParams(self.api)
             if self.isEnabled("jogaxisxvelocity"):
-                Dobot.jogAxisXVelocity.labels(device=self.id, station=self.host).set(jogCoords[0])
+                Dobot.jogAxisXVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[0])
 
             if self.isEnabled("jogaxisyvelocity"):
-                Dobot.jogAxisYVelocity.labels(device=self.id, station=self.host).set(jogCoords[1])
+                Dobot.jogAxisYVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[1])
 
             if self.isEnabled("jogaxiszvelocity"):
-                Dobot.jogAxisZVelocity.labels(device=self.id, station=self.host).set(jogCoords[2])
+                Dobot.jogAxisZVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[2])
 
             if self.isEnabled("jogaxisrvelocity"):
-                Dobot.jogAxisRVelocity.labels(device=self.id, station=self.host).set(jogCoords[3])
+                Dobot.jogAxisRVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[3])
 
             if self.isEnabled("jogaxisxacceleration"):
-                Dobot.jogAxisXAcceleration.labels(device=self.id, station=self.host).set(jogCoords[4])
+                Dobot.jogAxisXAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[4])
 
             if self.isEnabled("jogaxisyacceleration"):
-                Dobot.jogAxisYAcceleration.labels(device=self.id, station=self.host).set(jogCoords[5])
+                Dobot.jogAxisYAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[5])
 
             if self.isEnabled("jogaxiszacceleration"):
-                Dobot.jogAxisZAcceleration.labels(device=self.id, station=self.host).set(jogCoords[6])
+                Dobot.jogAxisZAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[6])
 
             if self.isEnabled("jogaxisracceleration"):
-                Dobot.jogAxisRAcceleration.labels(device=self.id, station=self.host).set(jogCoords[7])
+                Dobot.jogAxisRAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCoords[7])
 
         if self.GetJOGCommonParams:
             jogCommon = dTypeX.GetJOGCommonParams(self.api)
             if self.isEnabled("jogvelocityratio"):
-                Dobot.jogVelocityRatio.labels(device=self.id, station=self.host).set(jogCommon[0])
+                Dobot.jogVelocityRatio.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCommon[0])
 
             if self.isEnabled("jogaccelerationratio"):
-                Dobot.jogAccelerationRatio.labels(device=self.id, station=self.host).set(jogCommon[1])
+                Dobot.jogAccelerationRatio.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogCommon[1])
 
         if self.GetPTPJointParams:
             ptpJoints = dTypeX.GetPTPJointParams(self.api)
             if self.isEnabled("ptpbasevelocity"):
-                Dobot.ptpBaseVelocity.labels(device=self.id, station=self.host).set(ptpJoints[0])
+                Dobot.ptpBaseVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[0])
 
             if self.isEnabled("ptpreararmvelocity"):
-                Dobot.ptpRearArmVelocity.labels(device=self.id, station=self.host).set(ptpJoints[1])
+                Dobot.ptpRearArmVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[1])
 
             if self.isEnabled("ptpforearmvelocity"):
-                Dobot.ptpForearmVelocity.labels(device=self.id, station=self.host).set(ptpJoints[2])
+                Dobot.ptpForearmVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[2])
 
             if self.isEnabled("ptpendeffectorvelocity"):
-                Dobot.ptpEndEffectorVelocity.labels(device=self.id, station=self.host).set(ptpJoints[3])
+                Dobot.ptpEndEffectorVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[3])
 
             if self.isEnabled("ptpbaseacceleration"):
-                Dobot.ptpBaseAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[4])
+                Dobot.ptpBaseAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[4])
 
             if self.isEnabled("ptpreararmacceleration"):
-                Dobot.ptpRearArmAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[5])
+                Dobot.ptpRearArmAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[5])
 
             if self.isEnabled("ptpforearmacceleration"):
-                Dobot.ptpForearmAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[6])
+                Dobot.ptpForearmAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[6])
 
             if self.isEnabled("ptpendeffectoracceleration"):
-                Dobot.ptpEndEffectorAcceleration.labels(device=self.id, station=self.host).set(ptpJoints[7])
+                Dobot.ptpEndEffectorAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJoints[7])
 
         if self.GetPTPCoordinateParams:
             ptpCoords = dTypeX.GetPTPCoordinateParams(self.api)
             if self.isEnabled("ptpaxisxyzvelocity"):
-                Dobot.ptpAxisXYZVelocity.labels(device=self.id, station=self.host).set(ptpCoords[0])
+                Dobot.ptpAxisXYZVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpCoords[0])
 
             if self.isEnabled("ptpaxisrvelocity"):
-                Dobot.ptpAxisRVelocity.labels(device=self.id, station=self.host).set(ptpCoords[1])
+                Dobot.ptpAxisRVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpCoords[1])
 
             if self.isEnabled("ptpaxisxyzacceleration"):
-                Dobot.ptpAxisXYZAcceleration.labels(device=self.id, station=self.host).set(ptpCoords[2])
+                Dobot.ptpAxisXYZAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpCoords[2])
 
             if self.isEnabled("ptpaxisracceleration"):
-                Dobot.ptpAxisRAcceleration.labels(device=self.id, station=self.host).set(ptpCoords[3])
+                Dobot.ptpAxisRAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpCoords[3])
 
         if self.GetPTPCommonParams:
             ptpCommon = dTypeX.GetPTPCommonParams(self.api)
             if self.isEnabled("ptpvelocityratio"):
-                Dobot.ptpVelocityRatio.labels(device=self.id, station=self.host).set(ptpCommon[0])
+                Dobot.ptpVelocityRatio.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpCommon[0])
 
             if self.isEnabled("ptpaccelerationratio"):
-                Dobot.ptpAccelerationRatio.labels(device=self.id, station=self.host).set(ptpCommon[1])
+                Dobot.ptpAccelerationRatio.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpCommon[1])
 
         if self.GetPTPJumpParams:
             ptpJump = dTypeX.GetPTPJumpParams(self.api)
             if self.isEnabled("liftingheight"):
-                Dobot.liftingHeight.labels(device=self.id, station=self.host).set(ptpJump[0])
+                Dobot.liftingHeight.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJump[0])
 
             if self.isEnabled("heightlimit"):
-                Dobot.heightLimit.labels(device=self.id, station=self.host).set(ptpJump[1])
+                Dobot.heightLimit.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpJump[1])
 
         if self.GetCPParams:
             cp = dTypeX.GetCPParams(self.api)
             if self.isEnabled("cpvelocity"):
-                Dobot.cpVelocity.labels(device=self.id, station=self.host).set(cp[0])
+                Dobot.cpVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(cp[0])
 
             if self.isEnabled("cpacceleration"):
-                Dobot.cpAcceleration.labels(device=self.id, station=self.host).set(cp[1])
+                Dobot.cpAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(cp[1])
 
         if self.GetARCParams:
             arc = dTypeX.GetARCParams(self.api)
             if self.isEnabled("arcxyzvelocity"):
-                Dobot.arcXYZVelocity.labels(device=self.id, station=self.host).set(arc[0])
+                Dobot.arcXYZVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(arc[0])
 
             if self.isEnabled("arcrvelocity"):
-                Dobot.arcRVelocity.labels(device=self.id, station=self.host).set(arc[1])
+                Dobot.arcRVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(arc[1])
 
             if self.isEnabled("arcxyzacceleration"):
-                Dobot.arcXYZAcceleration.labels(device=self.id, station=self.host).set(arc[2])
+                Dobot.arcXYZAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(arc[2])
 
             if self.isEnabled("arcracceleration"):
-                Dobot.arcRAcceleration.labels(device=self.id, station=self.host).set(arc[3])
+                Dobot.arcRAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(arc[3])
 
         if self.GetAngleSensorStaticError:
             angleStaticErr = dTypeX.GetAngleSensorStaticError(self.api)
             if self.isEnabled("anglestaticerrrear"):
-                Dobot.angleStaticErrRear.labels(device=self.id, station=self.host).set(angleStaticErr[0])
+                Dobot.angleStaticErrRear.labels(device_id=self.id, device_type=self.type, station=self.host).set(angleStaticErr[0])
 
             if self.isEnabled("anglestaticerrfront"):
-                Dobot.angleStaticErrFront.labels(device=self.id, station=self.host).set(angleStaticErr[1])
+                Dobot.angleStaticErrFront.labels(device_id=self.id, device_type=self.type, station=self.host).set(angleStaticErr[1])
 
         if self.GetAngleSensorCoef:
             angleCoef = dTypeX.GetAngleSensorCoef(self.api)
             if self.isEnabled("anglecoefrear"):
-                Dobot.angleCoefRear.labels(device=self.id, station=self.host).set(angleCoef[0])
+                Dobot.angleCoefRear.labels(device_id=self.id, device_type=self.type, station=self.host).set(angleCoef[0])
 
             if self.isEnabled("anglecoeffront"):
-                Dobot.angleCoefFront.labels(device=self.id, station=self.host).set(angleCoef[1])
+                Dobot.angleCoefFront.labels(device_id=self.id, device_type=self.type, station=self.host).set(angleCoef[1])
 
         if self.isEnabled("slidingrailstatus"):
             if bool(dTypeX.GetDeviceWithL(self.api)[0]):
-                Dobot.slidingRailStatus.labels(device=self.id, station=self.host).state("enabled")
+                Dobot.slidingRailStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("enabled")
             else:
-                Dobot.slidingRailStatus.labels(device=self.id, station=self.host).state("disabled")
+                Dobot.slidingRailStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("disabled")
 
         if self.isEnabled("slidingrailpose"):
-            Dobot.slidingRailPose.labels(device=self.id, station=self.host).set(dTypeX.GetPoseL(self.api)[0])
+            Dobot.slidingRailPose.labels(device_id=self.id, device_type=self.type, station=self.host).set(dTypeX.GetPoseL(self.api)[0])
 
         if self.GetJOGLParams:
             jogRail = dTypeX.GetJOGLParams(self.api)
             if self.isEnabled("slidingrailjogvelocity"):
-                Dobot.slidingRailJogVelocity.labels(device=self.id, station=self.host).set(jogRail[0])
+                Dobot.slidingRailJogVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogRail[0])
 
             if self.isEnabled("slidingrailjogacceleration"):
-                Dobot.slidingRailJogAcceleration.labels(device=self.id, station=self.host).set(jogRail[1])
+                Dobot.slidingRailJogAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(jogRail[1])
 
         if self.GetPTPLParams:
             ptpRail = dTypeX.GetPTPLParams(self.api)
             if self.isEnabled("slidingrailptpvelocity"):
-                Dobot.slidingRailPtpVelocity.labels(device=self.id, station=self.host).set(ptpRail[0])
+                Dobot.slidingRailPtpVelocity.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpRail[0])
 
             if self.isEnabled("slidingrailptpacceleration"):
-                Dobot.slidingRailPtpAcceleration.labels(device=self.id, station=self.host).set(ptpRail[1])
+                Dobot.slidingRailPtpAcceleration.labels(device_id=self.id, device_type=self.type, station=self.host).set(ptpRail[1])
 
         if self.isEnabled("wifimodulestatus"):
             if bool(dTypeX.GetWIFIConfigMode(self.api)[0]):
-                Dobot.wifiModuleStatus.labels(device=self.id, station=self.host).state("enabled")
+                Dobot.wifiModuleStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("enabled")
             else:
-                Dobot.wifiModuleStatus.labels(device=self.id, station=self.host).state("disabled")
+                Dobot.wifiModuleStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("disabled")
 
         if self.isEnabled("wificonnectionstatus"):
             if bool(dTypeX.GetWIFIConnectStatus(self.api)[0]):
-                Dobot.wifiConnectionStatus.labels(device=self.id, station=self.host).state("enabled")
+                Dobot.wifiConnectionStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("enabled")
             else:
-                Dobot.wifiConnectionStatus.labels(device=self.id, station=self.host).state("disabled")
+                Dobot.wifiConnectionStatus.labels(device_id=self.id, device_type=self.type, station=self.host).state("disabled")
 
     def disconnect(self):
         dTypeX.DisconnectDobotX(self.api)
@@ -481,10 +481,10 @@ class Dobot(Device):
 class Jevois(Device):
     options = {"objects":"","objectidentified":True,"objectlocation":True,"objectsize":False}
 
-    objectLocationX = Gauge("object_location_x", "Identified object\"s x position", ["device","station"])
-    objectLocationY = Gauge("object_location_y", "Identified object\"s y position", ["device","station"])
-    objectLocationZ = Gauge("object_location_z", "Identified object\"s Z position", ["device","station"])
-    objectSize = Gauge("object_size","Identified object\"s size", ["device","station"])
+    objectLocationX = Gauge("object_location_x", "Identified object\"s x position", ["device_id","device_type","station"])
+    objectLocationY = Gauge("object_location_y", "Identified object\"s y position", ["device_id","device_type","station"])
+    objectLocationZ = Gauge("object_location_z", "Identified object\"s Z position", ["device_id","device_type","station"])
+    objectSize = Gauge("object_size","Identified object\"s size", ["device_id","device_type","station"])
 
     def connect(self):
         try:
@@ -523,21 +523,21 @@ class Jevois(Device):
                 self.objectIdentified.state(tok[1])
 
         if self.isEnabled("objectlocation"):
-            Jevois.objectLocationX.labels(device=self.id, station=self.host).set(float(tok[2]))
+            Jevois.objectLocationX.labels(device_id=self.id, device_type=self.type, station=self.host).set(float(tok[2]))
 
             if int(dimension) > 1:
-                Jevois.objectLocationY.labels(device=self.id, station=self.host).set(float(tok[3]))
+                Jevois.objectLocationY.labels(device_id=self.id, device_type=self.type, station=self.host).set(float(tok[3]))
 
             if int(dimension) == 3:
-                Jevois.objectLocationZ.labels(device=self.id, station=self.host).set(float(tok[4]))
+                Jevois.objectLocationZ.labels(device_id=self.id, device_type=self.type, station=self.host).set(float(tok[4]))
 
         if self.isEnabled("objectsize"):
             if dimension == "1":
-                Jevois.objectSize.labels(device=self.id, station=self.host).set(float(tok[3]))
+                Jevois.objectSize.labels(device_id=self.id, device_type=self.type, station=self.host).set(float(tok[3]))
             elif dimension == "2":
-                Jevois.objectSize.labels(device=self.id, station=self.host).set(abs(float(tok[4])*float(tok[5])))
+                Jevois.objectSize.labels(device_id=self.id, device_type=self.type, station=self.host).set(abs(float(tok[4])*float(tok[5])))
             elif dimension == "3":
-                Jevois.objectSize.labels(device=self.id, station=self.host).set(abs(float(tok[5])*float(tok[6])*float(tok[7])))
+                Jevois.objectSize.labels(device_id=self.id, device_type=self.type, station=self.host).set(abs(float(tok[5])*float(tok[6])*float(tok[7])))
 
     def disconnect(self):
         self.serial.close()

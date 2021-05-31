@@ -8,7 +8,6 @@ from prometheus_client import start_http_server
 from device_modules import *
 
 class Agent():
-    stopped = False
     termcolors = {
     "B":"\033[1m","U":"\033[4m","H":"\033[95m",
     "OK":"\033[92m","INFO":"\033[94m",
@@ -16,6 +15,7 @@ class Agent():
     "END":"\033[0m"}
 
     def __init__(self, devicesFilename:str, name:str, prometheusPort:int, killSwitch:bool, verbose:bool, color:bool):
+        self.stopped = False
         self.config = configparser.ConfigParser()
         self.devicesFilename = devicesFilename
         self.name = name
@@ -181,7 +181,7 @@ class Agent():
                 self.agentPrint("Disconnected device " + device.id, type="o")
 
     def __fetchFrom(self, device):
-        while not Agent.stopped:
+        while not self.stopped:
             start = time.time()
             try:
                 device.fetch()
@@ -221,7 +221,7 @@ class Agent():
             while 1:
                 pass
         except KeyboardInterrupt:
-            Agent.stopped = True
+            self.stopped = True
             self.agentPrint("Waiting for active fetching to complete..", type="i")
             for device in threads:
                 threads[device].join()
