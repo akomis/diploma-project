@@ -161,7 +161,7 @@ For a more practical insight check the default `devices.conf` included.
 <br><br>
 
 ## Querying
-The supported device modules currently implement the device_id, device_type and station labels for querying based on specific device id (e.g. Dobot: 192.168.43.4), device type (e.g. Dobot, Jevois) and agent/station name, respectively. You can find the monitoring options and their respective prometheus metric names for querying below.
+The supported device modules currently implement the device_id, device_type and station labels for querying based on specific device id (e.g. Dobot:192.168.43.4), device type (e.g. Dobot, Jevois) and agent/station name, respectively. You can find the monitoring options and their respective Prometheus metric names for querying below.
 
 ### Dobot
 |         Config Name        |     Prometheus Metric Name    |
@@ -252,7 +252,7 @@ The supported device modules currently implement the device_id, device_type and 
 ### Jevois
 |    Config Name   |           Prometheus Metric Name           |
 |:----------------:|:------------------------------------------:|
-| ObjectIdentified |                  object_id                 |
+| ObjectIdentified |               object_id_{port}             |
 |  ObjectLocation  |          object_location_{x\|y\|z}         |
 |    ObjectSize    |                 object_size                |
 

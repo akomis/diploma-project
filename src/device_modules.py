@@ -504,7 +504,7 @@ class Jevois(Device):
                 for obj in self.section["objects"].split():
                     self.objects.append(obj.split(".")[0])
 
-                self.objectIdentified = Enum("object_id", "Object Identified", ["device_id","device_type","station"], states=self.objects)
+                self.objectIdentified = Enum("object_id_"+lower(self.port), "Object Identified", ["device_id","device_type","station"], states=self.objects)
             else:
                 raise Exception("The \"objects\" list is necessary for monitoring identified objects")
 
