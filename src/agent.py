@@ -242,7 +242,7 @@ def isPort(value):
 def main():
     parser = argparse.ArgumentParser(description="Agent Settings")
     parser.add_argument("-d", "--devices", default="devices.conf", help="specify discovery/configuration file absolute path (default: \".\\devices.conf\")")
-    parser.add_argument("-n", "--name", default="Agent0", help="specify symbolic agent/station name used for seperation/grouping of stations (default: \"Agent0\")")
+    parser.add_argument("-n", "--name", default="Agent0", help="specify symbolic agent/station name used for separation/grouping of stations (default: \"Agent0\")")
     parser.add_argument("-p", "--promport", type=isPort, default=8000, help="specify port number for the Prometheus endpoint (default: 8000)")
     parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if error occurs in validation/connection phase")
     parser.add_argument("-v", "--verbose", action="store_true", help="print actions with details in standard output")
