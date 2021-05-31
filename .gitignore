@@ -1,6 +1,8 @@
 tmp/*
 .*
 README.dobot
+demo.*
+dobot[0-9]*.dll
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

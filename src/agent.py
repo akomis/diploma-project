@@ -182,8 +182,8 @@ class Agent():
 
     def __fetchFrom(self, device):
         while not self.stopped:
-            start = time.time()
             try:
+                start = time.time()
                 device.fetch()
                 elapsed = time.time() - start
                 if self.verbose:
@@ -200,7 +200,7 @@ class Agent():
 
         if len(self.devices) == 0:
             self.agentPrint("No devices connected to the agent. Exiting..", type="f")
-            sys.exit(11)
+            sys.exit(8)
 
         self.agentPrint("Starting prometheus server at port " + str(self.prometheusPort) + "..", type="i")
         start_http_server(self.prometheusPort)
@@ -249,11 +249,12 @@ def main():
     parser.add_argument("-k", "--killswitch", action="store_true", help="exit agent if error occurs in validation/connection phase")
     parser.add_argument("-v", "--verbose", action="store_true", help="print actions with details in standard output")
     parser.add_argument("-c", "--color", action="store_true", help="print color rich messages to terminal (terminal needs to support ANSI escape colors)")
-    parser.add_argument("-m", "--more", action="store_true", help="open README.md with configuration and implementation details")
+    parser.add_argument("-m", "--more", action="store_true", help="open README.md with configuration and implementation details and exit")
     args = parser.parse_args()
 
     if args.more:
         webbrowser.open("..\README.md")
+        exit(0)
 
     Agent(args.devices, args.name, args.promport, args.killswitch, args.verbose, args.color).startRoutine()
 

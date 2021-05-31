@@ -70,13 +70,13 @@ class Dobot(Device):
     "wifinetmask":False,"wifigateway":False,"wifidns":False}
 
     deviceInfo = Info("dobot_magician", "General information about monitored Dobot Magician device", ["device_id","device_type","station"])
-    wifiInfo = Info("wifi_info", "Information regarding the device\"s wifi connection", ["device_id","device_type","station"])
-    deviceTime = Gauge("device_time","Device\"s clock/time", ["device_id","device_type","station"])
+    wifiInfo = Info("wifi", "Information regarding the device's wifi connection", ["device_id","device_type","station"])
+    deviceTime = Gauge("device_time","Device's clock/time", ["device_id","device_type","station"])
     queueIndex = Gauge("queue_index","Current index in command queue", ["device_id","device_type","station"])
-    poseX = Gauge("pose_x","Real-time cartesian coordinate of device\"s X axis", ["device_id","device_type","station"])
-    poseY = Gauge("pose_y","Real-time cartesian coordinate of device\"s Y axis", ["device_id","device_type","station"])
-    poseZ = Gauge("pose_z","Real-time cartesian coordinate of device\"s Z axis", ["device_id","device_type","station"])
-    poseR = Gauge("pose_r","Real-time cartesian coordinate of device\"s R axis", ["device_id","device_type","station"])
+    poseX = Gauge("pose_x","Real-time cartesian coordinate of device's X axis", ["device_id","device_type","station"])
+    poseY = Gauge("pose_y","Real-time cartesian coordinate of device's Y axis", ["device_id","device_type","station"])
+    poseZ = Gauge("pose_z","Real-time cartesian coordinate of device's Z axis", ["device_id","device_type","station"])
+    poseR = Gauge("pose_r","Real-time cartesian coordinate of device's R axis", ["device_id","device_type","station"])
     angleBase = Gauge("angle_base","Base joint angle", ["device_id","device_type","station"])
     angleRearArm = Gauge("angle_rear_arm","Rear arm joint angle", ["device_id","device_type","station"])
     angleForearm = Gauge("angle_forearm","Forearm joint angle", ["device_id","device_type","station"])
@@ -100,14 +100,14 @@ class Dobot(Device):
     jogRearArmAcceleration = Gauge("jog_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in jogging mode", ["device_id","device_type","station"])
     jogForearmAcceleration = Gauge("jog_forearm_acceleration","Acceleration (°/s^2) of forearm joint in jogging mode", ["device_id","device_type","station"])
     jogEndEffectorAcceleration = Gauge("jog_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in jogging mode", ["device_id","device_type","station"])
-    jogAxisXVelocity = Gauge("jog_axis_x_velocity","Velocity (mm/s) of device\"s X axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisYVelocity = Gauge("jog_axis_y_velocity","Velocity (mm/s) of device\"s Y axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisZVelocity = Gauge("jog_axis_z_velocity","Velocity (mm/s) of device\"s Z axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisRVelocity = Gauge("jog_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisXAcceleration = Gauge("jog_axis_x_acceleration","Acceleration (mm/s^2) of device\"s X axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisYAcceleration = Gauge("jog_axis_y_acceleration","Acceleration (mm/s^2) of device\"s Y axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisZAcceleration = Gauge("jog_axis_z_acceleration","Acceleration (mm/s^2) of device\"s Z axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
-    jogAxisRAcceleration = Gauge("jog_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisXVelocity = Gauge("jog_axis_x_velocity","Velocity (mm/s) of device's X axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisYVelocity = Gauge("jog_axis_y_velocity","Velocity (mm/s) of device's Y axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisZVelocity = Gauge("jog_axis_z_velocity","Velocity (mm/s) of device's Z axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisRVelocity = Gauge("jog_axis_r_velocity","Velocity (mm/s) of device's R axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisXAcceleration = Gauge("jog_axis_x_acceleration","Acceleration (mm/s^2) of device's X axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisYAcceleration = Gauge("jog_axis_y_acceleration","Acceleration (mm/s^2) of device's Y axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisZAcceleration = Gauge("jog_axis_z_acceleration","Acceleration (mm/s^2) of device's Z axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
+    jogAxisRAcceleration = Gauge("jog_axis_r_acceleration","Acceleration (mm/s^2) of device's R axis (cartesian coordinate) in jogging mode", ["device_id","device_type","station"])
     jogVelocityRatio = Gauge("jog_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in jogging mode", ["device_id","device_type","station"])
     jogAccelerationRatio = Gauge("jog_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in jogging mode", ["device_id","device_type","station"])
     ptpBaseVelocity = Gauge("ptp_base_velocity","Velocity (°/s) of base joint in point to point mode", ["device_id","device_type","station"])
@@ -118,10 +118,10 @@ class Dobot(Device):
     ptpRearArmAcceleration = Gauge("ptp_rear_arm_acceleration","Acceleration (°/s^2) of rear arm joint in point to point mode", ["device_id","device_type","station"])
     ptpForearmAcceleration = Gauge("ptp_forearm_acceleration","Acceleration (°/s^2) of forearm joint in point to point mode", ["device_id","device_type","station"])
     ptpEndEffectorAcceleration = Gauge("ptp_end_effector_acceleration","Acceleration (°/s^2) of end effector joint in point to point mode", ["device_id","device_type","station"])
-    ptpAxisXYZVelocity = Gauge("ptp_axis_xyz_velocity","Velocity (mm/s) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
-    ptpAxisRVelocity = Gauge("ptp_axis_r_velocity","Velocity (mm/s) of device\"s R axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
-    ptpAxisXYZAcceleration = Gauge("ptp_axis_x_y_z_acceleration","Acceleration (mm/s^2) of device\"s X, Y, Z axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
-    ptpAxisRAcceleration = Gauge("ptp_axis_r_acceleration","Acceleration (mm/s^2) of device\"s R axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisXYZVelocity = Gauge("ptp_axis_xyz_velocity","Velocity (mm/s) of device's X, Y, Z axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisRVelocity = Gauge("ptp_axis_r_velocity","Velocity (mm/s) of device's R axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisXYZAcceleration = Gauge("ptp_axis_x_y_z_acceleration","Acceleration (mm/s^2) of device's X, Y, Z axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
+    ptpAxisRAcceleration = Gauge("ptp_axis_r_acceleration","Acceleration (mm/s^2) of device's R axis (cartesian coordinate) in point to point mode", ["device_id","device_type","station"])
     ptpVelocityRatio = Gauge("ptp_velocity_ratio","Velocity ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device_id","device_type","station"])
     ptpAccelerationRatio = Gauge("ptp_acceleration_ratio","Acceleration ratio of all axis (joint and cartesian coordinate system) in point to point mode", ["device_id","device_type","station"])
     liftingHeight = Gauge("lifting_height","Lifting height in jump mode", ["device_id","device_type","station"])
@@ -136,8 +136,8 @@ class Dobot(Device):
     angleStaticErrFront = Gauge("arc_static_err_front","Forearm angle sensor static error", ["device_id","device_type","station"])
     angleCoefRear = Gauge("angle_coef_rear","Rear arm angle sensor linearization parameter", ["device_id","device_type","station"])
     angleCoefFront = Gauge("angle_coef_front","Forearm angle sensor linearization parameter", ["device_id","device_type","station"])
-    slidingRailStatus = Enum("sliding_rail_status","Sliding rail\"s status (enabled/disabled)", ["device_id","device_type","station"], states=["enabled","disabled"])
-    slidingRailPose = Gauge("sliding_rail_pose","Sliding rail\"s real-time pose in mm", ["device_id","device_type","station"])
+    slidingRailStatus = Enum("sliding_rail_status","Sliding rail's status (enabled/disabled)", ["device_id","device_type","station"], states=["enabled","disabled"])
+    slidingRailPose = Gauge("sliding_rail_pose","Sliding rail's real-time pose in mm", ["device_id","device_type","station"])
     slidingRailJogVelocity = Gauge("sliding_rail_jog_velocity","Velocity (mm/s) of sliding rail in jogging mode", ["device_id","device_type","station"])
     slidingRailJogAcceleration = Gauge("sliding_rail_jog_acceleration","Acceleration (mm/s^2) of sliding rail in jogging mode", ["device_id","device_type","station"])
     slidingRailPtpVelocity = Gauge("sliding_rail_ptp_velocity","Velocity (mm/s) of sliding rail in point to point mode", ["device_id","device_type","station"])
@@ -481,10 +481,10 @@ class Dobot(Device):
 class Jevois(Device):
     options = {"objects":"","objectidentified":True,"objectlocation":True,"objectsize":False}
 
-    objectLocationX = Gauge("object_location_x", "Identified object\"s x position", ["device_id","device_type","station"])
-    objectLocationY = Gauge("object_location_y", "Identified object\"s y position", ["device_id","device_type","station"])
-    objectLocationZ = Gauge("object_location_z", "Identified object\"s Z position", ["device_id","device_type","station"])
-    objectSize = Gauge("object_size","Identified object\"s size", ["device_id","device_type","station"])
+    objectLocationX = Gauge("object_location_x", "Identified object's x position", ["device_id","device_type","station"])
+    objectLocationY = Gauge("object_location_y", "Identified object's y position", ["device_id","device_type","station"])
+    objectLocationZ = Gauge("object_location_z", "Identified object's Z position", ["device_id","device_type","station"])
+    objectSize = Gauge("object_size","Identified object's size", ["device_id","device_type","station"])
 
     def connect(self):
         try:
@@ -497,7 +497,7 @@ class Jevois(Device):
         if self.isEnabled("objectidentified"):
             if self.section["objects"] is not None:
                 self.objects = self.section["objects"].split()
-                self.objectIdentified = Enum("object_identified_by_"+self.port, "Object Identified", states=self.objects)
+                self.objectIdentified = Enum("object_identified_by_"+self.id+"_"+self.host, "Object Identified", states=self.objects)
             else:
                 raise Exception("The \"objects\" list is necessary for monitoring identified objects")
 
